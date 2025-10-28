@@ -1,22 +1,44 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Start from '../views/Start.vue'
+import Book from '../views/Book.vue'
+import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
+import LoveTree from '@/components/LoveTree.vue'
+import Four from '../views/Four.vue'
+import Foreword from '../views/foreword.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'book',
+    component: Book
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    path: '/start',
+    name: 'start',
+    component: Start
+  },
+  {
+    path: '/loveflip',
+    name: 'loveflip',
+    component: LoveFlipTimer
+  },
+  {
+    path: '/four',
+    name: 'four',
+    component: Four
+  },
+  {
+    path: '/lovertree',
+    name: 'lovertree',
+    component: LoveTree
+  },
+  {
+    path: '/foreword',
+    name: 'foreword',
+    component: Foreword
   }
 ]
 
