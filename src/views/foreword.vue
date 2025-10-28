@@ -138,6 +138,37 @@ export default {
       ctx.closePath()
       ctx.fill()
       ctx.restore()
+      
+      // 只有当信封未打开时显示"请点击"提示
+      if (!this.isOpen && progress < 0.1) {
+        ctx.save()
+        // 计算提示文字位置 - 位于信封下方
+        const tipY = centerY + envelopeHeight / 2 - 60
+        
+        // 添加文字阴影效果
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
+        ctx.shadowBlur = 3
+        ctx.shadowOffsetX = 1
+        ctx.shadowOffsetY = 1
+        
+        // 设置文字样式
+        ctx.font = '30px "Love", cursive'
+        ctx.fillStyle = '#Fff2df'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        
+        // 添加强烈可见的呼吸动画效果
+        const currentTime = Date.now() / 1000 // 更快的时间更新
+        const pulse = 0.95 + 0.05 * Math.sin(currentTime * 1) // 强烈的呼吸动画，范围0.4-1.2
+        
+        // 绘制提示文字
+        ctx.save()
+        ctx.translate(centerX, tipY)
+        ctx.scale(pulse, pulse)
+        ctx.fillText('请点击', 0, 0)
+        ctx.restore()
+      
+      }
 
 
       // 绘制信纸（当信封打开时）
@@ -242,7 +273,7 @@ export default {
 
           // 只有当信纸打开动画完全结束后才开始打字机动画
           if (openProgress >= 1 && this.textProgress < this.maxTextProgress) {
-            this.textProgress = Math.min(this.maxTextProgress, this.textProgress + 110) // 适中的打字速度
+            this.textProgress = Math.min(this.maxTextProgress, this.textProgress + 0.1) // 适中的打字速度
           } else if (openProgress < 1) {
             // 确保在信纸完全打开前，打字进度重置为0
             this.textProgress = 0
@@ -288,11 +319,10 @@ export default {
         }
       }
 
-      // 继续动画
-      if (this.animationProgress < 1) {
-        this.animationProgress += this.animationSpeed
-        this.animationFrame = requestAnimationFrame(() => this.drawEnvelope())
-      }
+      // 确保动画持续运行，无论是打开还是关闭状态
+      this.animationProgress += this.animationSpeed
+      // 使用requestAnimationFrame确保呼吸动画持续流畅运行
+      this.animationFrame = requestAnimationFrame(() => this.drawEnvelope())
     },
 
     handleCanvasClick() {
@@ -338,5 +368,18 @@ export default {
 
 .envelope-canvas:hover {
   transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+/* 添加简单的点击波纹效果 */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 </style>
