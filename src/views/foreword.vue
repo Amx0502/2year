@@ -73,7 +73,7 @@ export default {
       const baseEnvelopeHeight = 200
 
       // 当信封打开时，增加大小
-      const scaleFactor = 1 + (this.isOpen ? Math.min(this.animationProgress, 1) * 0.2 : 0)
+      const scaleFactor = 1 + (this.isOpen ? Math.min(this.animationProgress, 1) * 0.4 : 0)
       const envelopeWidth = baseEnvelopeWidth * scaleFactor
       const envelopeHeight = baseEnvelopeHeight * scaleFactor
 
@@ -139,20 +139,6 @@ export default {
       ctx.fill()
       ctx.restore()
 
-      // 绘制装饰线条 - 恋爱主题爱心装饰
-      ctx.shadowBlur = 0
-      ctx.strokeStyle = '#ff4081'
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.moveTo(centerX - envelopeWidth / 3, centerY + envelopeHeight / 4)
-      ctx.lineTo(centerX + envelopeWidth / 3, centerY + envelopeHeight / 4)
-      ctx.stroke()
-
-      // 绘制小爱心装饰
-      if (!this.isOpen) {
-        this.drawSmallHeart(ctx, centerX - envelopeWidth / 4, centerY - envelopeHeight / 4, 12)
-        this.drawSmallHeart(ctx, centerX + envelopeWidth / 4, centerY - envelopeHeight / 4, 12)
-      }
 
       // 绘制信纸（当信封打开时）
       if (progress > 0.3) {
@@ -166,64 +152,64 @@ export default {
         const letterYOffset = centerY - (maxLetterHeight * 0.5) - letterProgress * 100 // 调整Y轴偏移使信纸完全显示
 
         // 绘制信纸图片 - 实现从中间向外打开的动画效果
-          const stationeryImage = new Image()
-          stationeryImage.src = '/image/stationery.png'
-          
-          // 计算从中间向外打开的动画参数
-          const openProgress = Math.min(letterProgress, 1)
-          const centerImageX = centerX
-          
-          // 使用clip()方法实现从中间向两侧打开的效果
-          ctx.save()
-          
-          // 创建从中间向两侧扩展的剪切区域
-          const leftWidth = (letterWidth / 2) * openProgress
-          const rightWidth = (letterWidth / 2) * openProgress
-          
-          // 左侧部分
-          ctx.beginPath()
-          ctx.rect(centerImageX - leftWidth, letterYOffset, leftWidth, letterHeight)
-          ctx.clip()
-          
-          // 绘制左侧部分的信纸
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
-          ctx.shadowBlur = 5
-          ctx.shadowOffsetX = 2
-          ctx.shadowOffsetY = 2
-          if (stationeryImage.complete) {
-            ctx.drawImage(stationeryImage, centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
-          } else {
-            ctx.fillStyle = '#f8f9fa'
-            ctx.fillRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
-            ctx.strokeStyle = '#e0e0e0'
-            ctx.lineWidth = 1
-            ctx.strokeRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
-          }
-          
-          ctx.restore()
-          ctx.save()
-          
-          // 右侧部分
-          ctx.beginPath()
-          ctx.rect(centerImageX, letterYOffset, rightWidth, letterHeight)
-          ctx.clip()
-          
-          // 绘制右侧部分的信纸
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
-          ctx.shadowBlur = 5
-          ctx.shadowOffsetX = 2
-          ctx.shadowOffsetY = 2
-          if (stationeryImage.complete) {
-            ctx.drawImage(stationeryImage, centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
-          } else {
-            ctx.fillStyle = '#f8f9fa'
-            ctx.fillRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
-            ctx.strokeStyle = '#e0e0e0'
-            ctx.lineWidth = 1
-            ctx.strokeRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
-          }
-          
-          ctx.restore()
+        const stationeryImage = new Image()
+        stationeryImage.src = '/image/stationery.png'
+
+        // 计算从中间向外打开的动画参数
+        const openProgress = Math.min(letterProgress, 1)
+        const centerImageX = centerX
+
+        // 使用clip()方法实现从中间向两侧打开的效果
+        ctx.save()
+
+        // 创建从中间向两侧扩展的剪切区域
+        const leftWidth = (letterWidth / 2) * openProgress
+        const rightWidth = (letterWidth / 2) * openProgress
+
+        // 左侧部分
+        ctx.beginPath()
+        ctx.rect(centerImageX - leftWidth, letterYOffset, leftWidth, letterHeight)
+        ctx.clip()
+
+        // 绘制左侧部分的信纸
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
+        ctx.shadowBlur = 5
+        ctx.shadowOffsetX = 2
+        ctx.shadowOffsetY = 2
+        if (stationeryImage.complete) {
+          ctx.drawImage(stationeryImage, centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
+        } else {
+          ctx.fillStyle = '#f8f9fa'
+          ctx.fillRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
+          ctx.strokeStyle = '#e0e0e0'
+          ctx.lineWidth = 1
+          ctx.strokeRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
+        }
+
+        ctx.restore()
+        ctx.save()
+
+        // 右侧部分
+        ctx.beginPath()
+        ctx.rect(centerImageX, letterYOffset, rightWidth, letterHeight)
+        ctx.clip()
+
+        // 绘制右侧部分的信纸
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
+        ctx.shadowBlur = 5
+        ctx.shadowOffsetX = 2
+        ctx.shadowOffsetY = 2
+        if (stationeryImage.complete) {
+          ctx.drawImage(stationeryImage, centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
+        } else {
+          ctx.fillStyle = '#f8f9fa'
+          ctx.fillRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
+          ctx.strokeStyle = '#e0e0e0'
+          ctx.lineWidth = 1
+          ctx.strokeRect(centerImageX - letterWidth / 2, letterYOffset, letterWidth, letterHeight)
+        }
+
+        ctx.restore()
 
         // 绘制信纸上的文本 - 使用love字体
         if (letterProgress > 0.5) {
@@ -241,26 +227,26 @@ export default {
 
           // 打字机效果文字
           const textLines = [
-            { text: '前言：', align: 'left', x: centerX - letterWidth / 2 + 55, y: startY + lineHeight, length: 3, fontSize: '40px'},
+            { text: '前言：', align: 'left', x: centerX - letterWidth / 2 + 55, y: startY + lineHeight, length: 3, fontSize: '40px' },
             { text: '🎕很喜欢一句话', align: 'left', x: centerX - letterWidth / 2 + 100, y: startY + lineHeight * 2, length: 8 },
             { text: '"手工之所以珍贵，', align: 'left', x: centerX - letterWidth / 2 + 80, y: startY + lineHeight * 3, length: 9 },
             { text: '是因为有人', align: 'left', x: centerX - letterWidth / 2 + 120, y: startY + lineHeight * 4, length: 6 },
             { text: '把生命中的一段时光', align: 'left', x: centerX - letterWidth / 2 + 110, y: startY + lineHeight * 5, length: 9 },
             { text: '物化给了你。"', align: 'left', x: centerX - letterWidth / 2 + 200, y: startY + lineHeight * 6, length: 8 },
-            { text: '你是这本书最棒的读者', align: 'left', x: centerX - letterWidth / 2 + 80, y: startY + lineHeight * 7.5, length: 10 },  
+            { text: '你是这本书最棒的读者', align: 'left', x: centerX - letterWidth / 2 + 80, y: startY + lineHeight * 7.5, length: 10 },
             { text: '也是唯一的主人', align: 'left', x: centerX - letterWidth / 2 + 100, y: startY + lineHeight * 8.5, length: 8 }
           ]
 
           // 打字机效果 - 与信纸打开动画无缝衔接
-            let charCount = 0
-            
-            // 只有当信纸打开动画完全结束后才开始打字机动画
-            if (openProgress >= 1 && this.textProgress < this.maxTextProgress) {
-              this.textProgress = Math.min(this.maxTextProgress, this.textProgress + 110) // 适中的打字速度
-            } else if (openProgress < 1) {
-              // 确保在信纸完全打开前，打字进度重置为0
-              this.textProgress = 0
-            }
+          let charCount = 0
+
+          // 只有当信纸打开动画完全结束后才开始打字机动画
+          if (openProgress >= 1 && this.textProgress < this.maxTextProgress) {
+            this.textProgress = Math.min(this.maxTextProgress, this.textProgress + 110) // 适中的打字速度
+          } else if (openProgress < 1) {
+            // 确保在信纸完全打开前，打字进度重置为0
+            this.textProgress = 0
+          }
 
           // 显示所有已经处理到的文字
           textLines.forEach(line => {
@@ -309,17 +295,6 @@ export default {
       }
     },
 
-    // 绘制小爱心的辅助函数
-    drawSmallHeart(ctx, x, y, size) {
-      ctx.fillStyle = '#ff4081'
-      ctx.beginPath()
-      ctx.moveTo(x, y + size / 4)
-      ctx.bezierCurveTo(x - size / 2, y - size / 2, x - size, y + size / 4, x, y + size)
-      ctx.bezierCurveTo(x + size, y + size / 4, x + size / 2, y - size / 2, x, y + size / 4)
-      ctx.closePath()
-      ctx.fill()
-    },
-
     handleCanvasClick() {
       if (this.animationProgress < 1) return // 动画进行中不响应点击
 
@@ -342,7 +317,9 @@ export default {
   align-items: center;
   height: 100vh;
   background-color: #ffebee;
-  padding: 20px;
+  background-image: url('../../public/image/background.png');
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
 }
 

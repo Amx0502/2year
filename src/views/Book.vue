@@ -9,7 +9,7 @@
     <div class="turnClass">
       <div id="flipbook">
         <LoveTree />
-        <Two />
+        <div class="cover-page"></div>
         <Foreword />
         <LoveFlipTimer />
         <div class="transparent-page"></div>
@@ -210,6 +210,18 @@ export default {
   #flipbook {
     z-index: 1;
     border-radius: 20px;
+
+    .cover-page {
+      width: 100%;
+      height: 100%;
+      background-color: #f5f5f5;
+      background-image: url('../../public/image/calendar.png');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+
     .blank-page {
       width: 100%;
       height: 100%;
