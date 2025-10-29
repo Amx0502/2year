@@ -27,18 +27,21 @@
       <button class="prev-btn" @click="goToPreviousPage">上一页</button>
       <button class="next-btn" @click="goToNextPage">下一页</button>
     </div>
+    <MusicPlayer />
   </div>
 </template>
 
 <script>
-import turn from '../js/turn.js'
+import '../js/turn.js'
+import '../js/APlayer.min.js'
+import '../js/APlayer.min.css'
 import Start from './Start.vue'
 import Two from './Two.vue'
 import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import Four from './Four.vue'
 import LoveTree from '@/components/LoveTree.vue'
 import Foreword from './foreword.vue'
-
+import MusicPlayer from '@/components/MusicPlayer.vue'
 
 export default {
   name: 'Home',
@@ -48,7 +51,8 @@ export default {
     LoveFlipTimer,
     Four,
     LoveTree,
-    Foreword
+    Foreword,
+    MusicPlayer
   },
   data() {
     return {

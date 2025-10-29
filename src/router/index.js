@@ -6,7 +6,7 @@ import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import LoveTree from '@/components/LoveTree.vue'
 import Four from '../views/Four.vue'
 import Foreword from '../views/foreword.vue'
-
+import MusicPlayer from '../components/MusicPlayer.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -39,6 +39,11 @@ const routes = [
     path: '/foreword',
     name: 'foreword',
     component: Foreword
+  },
+  {
+    path: '/musicplayer',
+    name: 'musicplayer',
+    component: MusicPlayer
   }
 ]
 
