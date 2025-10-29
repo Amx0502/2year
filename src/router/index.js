@@ -5,9 +5,10 @@ import Book from '../views/Book.vue'
 import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import LoveTree from '@/components/LoveTree.vue'
 import Six from '../views/six.vue'
-import Seven from '../views/seven.vue'  
+import Seven from '../views/letter-1.vue'  
 import Foreword from '../views/foreword.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
+
 Vue.use(VueRouter)
 
 const routes = [
