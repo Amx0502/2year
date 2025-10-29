@@ -13,8 +13,9 @@
         <Foreword />
         <LoveFlipTimer />
         <div class="transparent-page"></div>
-        <Four />
-        <div class="transparent-page"></div>
+        <Six />
+         <div class="cover-page7"></div>
+        <Seven />
         <Start />
         <div v-for="n in 4" :key="n" class="blank-page">
         </div>
@@ -38,7 +39,8 @@ import '../js/APlayer.min.css'
 import Start from './Start.vue'
 import Two from './Two.vue'
 import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
-import Four from './Four.vue'
+import Six from './six.vue'
+import Seven from './seven.vue'
 import LoveTree from '@/components/LoveTree.vue'
 import Foreword from './foreword.vue'
 import MusicPlayer from '@/components/MusicPlayer.vue'
@@ -49,7 +51,8 @@ export default {
     Start,
     Two,
     LoveFlipTimer,
-    Four,
+    Six,
+    Seven,
     LoveTree,
     Foreword,
     MusicPlayer
@@ -220,6 +223,17 @@ export default {
       height: 100%;
       background-color: #f5f5f5;
       background-image: url('../../public/image/calendar.png');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+        .cover-page7 {
+      width: 100%;
+      height: 100%;
+      background-color: #f5f5f5;
+      background-image: url('../../public/image/good.png');
       background-size: cover;
       background-position: center;
       position: relative;

@@ -44,18 +44,39 @@ export default {
 
 <style scoped>
 .four-container {
-  min-height: 105vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  z-index: 1;
+  background-color: black;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;  /* 为视频容器提供定位上下文 */
-  background-color: rgba(255, 255, 255);
+}
+
+.video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .background-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;  /* 保持视频比例并覆盖整个容器 */
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
 }
 </style>
