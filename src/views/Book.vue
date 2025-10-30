@@ -9,15 +9,14 @@
     <div class="turnClass">
       <div id="flipbook">
         <LoveTree />
-        <!-- <div class="cover-page"></div> -->
-        <letter1 />
+        <div class="cover-page"></div>
         <Foreword />
         <LoveFlipTimer />
         <div class="transparent-page"></div>
         <Six />
         <div class="cover-page7"></div>
         <letter1 />
-        <letter1 />
+        <letter2 />
         <Start />
         <div v-for="n in 4" :key="n" class="blank-page">
         </div>
@@ -44,6 +43,7 @@ import Foreword from './foreword.vue'
 import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import Six from './six.vue'
 import letter1 from './letter-1.vue'
+import letter2 from './letter-2.vue'
 
 import Start from './Start.vue'
 import Two from './Two.vue'
@@ -58,7 +58,7 @@ export default {
     LoveFlipTimer,
     Six,
     letter1,
-
+    letter2,
     Start,
     Two,
 

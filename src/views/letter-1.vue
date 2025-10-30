@@ -13,6 +13,9 @@
         </div>
       </div>
     </div>
+    <!-- 纸撕拉动画Canvas -->
+    <canvas v-if="!tearAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
+    <div v-if="!tearAnimationCompleted" class="tear-instruction">向上拉动鼠标撕开信纸...</div>
   </div>
 </template>
 
@@ -35,16 +38,26 @@ export default {
         { text: "你指的是那个创新创业？结果最后我们分却很低。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
         { text: "是，那是我们相识相见的地方。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
         { text: "印象深刻在哪？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "你激烈回答的样子让我觉得很有依靠，我观察着你的一举一动，那种在台上属于我们的专属时刻，把我们绑定在一起一同对抗外人，多难得。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' }
+        { text: "你激烈回答的样子让我觉得很有依靠，我观察着你的一举一动，那种在台上属于我们的专属时刻，把我们绑定在一起一同对抗外人，多难", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "得。", fontSize: '23px', marginTop: '0px', marginBottom: '0px', paddingLeft: '180px', paddingRight: '0px' }
       ],
       displayedTextLines: [],
-      cursorInterval: null
+      cursorInterval: null,
+      // Canvas撕拉动画相关状态
+      tearAnimationCompleted: false,
+      isTearing: false,
+      startY: 0,
+      currentY: 0,
+      tearPath: [],
+      canvasContext: null
     }
   },
   mounted() {
     this.loadLoveFont()
-    // 等待字体加载后开始打字机动画
-    setTimeout(() => this.startTypingAnimation(), 500)
+    // 先初始化撕拉动画Canvas
+    this.$nextTick(() => {
+      this.initTearCanvas()
+    })
     // 设置光标闪烁
     this.cursorInterval = setInterval(() => {
       this.showCursor = !this.showCursor
@@ -61,7 +74,7 @@ export default {
   methods: {
     loadLoveFont() {
       // 加载Love字体
-      const font = new FontFace('Love', `url(${require('@/assets/fonts/love3.ttf')})`)
+      const font = new FontFace('Love', `url(${require('@/assets/fonts/谦度手写楷体.ttf')})`)
       font.load().then((loadedFont) => {
         document.fonts.add(loadedFont)
         this.fontLoaded = true
@@ -70,6 +83,150 @@ export default {
         // 降级使用系统字体
         this.fontLoaded = true
       })
+    },
+    // 初始化撕拉动画Canvas
+    initTearCanvas() {
+      const canvas = this.$refs.tearCanvas
+      if (!canvas) return
+      
+      // 设置Canvas尺寸为视口大小
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      
+      this.canvasContext = canvas.getContext('2d')
+      
+      // 绘制初始覆盖层
+      this.drawTearEffect()
+      
+      // 绑定鼠标事件
+      canvas.addEventListener('mousedown', this.handleMouseDown)
+      canvas.addEventListener('mousemove', this.handleMouseMove)
+      canvas.addEventListener('mouseup', this.handleMouseUp)
+      canvas.addEventListener('mouseleave', this.handleMouseUp)
+      
+      // 绑定触摸事件（移动端支持）
+      canvas.addEventListener('touchstart', this.handleTouchStart)
+      canvas.addEventListener('touchmove', this.handleTouchMove)
+      canvas.addEventListener('touchend', this.handleTouchEnd)
+    },
+    
+    // 绘制撕拉效果
+    drawTearEffect() {
+      if (!this.canvasContext) return
+      
+      const canvas = this.$refs.tearCanvas
+      const ctx = this.canvasContext
+      
+      // 清空Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      
+      // 填充覆盖层
+      ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      if (this.isTearing) {
+        // 创建撕拉效果路径
+        ctx.beginPath()
+        ctx.moveTo(0, canvas.height)
+        
+        // 添加一些随机波动来模拟撕纸的不规则边缘
+        const baseY = Math.min(this.currentY, canvas.height * 0.8) // 限制最大撕裂高度
+        for (let x = 0; x <= canvas.width; x += 10) {
+          const randomOffset = Math.sin(x * 0.01 + this.currentY * 0.001) * 15 + 
+                             Math.random() * 10 - 5
+          const y = baseY + randomOffset
+          ctx.lineTo(x, y)
+        }
+        
+        ctx.lineTo(canvas.width, canvas.height)
+        ctx.lineTo(0, canvas.height)
+        ctx.closePath()
+        
+        // 设置渐变效果模拟纸张厚度
+        const gradient = ctx.createLinearGradient(0, baseY - 20, 0, baseY)
+        gradient.addColorStop(0, 'rgba(255, 245, 238, 0.4)')
+        gradient.addColorStop(1, 'rgba(255, 245, 238, 0.95)')
+        ctx.fillStyle = gradient
+        ctx.fill()
+        
+        // 绘制撕裂痕迹
+        ctx.strokeStyle = 'rgba(200, 190, 180, 0.5)'
+        ctx.lineWidth = 2
+        ctx.stroke()
+        
+        // 检查是否完成撕裂
+        if (baseY < canvas.height * 0.2) {
+          this.completeTearAnimation()
+        }
+      }
+    },
+    
+    // 完成撕拉动画
+    completeTearAnimation() {
+      this.tearAnimationCompleted = true
+      
+      // 移除事件监听器
+      const canvas = this.$refs.tearCanvas
+      if (canvas) {
+        canvas.removeEventListener('mousedown', this.handleMouseDown)
+        canvas.removeEventListener('mousemove', this.handleMouseMove)
+        canvas.removeEventListener('mouseup', this.handleMouseUp)
+        canvas.removeEventListener('mouseleave', this.handleMouseUp)
+        canvas.removeEventListener('touchstart', this.handleTouchStart)
+        canvas.removeEventListener('touchmove', this.handleTouchMove)
+        canvas.removeEventListener('touchend', this.handleTouchEnd)
+      }
+      
+      // 添加一个小延迟后开始打字机动画，实现无缝过渡
+      setTimeout(() => {
+        this.startTypingAnimation()
+      }, 300)
+    },
+    
+    // 鼠标事件处理
+    handleMouseDown(event) {
+      this.isTearing = true
+      this.startY = event.clientY
+      this.currentY = event.clientY
+    },
+    
+    handleMouseMove(event) {
+      if (this.isTearing) {
+        // 只允许向上拉动
+        const newY = Math.min(this.startY, event.clientY)
+        if (newY < this.currentY) {
+          this.currentY = newY
+          this.drawTearEffect()
+        }
+      }
+    },
+    
+    handleMouseUp() {
+      if (this.isTearing) {
+        // 如果拉动距离不够，重置
+        if (this.startY - this.currentY < 100) {
+          this.currentY = this.startY
+          this.drawTearEffect()
+        }
+        this.isTearing = false
+      }
+    },
+    
+    // 触摸事件处理（移动端支持）
+    handleTouchStart(event) {
+      event.preventDefault()
+      const touch = event.touches[0]
+      this.handleMouseDown(touch)
+    },
+    
+    handleTouchMove(event) {
+      event.preventDefault()
+      const touch = event.touches[0]
+      this.handleMouseMove(touch)
+    },
+    
+    handleTouchEnd() {
+      this.handleMouseUp()
     },
     startTypingAnimation() {
       if (this.currentLineIndex >= this.textLines.length) {
@@ -195,12 +352,49 @@ export default {
 @keyframes blink {
 
   0%,
-  100% {
-    opacity: 1;
+  100% {    opacity: 1;
   }
 
+  50% {    opacity: 0;
+  }
+}
+
+/* 撕拉动画样式 */
+.tear-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  cursor: grab;
+  pointer-events: all;
+}
+
+.tear-canvas:active {
+  cursor: grabbing;
+}
+
+.tear-instruction {
+  position: fixed;
+  bottom: 50px;
+  transform: translateX(-50%);
+  z-index: 11;
+  font-family: 'Love', cursive, 'Microsoft YaHei', sans-serif;
+  font-size: 20px;
+  color: #8b4513;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  opacity: 0.8;
+  animation: fadeInOut 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.8;
+  }
   50% {
-    opacity: 0;
+    opacity: 0.4;
   }
 }
 
