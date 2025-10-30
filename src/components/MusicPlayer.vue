@@ -76,10 +76,6 @@ export default {
 </script>
 
 <style scoped>
-* {
-    background-color: #ffe2fd;
-}
-
 .music-player {
     /* margin: 20px auto; */
     max-width: 800px;

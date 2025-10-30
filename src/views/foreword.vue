@@ -35,7 +35,7 @@ export default {
   methods: {
     loadLoveFont() {
       // 创建字体加载器，使用Vue正确的资源引用方式
-      const font = new FontFace('Love', `url(${require('@/assets/fonts/love2.ttf')})`)
+      const font = new FontFace('Love2', `url(${require('@/assets/fonts/love2.ttf')})`)
       font.load().then((loadedFont) => {
         document.fonts.add(loadedFont)
         this.fontLoaded = true
@@ -152,7 +152,7 @@ export default {
         ctx.shadowOffsetY = 1
         
         // 设置文字样式
-        ctx.font = '30px "Love", cursive'
+        ctx.font = '30px "Love2", cursive'
         ctx.fillStyle = '#Fff2df'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
@@ -247,7 +247,7 @@ export default {
           ctx.shadowBlur = 0
           ctx.fillStyle = '#000000' // 使用纯黑色确保文字清晰可见
           // 使用love字体，降级为系统字体，文本大小相应增大
-          ctx.font = this.fontLoaded ? '32px Love, cursive' : '32px cursive'
+          ctx.font = this.fontLoaded ? '32px Love2, cursive' : '32px cursive'
           ctx.textBaseline = 'middle'
 
           // 计算文本区域的中心位置，确保在信纸上居中
@@ -291,13 +291,13 @@ export default {
               if (line.fontSize || line.fontWeight) {
                 const size = line.fontSize || '32px'
                 const weight = line.fontWeight || 'normal'
-                ctx.font = `${weight} ${size} ${this.fontLoaded ? 'Love, cursive' : 'cursive'}`
+                ctx.font = `${weight} ${size} ${this.fontLoaded ? 'Love2, cursive' : 'cursive'}`
               } else {
-                ctx.font = '32px ' + (this.fontLoaded ? 'Love, cursive' : 'cursive')
+                ctx.font = '32px ' + (this.fontLoaded ? 'Love2, cursive' : 'cursive')
               }
               ctx.fillText(line.text.substring(0, displayChars), line.x, line.y)
               // 恢复默认字体设置
-              ctx.font = '32px ' + (this.fontLoaded ? 'Love, cursive' : 'cursive')
+              ctx.font = '32px ' + (this.fontLoaded ? 'Love2, cursive' : 'cursive')
             }
 
             // 添加闪烁光标效果（仅在当前行有内容显示时）

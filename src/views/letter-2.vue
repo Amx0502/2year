@@ -9,13 +9,12 @@
             <div v-if="line.speaker" class="speaker">{{ line.speaker }}：</div>
             <span class="text">{{ line.text }}</span>
           </div>
-          <div v-if="showCursor" class="cursor"></div>
         </div>
       </div>
     </div>
     <!-- 纸撕拉动画Canvas -->
     <canvas v-if="!tearAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
-    <div v-if="!tearAnimationCompleted" class="tear-instruction">向上拉动鼠标撕开信纸...</div>
+    <div v-if="!tearAnimationCompleted" class="tear-instruction">向下拉动鼠标撕开信纸...</div>
   </div>
 </template>
 
@@ -30,16 +29,17 @@ export default {
       displaySpeed: 30, // 打字速度（毫秒）
       lineDelay: 500, // 行间隔延迟（毫秒）
       cursorBlinkSpeed: 500, // 光标闪烁速度（毫秒）
-      showCursor: true,
+      showCursor: false,
       fontLoaded: false,
       textLines: [
-        { text: "你心中有和我最印象深刻的事top10吗？", speaker: "她问", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "top10是讲台上的我俩。", speaker: "我说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "你指的是那个创新创业？结果最后我们分却很低。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "是，那是我们相识相见的地方。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "印象深刻在哪？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "你激烈回答的样子让我觉得很有依靠，我观察着你的一举一动，那种在台上属于我们的专属时刻，把我们绑定在一起一同对抗外人，多难", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "得。", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '80px', paddingRight: '0px' }
+        { text: "确实。那top9呢？", speaker: "她答道", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "top9是汽车站。", speaker: "我说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "你当时来汽车站接我是我没想到的，我以为只是在学校门口。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "小事更能体现我对你的重视。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "那你说哪里印象深刻？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "在去接你的路上，我满脑子想的是你见到我时的模样，期待", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "伴随着心中的澎湃，直至", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '114px', paddingRight: '0px' },
+        { text: "遇见你的那一刻。", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '114px', paddingRight: '0px' },
       ],
       displayedTextLines: [],
       cursorInterval: null,
@@ -58,15 +58,8 @@ export default {
     this.$nextTick(() => {
       this.initTearCanvas()
     })
-    // 设置光标闪烁
-    this.cursorInterval = setInterval(() => {
-      this.showCursor = !this.showCursor
-    }, this.cursorBlinkSpeed)
   },
   beforeDestroy() {
-    if (this.cursorInterval) {
-      clearInterval(this.cursorInterval)
-    }
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
     }
@@ -74,7 +67,7 @@ export default {
   methods: {
     loadLoveFont() {
       // 加载Love字体
-      const font = new FontFace('Love', `url(${require('@/assets/fonts/谦度手写楷体.ttf')})`)
+      const font = new FontFace('Write', `url(${require('@/assets/fonts/谦度手写楷体.ttf')})`)
       font.load().then((loadedFont) => {
         document.fonts.add(loadedFont)
         this.fontLoaded = true
@@ -88,86 +81,89 @@ export default {
     initTearCanvas() {
       const canvas = this.$refs.tearCanvas
       if (!canvas) return
-
+      
       // 设置Canvas尺寸为视口大小
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
-
+      
       this.canvasContext = canvas.getContext('2d')
-
+      
       // 绘制初始覆盖层
       this.drawTearEffect()
-
+      
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
       canvas.addEventListener('mousemove', this.handleMouseMove)
       canvas.addEventListener('mouseup', this.handleMouseUp)
       canvas.addEventListener('mouseleave', this.handleMouseUp)
-
+      
       // 绑定触摸事件（移动端支持）
       canvas.addEventListener('touchstart', this.handleTouchStart)
       canvas.addEventListener('touchmove', this.handleTouchMove)
       canvas.addEventListener('touchend', this.handleTouchEnd)
     },
-
+    
     // 绘制撕拉效果
     drawTearEffect() {
       if (!this.canvasContext) return
-
+      
       const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-
+      
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+      
       // 填充覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
+      
       if (this.isTearing) {
         // 创建撕拉效果路径
-        ctx.beginPath()
-        ctx.moveTo(0, canvas.height)
-
-        // 添加一些随机波动来模拟撕纸的不规则边缘
-        const baseY = Math.min(this.currentY, canvas.height * 0.8) // 限制最大撕裂高度
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      
+      // 添加一些随机波动来模拟撕纸的不规则边缘
+      const baseY = Math.max(this.currentY, canvas.height * 0.2) // 限制最小撕裂高度
         for (let x = 0; x <= canvas.width; x += 10) {
-          const randomOffset = Math.sin(x * 0.01 + this.currentY * 0.001) * 15 +
-            Math.random() * 10 - 5
+          const randomOffset = Math.sin(x * 0.01 + this.currentY * 0.001) * 15 + 
+                             Math.random() * 10 - 5
           const y = baseY + randomOffset
           ctx.lineTo(x, y)
-        }
-
-        ctx.lineTo(canvas.width, canvas.height)
-        ctx.lineTo(0, canvas.height)
-        ctx.closePath()
-
-        // 设置渐变效果模拟纸张厚度
-        const gradient = ctx.createLinearGradient(0, baseY - 20, 0, baseY)
-        gradient.addColorStop(0, 'rgba(255, 245, 238, 0.4)')
-        gradient.addColorStop(1, 'rgba(255, 245, 238, 0.95)')
+      }
+      
+      ctx.lineTo(canvas.width, 0)
+      ctx.lineTo(0, 0)
+      ctx.closePath()
+      
+      // 设置渐变效果模拟纸张厚度
+      const gradient = ctx.createLinearGradient(0, baseY, 0, baseY + 20)
+      gradient.addColorStop(0, 'rgba(255, 245, 238, 0.95)')
+      gradient.addColorStop(1, 'rgba(255, 245, 238, 0.4)')
         ctx.fillStyle = gradient
         ctx.fill()
-
+        
         // 绘制撕裂痕迹
         ctx.strokeStyle = 'rgba(200, 190, 180, 0.5)'
         ctx.lineWidth = 2
         ctx.stroke()
-
+        
         // 检查是否完成撕裂
-        if (baseY < canvas.height * 0.2) {
-          this.completeTearAnimation()
-        }
+      if (baseY > canvas.height * 0.8) {
+        this.completeTearAnimation()
+      }
       }
     },
-
+    
     // 完成撕拉动画
     completeTearAnimation() {
-      this.tearAnimationCompleted = true
-
-      // 移除事件监听器
+      // 添加叠化过渡效果
       const canvas = this.$refs.tearCanvas
       if (canvas) {
+        // 设置Canvas的过渡效果
+        canvas.style.transition = 'opacity 0.8s ease-out'
+        canvas.style.opacity = '0'
+        
+        // 移除事件监听器
         canvas.removeEventListener('mousedown', this.handleMouseDown)
         canvas.removeEventListener('mousemove', this.handleMouseMove)
         canvas.removeEventListener('mouseup', this.handleMouseUp)
@@ -175,56 +171,64 @@ export default {
         canvas.removeEventListener('touchstart', this.handleTouchStart)
         canvas.removeEventListener('touchmove', this.handleTouchMove)
         canvas.removeEventListener('touchend', this.handleTouchEnd)
+        
+        // 获取撕拉提示文字元素并添加过渡效果
+        const instruction = document.querySelector('.tear-instruction')
+        if (instruction) {
+          instruction.style.transition = 'opacity 0.8s ease-out'
+          instruction.style.opacity = '0'
+        }
       }
-
-      // 添加一个小延迟后开始打字机动画，实现无缝过渡
+      
+      // 延迟设置tearAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
+        this.tearAnimationCompleted = true
         this.startTypingAnimation()
-      }, 300)
+      }, 800)
     },
-
+    
     // 鼠标事件处理
     handleMouseDown(event) {
       this.isTearing = true
       this.startY = event.clientY
       this.currentY = event.clientY
     },
-
+    
     handleMouseMove(event) {
       if (this.isTearing) {
-        // 只允许向上拉动
-        const newY = Math.min(this.startY, event.clientY)
-        if (newY < this.currentY) {
+        // 只允许向下拉动
+        const newY = Math.max(this.startY, event.clientY)
+        if (newY > this.currentY) {
           this.currentY = newY
           this.drawTearEffect()
         }
       }
     },
-
+    
     handleMouseUp() {
       if (this.isTearing) {
         // 如果拉动距离不够，重置
-        if (this.startY - this.currentY < 100) {
+        if (this.currentY - this.startY < 100) {
           this.currentY = this.startY
           this.drawTearEffect()
         }
         this.isTearing = false
       }
     },
-
+    
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
       event.preventDefault()
       const touch = event.touches[0]
       this.handleMouseDown(touch)
     },
-
+    
     handleTouchMove(event) {
       event.preventDefault()
       const touch = event.touches[0]
       this.handleMouseMove(touch)
     },
-
+    
     handleTouchEnd() {
       this.handleMouseUp()
     },
@@ -296,7 +300,7 @@ export default {
 }
 
 .letter-content {
-  font-family: 'Love', cursive, 'Microsoft YaHei', sans-serif;
+  font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   color: #333;
 }
 
@@ -339,28 +343,6 @@ export default {
   color: #1976d2;
 }
 
-.cursor {
-  display: inline-block;
-  width: 2px;
-  height: 24px;
-  background-color: #e91e63;
-  margin-left: 2px;
-  vertical-align: middle;
-  animation: blink 0.7s infinite;
-}
-
-@keyframes blink {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0;
-  }
-}
-
 /* 撕拉动画样式 */
 .tear-canvas {
   position: fixed;
@@ -379,10 +361,10 @@ export default {
 
 .tear-instruction {
   position: fixed;
-  bottom: 50px;
+  top: 50px;
   transform: translateX(-50%);
   z-index: 11;
-  font-family: 'Love', cursive, 'Microsoft YaHei', sans-serif;
+  font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   color: #8b4513;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
@@ -392,12 +374,9 @@ export default {
 }
 
 @keyframes fadeInOut {
-
-  0%,
-  100% {
+  0%, 100% {
     opacity: 0.8;
   }
-
   50% {
     opacity: 0.4;
   }

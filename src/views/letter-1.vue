@@ -9,7 +9,6 @@
             <div v-if="line.speaker" class="speaker">{{ line.speaker }}：</div>
             <span class="text">{{ line.text }}</span>
           </div>
-          <div v-if="showCursor" class="cursor"></div>
         </div>
       </div>
     </div>
@@ -30,7 +29,7 @@ export default {
       displaySpeed: 30, // 打字速度（毫秒）
       lineDelay: 500, // 行间隔延迟（毫秒）
       cursorBlinkSpeed: 500, // 光标闪烁速度（毫秒）
-      showCursor: true,
+      showCursor: false,
       fontLoaded: false,
       textLines: [
         { text: "你心中有和我最印象深刻的事top10吗？", speaker: "她问", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
@@ -58,15 +57,8 @@ export default {
     this.$nextTick(() => {
       this.initTearCanvas()
     })
-    // 设置光标闪烁
-    this.cursorInterval = setInterval(() => {
-      this.showCursor = !this.showCursor
-    }, this.cursorBlinkSpeed)
   },
   beforeDestroy() {
-    if (this.cursorInterval) {
-      clearInterval(this.cursorInterval)
-    }
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
     }
@@ -74,7 +66,7 @@ export default {
   methods: {
     loadLoveFont() {
       // 加载Love字体
-      const font = new FontFace('Love', `url(${require('@/assets/fonts/谦度手写楷体.ttf')})`)
+      const font = new FontFace('Write', `url(${require('@/assets/fonts/谦度手写楷体.ttf')})`)
       font.load().then((loadedFont) => {
         document.fonts.add(loadedFont)
         this.fontLoaded = true
@@ -163,11 +155,14 @@ export default {
     
     // 完成撕拉动画
     completeTearAnimation() {
-      this.tearAnimationCompleted = true
-      
-      // 移除事件监听器
+      // 添加叠化过渡效果
       const canvas = this.$refs.tearCanvas
       if (canvas) {
+        // 设置Canvas的过渡效果
+        canvas.style.transition = 'opacity 0.8s ease-out'
+        canvas.style.opacity = '0'
+        
+        // 移除事件监听器
         canvas.removeEventListener('mousedown', this.handleMouseDown)
         canvas.removeEventListener('mousemove', this.handleMouseMove)
         canvas.removeEventListener('mouseup', this.handleMouseUp)
@@ -175,12 +170,20 @@ export default {
         canvas.removeEventListener('touchstart', this.handleTouchStart)
         canvas.removeEventListener('touchmove', this.handleTouchMove)
         canvas.removeEventListener('touchend', this.handleTouchEnd)
+        
+        // 获取撕拉提示文字元素并添加过渡效果
+        const instruction = document.querySelector('.tear-instruction')
+        if (instruction) {
+          instruction.style.transition = 'opacity 0.8s ease-out'
+          instruction.style.opacity = '0'
+        }
       }
       
-      // 添加一个小延迟后开始打字机动画，实现无缝过渡
+      // 延迟设置tearAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
+        this.tearAnimationCompleted = true
         this.startTypingAnimation()
-      }, 300)
+      }, 800)
     },
     
     // 鼠标事件处理
@@ -296,7 +299,7 @@ export default {
 }
 
 .letter-content {
-  font-family: 'Love', cursive, 'Microsoft YaHei', sans-serif;
+  font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   color: #333;
 }
 
@@ -339,25 +342,7 @@ export default {
   color: #1976d2;
 }
 
-.cursor {
-  display: inline-block;
-  width: 2px;
-  height: 24px;
-  background-color: #e91e63;
-  margin-left: 2px;
-  vertical-align: middle;
-  animation: blink 0.7s infinite;
-}
-
-@keyframes blink {
-
-  0%,
-  100% {    opacity: 1;
-  }
-
-  50% {    opacity: 0;
-  }
-}
+/* 打字机光标样式已移除 */
 
 /* 撕拉动画样式 */
 .tear-canvas {
@@ -380,7 +365,7 @@ export default {
   bottom: 50px;
   transform: translateX(-50%);
   z-index: 11;
-  font-family: 'Love', cursive, 'Microsoft YaHei', sans-serif;
+  font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   color: #8b4513;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
