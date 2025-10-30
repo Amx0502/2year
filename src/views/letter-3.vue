@@ -33,7 +33,7 @@ export default {
       fontLoaded: false,
       textLines: [
         { text: "哈哈哈哈哈哈好喽。", speaker: "她笑着说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "top9是牵手。", speaker: "我说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "top8是牵手。", speaker: "我说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "没想到吧，当时我会提出牵手。", speaker: "她得意说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "没想到，我以为是摸头来着，牵着手挺紧张的一直出汗。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "出其不意哈哈哈哈哈哈哈。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
