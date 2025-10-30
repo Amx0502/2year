@@ -17,6 +17,8 @@
         <div class="cover-page7"></div>
         <letter1 />
         <letter2 />
+        <letter3 />
+        <letter4 />
         <Start />
         <div v-for="n in 4" :key="n" class="blank-page">
         </div>
@@ -44,6 +46,9 @@ import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import Six from './six.vue'
 import letter1 from './letter-1.vue'
 import letter2 from './letter-2.vue'
+import letter3 from './letter-3.vue'
+import letter4 from './letter-4.vue'
+
 
 import Start from './Start.vue'
 import Two from './Two.vue'
@@ -59,6 +64,9 @@ export default {
     Six,
     letter1,
     letter2,
+    letter3,
+    letter4,
+
     Start,
     Two,
 

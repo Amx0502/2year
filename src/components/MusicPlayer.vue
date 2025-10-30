@@ -41,7 +41,7 @@ export default {
                             artist: '王俊凯',
                             // 使用示例音频文件URL，实际项目中替换为真实的音频文件路径
                             url: '/audio/my.mp3',
-                            cover: '/image/stationery.png',
+                            cover: '/audio/music.png',
                             // 添加歌词文件路径
                             lrc: '/audio/my.lrc'
                         }
