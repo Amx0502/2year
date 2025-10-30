@@ -72,7 +72,6 @@ export default {
         this.fontLoaded = true
       }).catch((error) => {
         console.error('字体加载失败:', error)
-        // 降级使用系统字体
         this.fontLoaded = true
       })
     },
