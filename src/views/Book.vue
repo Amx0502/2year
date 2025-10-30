@@ -284,6 +284,7 @@ export default {
     align-items: center;
     margin-top: 20px;
     gap: 30px;
+    width: 300px;
     z-index: 100;
   }
 
@@ -291,16 +292,30 @@ export default {
   .next-btn {
     width: 100px;
     height: 40px;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-    color: white;
-    border: none;
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid #5d4037;
     cursor: pointer;
-    font-size: 16px;
-    border-radius: 20px;
+    font-size: 20px;
+    border-radius: 8px;
     position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(238, 90, 111, 0.3);
+    transform: rotate(-1deg);
+    box-shadow: 3px 3px 0 #5d4037;
+    font-family: 'Write', cursive, 'Comic Sans MS', sans-serif;
+    transition: all 0.2s ease;
     z-index: 1;
+  }
+  
+  .prev-btn:hover,
+  .next-btn:hover {
+    transform: rotate(0deg) translateY(-0.5px);
+    box-shadow: 4px 4px 0 #5d4037;
+  }
+  
+  .prev-btn:active,
+  .next-btn:active {
+    transform: rotate(0deg) translateY(0);
+    box-shadow: 1px 1px 0 #5d4037;
   }
 
   .prev-btn::before,
