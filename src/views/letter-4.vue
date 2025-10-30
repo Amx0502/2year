@@ -358,7 +358,7 @@ export default {
 .tear-instruction {
   position: fixed;
   top: 50%;
-  left: 50%;
+  left: 51%;
   transform: translateY(-50%);
   z-index: 11;
   font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
