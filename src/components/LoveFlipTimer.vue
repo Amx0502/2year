@@ -1,7 +1,7 @@
 <template>
   <div class="love-flip-timer">
     <div id="loading-screen" :class="{ hidden: isLoaded }">
-      <canvas ref="heartCanvas" id="heartCanvas"></canvas>
+      <!-- 加载屏幕 -->
     </div>
 
     <div class="overlay-div">
@@ -254,15 +254,16 @@ const photoUrls = [
   '/video/2.mp4',
   '/video/3.mp4',
   '/video/4.mp4',
-  '/video/5.mp4'
+  '/video/5.mp4',
+  '/video/6.mp4',
 ];
 
 
 
 // 工具函数：计算从2023.10.27到现在的时间差（倒计时）
 function getTimeArr() {
-  // 设置纪念日日期（2023.10.27 23:07）- 直接使用本地时间
-  const anniversary = new Date(2023, 9, 27, 23, 7, 0) // 月份是从0开始的，10月对应9
+  // 设置纪念日日期（2023.10.27 18:30）- 直接使用本地时间
+  const anniversary = new Date(2023, 9, 27, 18, 30, 0) // 月份是从0开始的，10月对应9
   // 获取当前时间
   const now = new Date()
 
@@ -314,22 +315,13 @@ export default {
     return {
       isLoaded: false,
       loadedImages: 0,
-      totalImages: 24, // 3列 * 8张图片
+      totalImages: 12, // 3列 * 4张图片
       scrollSpeed: 0.7,
-      minScrollSpeed: 0.1,    // 最小滚动速度
-      maxScrollSpeed: 5,      // 最大滚动速度
-      imageScrollCoeff: 1.0,  // 图片滚动系数
-      videoScrollCoeff: 1.5,  // 视频滚动系数（略快于图片）
-      targetScrollSpeed: 0.7, // 目标滚动速度（用于平滑过渡）
+      autoScrollSpeed: 0.7,   // 自动滚动速度
       scrollPosition: 0,
       column1Images: [],
       column2Images: [],
       column3Images: [],
-      particles: [],
-      particleCount: 700,
-      progressPercent: 0,
-      centerX: 105,
-      centerY: 105,
       animationId: null,
       // 倒计时相关数据
       timeArr: getTimeArr(),
@@ -347,24 +339,21 @@ export default {
       // 当前图片索引（用于轮流显示）
       currentImageIndex: 0,
       // 起始日期显示
-      startDate: '2023.10.27 23:07'
+      startDate: '2023.10.27 18:30'
     };
   },
   mounted() {
       // 初始化图片库
       this.initializeGallery();
-
-      // 初始化Canvas
-      this.$nextTick(() => {
-        this.initializeCanvas();
-        this.drawParticles();
-      });
       
       // 开始倒计时
       this.startTimer();
       
       // 添加鼠标滚轮事件监听
       this.addWheelListeners();
+      
+      // 添加页面可见性变化监听
+      document.addEventListener('visibilitychange', this.handleVisibilityChange);
     },
     beforeUnmount() {
       // 清理资源
@@ -376,6 +365,9 @@ export default {
       
       // 移除鼠标滚轮事件监听
       this.removeWheelListeners();
+      
+      // 移除页面可见性变化监听
+      document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     },
   watch: {
     // 监听时间数组变化，更新翻页效果
@@ -413,71 +405,96 @@ export default {
       clearTimeout(this.timer);
     },
 
-    // 初始化Canvas
-    initializeCanvas() {
-      const canvas = this.$refs.heartCanvas;
-      if (!canvas) return;
 
-      canvas.width = 210;
-      canvas.height = 210;
-
-      this.centerX = canvas.width / 2;
-      this.centerY = canvas.height / 2;
-
-      this.createParticles();
-    },
-
-    // 心形函数 - 与HTML一致
-    heartFunction(t) {
-      return {
-        x: this.centerX + 60 * Math.sin(t) ** 3,
-        y: this.centerY - 50 * Math.cos(t) + 20 * Math.cos(2 * t) + 10 * Math.cos(3 * t) + 5 * Math.cos(4 * t)
-      };
-    },
-
-    // 创建粒子 - 与HTML一致
-    createParticles() {
-      for (let i = 0; i < this.particleCount; i++) {
-        let t = (Math.PI * 2 * i) / this.particleCount; // 均匀分布
-        let pos = this.heartFunction(t);
-        this.particles.push({
-          x: pos.x + (Math.random() - 0.5) * 11, // 增加随机偏移
-          y: pos.y + (Math.random() - 0.5) * 11,
-          alpha: 0 // 透明度，随着进度渐变
-        });
-      }
-    },
-
-    // 绘制粒子 - 与HTML一致
-    drawParticles() {
-      const canvas = this.$refs.heartCanvas;
-      if (!canvas || typeof canvas.getContext !== 'function') return;
-
-      try {
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        this.particles.forEach((p, index) => {
-          if (index / this.particleCount < this.progressPercent / 100) {
-            p.alpha = Math.min(p.alpha + 0.02, 1); // 透明度逐渐增加
-          }
-          ctx.fillStyle = `rgba(255, 20, 147, ${p.alpha})`; // 更鲜艳的粉色
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); // 粒子半径增大到 4px
-          ctx.fill();
-        });
-      } catch (error) {
-        console.error('绘制粒子时出错:', error);
-      }
-    },
 
     // 初始化图片库
     initializeGallery() {
-      // 为每列填充8张图片（轮流显示）
-      for (let i = 0; i < 8; i++) {
+      // 为每列填充4张图片（轮流显示），总共12张
+      for (let i = 0; i < 4; i++) {
         this.column1Images.push(this.getNextImage());
         this.column2Images.push(this.getNextImage());
         this.column3Images.push(this.getNextImage());
+      }
+    },
+    
+    // 限制每列最大显示项数并清理离开视口过远的元素
+    manageColumnElements() {
+      const maxItemsPerColumn = 12;
+      const gallery = this.$refs.imagesGallery;
+      
+      if (!gallery) return;
+      
+      const galleryRect = gallery.getBoundingClientRect();
+      const cleanupThreshold = galleryRect.bottom + 500; // 离开视口底部500px的元素将被移除
+      
+      // 处理每一列
+      this.cleanupColumn(this.column1Images, 0, maxItemsPerColumn, cleanupThreshold);
+      this.cleanupColumn(this.column2Images, 1, maxItemsPerColumn, cleanupThreshold);
+      this.cleanupColumn(this.column3Images, 2, maxItemsPerColumn, cleanupThreshold);
+    },
+    
+    // 清理特定列中离开视口过远的元素
+    cleanupColumn(columnImages, columnIndex, maxItems, cleanupThreshold) {
+      const columns = this.$el.querySelectorAll('.column');
+      const column = columns[columnIndex];
+      
+      if (!column) return;
+      
+      // 获取列中的所有子元素容器
+      const containers = column.querySelectorAll('div:not(.column)');
+      const elementsToRemove = [];
+      
+      // 检查哪些元素需要移除
+      containers.forEach((container, index) => {
+        const rect = container.getBoundingClientRect();
+        if (rect.bottom < cleanupThreshold && index < columnImages.length - maxItems) {
+          elementsToRemove.push(index);
+        }
+      });
+      
+      // 移除离开视口过远的元素
+      if (elementsToRemove.length > 0) {
+        // 从后往前移除，避免索引变化问题
+        elementsToRemove.sort((a, b) => b - a).forEach(index => {
+          columnImages.splice(index, 1);
+        });
+      }
+    },
+    
+    // 处理页面可见性变化
+    handleVisibilityChange() {
+      if (document.hidden) {
+        // 页面不可见时暂停动画和计时器
+        this.pauseAnimations();
+      } else {
+        // 页面可见时恢复动画和计时器
+        this.resumeAnimations();
+      }
+    },
+    
+    // 暂停动画和计时器
+    pauseAnimations() {
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+        this.animationId = null;
+      }
+      
+      this.stopTimer();
+      
+      // 暂停所有视频
+      const videos = this.$el.querySelectorAll('video');
+      videos.forEach(video => {
+        if (!video.paused) {
+          video.pause();
+        }
+      });
+    },
+    
+    // 恢复动画和计时器
+    resumeAnimations() {
+      this.startTimer();
+      if (this.isLoaded) {
+        this.autoScroll();
       }
     },
 
@@ -502,10 +519,6 @@ export default {
     // 处理图片加载
     handleImageLoad() {
       this.loadedImages++;
-      this.progressPercent = Math.round((this.loadedImages / this.totalImages) * 100);
-
-      // 绘制粒子进度
-      this.drawParticles();
 
       // 所有图片加载完成后，隐藏加载屏幕并开始自动滚动
       if (this.loadedImages === this.totalImages) {
@@ -519,45 +532,55 @@ export default {
     // 检查列是否触底
     checkColumns() {
       const columns = this.$el.querySelectorAll('.column');
+      const maxItemsPerColumn = 12;
+      
       columns.forEach((column, index) => {
         const rect = column.getBoundingClientRect();
         const windowHeight = window.innerHeight;
 
         if (rect.bottom < windowHeight + windowHeight / 2) {
-          // 根据列索引添加新图片（轮流显示）
-          if (index === 0) this.column1Images.push(this.getNextImage());
-          else if (index === 1) this.column2Images.push(this.getNextImage());
-          else if (index === 2) this.column3Images.push(this.getNextImage());
+          // 检查列是否未达到最大显示数量
+          let currentColumnLength = 0;
+          if (index === 0) currentColumnLength = this.column1Images.length;
+          else if (index === 1) currentColumnLength = this.column2Images.length;
+          else if (index === 2) currentColumnLength = this.column3Images.length;
+          
+          // 只有当列中的项目数小于最大值时才添加新图片
+          if (currentColumnLength < maxItemsPerColumn) {
+            if (index === 0) this.column1Images.push(this.getNextImage());
+            else if (index === 1) this.column2Images.push(this.getNextImage());
+            else if (index === 2) this.column3Images.push(this.getNextImage());
+          }
         }
       });
     },
 
-    // 处理鼠标滚轮事件，调整滚动速度
+    // 处理鼠标滚轮事件，直接控制图片滚动的上下方向
     handleWheel(event) {
       // 阻止默认滚动行为
       event.preventDefault();
       
-      // 获取当前视口中的媒体元素，区分图片和视频
-      const visibleMedia = this.getVisibleMediaElements();
+      // 定义滚动步长
+      const scrollStep = 80; // 每次滚轮滚动的像素数
       
-      // 根据可见元素类型计算速度调整系数
-      let speedChangeFactor = 0.2;
-      if (visibleMedia.videos > visibleMedia.images) {
-        // 如果可见视频多于图片，使用视频滚动系数
-        speedChangeFactor *= this.videoScrollCoeff;
-      } else {
-        // 如果可见图片多于或等于视频，使用图片滚动系数
-        speedChangeFactor *= this.imageScrollCoeff;
+      // 滚轮向上滚动，页面向上移动（图片向下移动）
+      // 滚轮向下滚动，页面向下移动（图片向上移动）
+      const scrollDirection = event.deltaY > 0 ? 1 : -1;
+      
+      // 直接调整滚动位置
+      this.scrollPosition += scrollStep * scrollDirection;
+      
+      // 确保滚动位置不会小于0
+      this.scrollPosition = Math.max(0, this.scrollPosition);
+      
+      // 应用滚动位置
+      const gallery = this.$refs.imagesGallery;
+      if (gallery) {
+        gallery.scrollTop = this.scrollPosition;
       }
       
-      // 滚轮向上滚动，增加速度；向下滚动，减少速度
-      const speedChange = event.deltaY > 0 ? -speedChangeFactor : speedChangeFactor;
-      
-      // 更新目标滚动速度，并限制在最小值和最大值之间
-      this.targetScrollSpeed = Math.max(
-        this.minScrollSpeed,
-        Math.min(this.maxScrollSpeed, this.targetScrollSpeed + speedChange)
-      );
+      // 检查是否需要加载更多图片
+      this.checkColumns();
     },
     
     // 获取视口中的媒体元素数量
@@ -622,18 +645,14 @@ export default {
     
     // 自动滚动
     autoScroll() {
-      if (!this.isLoaded) return;
+      if (!this.isLoaded || document.hidden) return;
 
       this.checkColumns();
+      // 定期清理离开视口过远的元素
+      this.manageColumnElements();
       
-      // 平滑过渡到目标速度
-      if (Math.abs(this.scrollSpeed - this.targetScrollSpeed) > 0.01) {
-        this.scrollSpeed += (this.targetScrollSpeed - this.scrollSpeed) * 0.1;
-      } else {
-        this.scrollSpeed = this.targetScrollSpeed;
-      }
-
-      this.scrollPosition += this.scrollSpeed;
+      // 使用固定的自动滚动速度
+      this.scrollPosition += this.autoScrollSpeed;
       const gallery = this.$refs.imagesGallery;
       if (gallery) {
         gallery.scrollTop = this.scrollPosition;
@@ -686,11 +705,7 @@ export default {
   visibility: hidden;
 }
 
-#heartCanvas {
-  width: 210px;
-  height: 210px;
-  display: block;
-}
+
 
 /* 覆盖层 */
 .overlay-div {
