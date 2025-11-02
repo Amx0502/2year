@@ -191,23 +191,39 @@
           <span class="unit">秒</span>
         </div>
       </div>
+      <div class="start-date">起始日期：{{ startDate }}</div>
     </div>
 
     <section>
       <div class="images-gallery" ref="imagesGallery" id="images-gallery">
         <div class="column">
           <div v-for="(img, index) in column1Images" :key="`col1-${index}`">
-            <img :src="getImageUrl(img)" alt="img" @load="handleImageLoad" @error="handleImageLoad">
+            <template v-if="isVideoFile(img)">
+              <video :src="img" autoplay loop muted playsinline @loadeddata="handleImageLoad"></video>
+            </template>
+            <template v-else>
+              <img :src="getImageUrl(img)" alt="img" @load="handleImageLoad" @error="handleImageLoad">
+            </template>
           </div>
         </div>
         <div class="column">
           <div v-for="(img, index) in column2Images" :key="`col2-${index}`">
-            <img :src="getImageUrl(img)" alt="img" @load="handleImageLoad" @error="handleImageLoad">
+            <template v-if="isVideoFile(img)">
+              <video :src="img" autoplay loop muted playsinline @loadeddata="handleImageLoad"></video>
+            </template>
+            <template v-else>
+              <img :src="getImageUrl(img)" alt="img" @load="handleImageLoad" @error="handleImageLoad">
+            </template>
           </div>
         </div>
         <div class="column">
           <div v-for="(img, index) in column3Images" :key="`col3-${index}`">
-            <img :src="getImageUrl(img)" alt="img" @load="handleImageLoad" @error="handleImageLoad">
+            <template v-if="isVideoFile(img)">
+              <video :src="img" autoplay loop muted playsinline @loadeddata="handleImageLoad"></video>
+            </template>
+            <template v-else>
+              <img :src="getImageUrl(img)" alt="img" @load="handleImageLoad" @error="handleImageLoad">
+            </template>
           </div>
         </div>
       </div>
@@ -232,15 +248,21 @@ const photoUrls = [
   '/images/12.jpg',
   '/images/13.jpg',
   '/images/14.jpg',
-  '/images/15.jpg'
+  '/images/15.jpg',
+  '/images/16.jpg',
+  '/video/1.mp4',
+  '/video/2.mp4',
+  '/video/3.mp4',
+  '/video/4.mp4',
+  '/video/5.mp4'
 ];
 
 
 
 // 工具函数：计算从2023.10.27到现在的时间差（倒计时）
 function getTimeArr() {
-  // 设置纪念日日期（2023.10.27）- 直接使用本地时间
-  const anniversary = new Date(2023, 9, 27, 0, 0, 0) // 月份是从0开始的，10月对应9
+  // 设置纪念日日期（2023.10.27 23:07）- 直接使用本地时间
+  const anniversary = new Date(2023, 9, 27, 23, 7, 0) // 月份是从0开始的，10月对应9
   // 获取当前时间
   const now = new Date()
 
@@ -294,6 +316,11 @@ export default {
       loadedImages: 0,
       totalImages: 24, // 3列 * 8张图片
       scrollSpeed: 0.7,
+      minScrollSpeed: 0.1,    // 最小滚动速度
+      maxScrollSpeed: 5,      // 最大滚动速度
+      imageScrollCoeff: 1.0,  // 图片滚动系数
+      videoScrollCoeff: 1.5,  // 视频滚动系数（略快于图片）
+      targetScrollSpeed: 0.7, // 目标滚动速度（用于平滑过渡）
       scrollPosition: 0,
       column1Images: [],
       column2Images: [],
@@ -316,30 +343,40 @@ export default {
       before6: -1,
       before7: -1,
       before8: -1,
-      timer: null
+      timer: null,
+      // 当前图片索引（用于轮流显示）
+      currentImageIndex: 0,
+      // 起始日期显示
+      startDate: '2023.10.27 23:07'
     };
   },
   mounted() {
-    // 初始化图片库
-    this.initializeGallery();
+      // 初始化图片库
+      this.initializeGallery();
 
-    // 初始化Canvas
-    this.$nextTick(() => {
-      this.initializeCanvas();
-      this.drawParticles();
-    });
-    
-    // 开始倒计时
-    this.startTimer();
-  },
-  beforeUnmount() {
-    // 清理资源
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
-    }
-    // 清理计时器
-    this.stopTimer();
-  },
+      // 初始化Canvas
+      this.$nextTick(() => {
+        this.initializeCanvas();
+        this.drawParticles();
+      });
+      
+      // 开始倒计时
+      this.startTimer();
+      
+      // 添加鼠标滚轮事件监听
+      this.addWheelListeners();
+    },
+    beforeUnmount() {
+      // 清理资源
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+      }
+      // 清理计时器
+      this.stopTimer();
+      
+      // 移除鼠标滚轮事件监听
+      this.removeWheelListeners();
+    },
   watch: {
     // 监听时间数组变化，更新翻页效果
     timeArr: {
@@ -436,23 +473,30 @@ export default {
 
     // 初始化图片库
     initializeGallery() {
-      // 为每列填充8张图片
+      // 为每列填充8张图片（轮流显示）
       for (let i = 0; i < 8; i++) {
-        this.column1Images.push(this.getRandomImage());
-        this.column2Images.push(this.getRandomImage());
-        this.column3Images.push(this.getRandomImage());
+        this.column1Images.push(this.getNextImage());
+        this.column2Images.push(this.getNextImage());
+        this.column3Images.push(this.getNextImage());
       }
     },
 
-    // 获取随机图片
-    getRandomImage() {
-      const randomIndex = Math.floor(Math.random() * photoUrls.length);
-      return photoUrls[randomIndex];
+    // 获取下一张图片（轮流显示）
+    getNextImage() {
+      const image = photoUrls[this.currentImageIndex];
+      this.currentImageIndex = (this.currentImageIndex + 1) % photoUrls.length;
+      return image;
     },
 
     // 获取图片URL - 添加图片处理参数，与HTML一致
     getImageUrl(img) {
       return img + '?x-oss-process=image/resize,p_20';
+    },
+    
+    // 判断是否为视频文件
+    isVideoFile(filePath) {
+      const videoExtensions = ['.mp4', '.mov', '.avi', '.wmv', '.flv', '.webm'];
+      return videoExtensions.some(ext => filePath.toLowerCase().endsWith(ext));
     },
 
     // 处理图片加载
@@ -480,19 +524,114 @@ export default {
         const windowHeight = window.innerHeight;
 
         if (rect.bottom < windowHeight + windowHeight / 2) {
-          // 根据列索引添加新图片
-          if (index === 0) this.column1Images.push(this.getRandomImage());
-          else if (index === 1) this.column2Images.push(this.getRandomImage());
-          else if (index === 2) this.column3Images.push(this.getRandomImage());
+          // 根据列索引添加新图片（轮流显示）
+          if (index === 0) this.column1Images.push(this.getNextImage());
+          else if (index === 1) this.column2Images.push(this.getNextImage());
+          else if (index === 2) this.column3Images.push(this.getNextImage());
         }
       });
     },
 
+    // 处理鼠标滚轮事件，调整滚动速度
+    handleWheel(event) {
+      // 阻止默认滚动行为
+      event.preventDefault();
+      
+      // 获取当前视口中的媒体元素，区分图片和视频
+      const visibleMedia = this.getVisibleMediaElements();
+      
+      // 根据可见元素类型计算速度调整系数
+      let speedChangeFactor = 0.2;
+      if (visibleMedia.videos > visibleMedia.images) {
+        // 如果可见视频多于图片，使用视频滚动系数
+        speedChangeFactor *= this.videoScrollCoeff;
+      } else {
+        // 如果可见图片多于或等于视频，使用图片滚动系数
+        speedChangeFactor *= this.imageScrollCoeff;
+      }
+      
+      // 滚轮向上滚动，增加速度；向下滚动，减少速度
+      const speedChange = event.deltaY > 0 ? -speedChangeFactor : speedChangeFactor;
+      
+      // 更新目标滚动速度，并限制在最小值和最大值之间
+      this.targetScrollSpeed = Math.max(
+        this.minScrollSpeed,
+        Math.min(this.maxScrollSpeed, this.targetScrollSpeed + speedChange)
+      );
+    },
+    
+    // 获取视口中的媒体元素数量
+    getVisibleMediaElements() {
+      const gallery = this.$refs.imagesGallery;
+      if (!gallery) return { images: 0, videos: 0 };
+      
+      let images = 0;
+      let videos = 0;
+      
+      // 检查所有图片
+      const imgElements = gallery.querySelectorAll('img');
+      imgElements.forEach(img => {
+        if (this.isElementInViewport(img)) {
+          images++;
+        }
+      });
+      
+      // 检查所有视频
+      const videoElements = gallery.querySelectorAll('video');
+      videoElements.forEach(video => {
+        if (this.isElementInViewport(video)) {
+          videos++;
+        }
+      });
+      
+      return { images, videos };
+    },
+    
+    // 检查元素是否在视口中
+    isElementInViewport(element) {
+      const rect = element.getBoundingClientRect();
+      const gallery = this.$refs.imagesGallery;
+      const galleryRect = gallery.getBoundingClientRect();
+      
+      return (
+        rect.top >= galleryRect.top - 100 &&
+        rect.bottom <= galleryRect.bottom + 100
+      );
+    },
+    
+    // 添加滚轮事件监听（兼容不同浏览器）
+    addWheelListeners() {
+      // 为图片库容器添加滚轮事件
+      const gallery = this.$refs.imagesGallery;
+      if (gallery) {
+        gallery.addEventListener('wheel', this.handleWheel, { passive: false });
+      }
+      
+      // 为整个窗口添加滚轮事件作为备用
+      window.addEventListener('wheel', this.handleWheel, { passive: false });
+    },
+    
+    // 移除滚轮事件监听
+    removeWheelListeners() {
+      const gallery = this.$refs.imagesGallery;
+      if (gallery) {
+        gallery.removeEventListener('wheel', this.handleWheel);
+      }
+      window.removeEventListener('wheel', this.handleWheel);
+    },
+    
     // 自动滚动
     autoScroll() {
       if (!this.isLoaded) return;
 
       this.checkColumns();
+      
+      // 平滑过渡到目标速度
+      if (Math.abs(this.scrollSpeed - this.targetScrollSpeed) > 0.01) {
+        this.scrollSpeed += (this.targetScrollSpeed - this.scrollSpeed) * 0.1;
+      } else {
+        this.scrollSpeed = this.targetScrollSpeed;
+      }
 
       this.scrollPosition += this.scrollSpeed;
       const gallery = this.$refs.imagesGallery;
@@ -512,8 +651,15 @@ export default {
   position: relative;
   width: 100%;
   height: 100vh;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'romantic', sans-serif;
   overflow: hidden;
+}
+
+@font-face {
+  font-family: 'romantic';
+  src: url('@/assets/fonts/字语坊浪漫手写体.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* 加载屏幕 */
@@ -566,9 +712,22 @@ export default {
 .overlay-text {
   font-weight: bold;
   font-size: 5vw;
-  margin-bottom: 20px;
-  color: #ff1493;
+  margin-bottom: 10px;
+  background: linear-gradient(45deg, #ff99cc, #ff8bc9, #f167f8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.start-date {
+  font-size: 1.2vw;
+  margin-top: 20px;
+  background: #efefef;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* 翻页倒计时样式 */
@@ -807,14 +966,21 @@ section::before {
 }
 
 .column img {
-  width: 100%;
-  display: block;
-  transition: transform 0.3s ease;
-}
+    width: 100%;
+    display: block;
+    transition: transform 0.3s ease;
+  }
 
-.column img:hover {
-  transform: scale(1.05);
-}
+  .column img:hover {
+    transform: scale(1.05);
+  }
+  
+  .column video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #000;
+  }
 
 
 
