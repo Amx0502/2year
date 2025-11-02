@@ -170,6 +170,8 @@ export default {
       if (!this.canvasContext) return
       
       const canvas = this.$refs.drawMCanvas
+      if (!canvas) return
+      
       const ctx = this.canvasContext
       
       // 清空Canvas
