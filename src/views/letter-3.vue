@@ -111,8 +111,8 @@ export default {
       const canvas = this.$refs.drawMCanvas
       const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const mHeight = 300 // 放大2倍
-      const mWidth = 200 // 放大2倍
+      const mHeight = 500 // 放大2倍
+      const mWidth = 400 // 放大2倍
       
       // 生成M形状的关键点
       this.templateMPoints = [
@@ -525,8 +525,8 @@ export default {
       const ctx = this.canvasContext
       const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const mHeight = 300 // 放大2倍
-      const mWidth = 200 // 放大2倍
+      const mHeight = 500 // 放大2倍
+      const mWidth = 400 // 放大2倍
       
       // 绘制M形状
       ctx.beginPath()

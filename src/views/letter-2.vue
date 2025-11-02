@@ -115,6 +115,41 @@ export default {
       // 填充覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // 绘制淡色A作为视觉提示
+      this.drawTemplateA()
+    },
+    
+    // 绘制淡色A模板作为视觉提示
+    drawTemplateA() {
+      if (!this.canvasContext) return
+      
+      const canvas = this.$refs.tearCanvas
+      const ctx = this.canvasContext
+      const centerX = canvas.width / 2 - 500
+      const centerY = canvas.height / 2
+      const aSize = Math.min(canvas.width, canvas.height) * 0.6 // A的大小
+      
+      // 使用半透明的棕色虚线绘制A的轮廓
+      ctx.beginPath()
+      
+      // 左侧斜线
+      ctx.moveTo(centerX - aSize / 2, centerY + aSize / 2)
+      ctx.lineTo(centerX, centerY - aSize / 2)
+      
+      // 右侧斜线
+      ctx.moveTo(centerX, centerY - aSize / 2)
+      ctx.lineTo(centerX + aSize / 2, centerY + aSize / 2)
+      
+      // 横线
+      ctx.moveTo(centerX - aSize / 4, centerY)
+      ctx.lineTo(centerX + aSize / 4, centerY)
+      
+      ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)' // 淡棕色半透明
+      ctx.lineWidth = 3
+      ctx.setLineDash([5, 5]) // 虚线样式
+      ctx.stroke()
+      ctx.setLineDash([]) // 重置为实线
     },
     
     // 绘制用户当前的笔画
@@ -123,7 +158,7 @@ export default {
       
       const ctx = this.canvasContext
       
-      // 重绘覆盖层
+      // 重绘覆盖层（会自动包含淡色A模板）
       this.drawAOverlay()
       
       // 绘制用户笔画
@@ -279,7 +314,7 @@ export default {
       const ctx = this.canvasContext
       const centerX = canvas.width / 2 - canvas.width * 0.25
       const centerY = canvas.height / 2
-      const aSize = Math.min(canvas.width, canvas.height) * 0.4
+      const aSize = Math.min(canvas.width, canvas.height) * 0.6
       
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)

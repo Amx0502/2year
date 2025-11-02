@@ -113,6 +113,42 @@ export default {
       // 填充覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // 绘制淡色X作为视觉提示
+      this.drawTemplateX()
+    },
+    
+    // 绘制淡色X模板作为视觉提示
+    drawTemplateX() {
+      if (!this.canvasContext) return
+      
+      const canvas = this.$refs.tearCanvas
+      const ctx = this.canvasContext
+      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerY = canvas.height / 2
+      const xSize = Math.min(canvas.width, canvas.height) * 0.6
+      
+      // 设置虚线样式
+      ctx.setLineDash([10, 5])
+      ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)' // 淡棕色虚线
+      ctx.lineWidth = 4
+      ctx.lineCap = 'round'
+      
+      // 绘制虚线X
+      ctx.beginPath()
+      
+      // 左上到右下的对角线
+      ctx.moveTo(centerX - xSize / 2, centerY - xSize / 2)
+      ctx.lineTo(centerX + xSize / 2, centerY + xSize / 2)
+      
+      // 右上到左下的对角线
+      ctx.moveTo(centerX + xSize / 2, centerY - xSize / 2)
+      ctx.lineTo(centerX - xSize / 2, centerY + xSize / 2)
+      
+      ctx.stroke()
+      
+      // 重置线条样式
+      ctx.setLineDash([])
     },
     
     // 绘制用户当前的笔画
@@ -121,7 +157,7 @@ export default {
       
       const ctx = this.canvasContext
       
-      // 重绘覆盖层
+      // 重绘覆盖层（会自动包含淡色X模板）
       this.drawXOverlay()
       
       // 绘制用户笔画
