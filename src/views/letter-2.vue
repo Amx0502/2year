@@ -13,8 +13,8 @@
       </div>
     </div>
     <!-- 纸撕拉动画Canvas -->
-    <canvas v-if="!tearAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
-    <div v-if="!tearAnimationCompleted" class="tear-instruction">向下拉动鼠标撕开信纸...</div>
+    <canvas v-if="!aAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
+    <div v-if="!aAnimationCompleted" class="tear-instruction">请画出大写A打开信纸...</div>
   </div>
 </template>
 
@@ -43,22 +43,21 @@ export default {
       ],
       displayedTextLines: [],
       cursorInterval: null,
-      // Canvas撕拉动画相关状态
-      tearAnimationCompleted: false,
-      isTearing: false,
-      startY: 0,
-      currentY: 0,
-      tearPath: [],
-      canvasContext: null
+      // Canvas绘制A相关状态
+      aAnimationCompleted: false,
+      isDrawing: false,
+      drawingPath: [],
+      canvasContext: null,
+      lineSegments: []
     }
   },
   mounted() {
-    this.loadLoveFont()
-    // 先初始化撕拉动画Canvas
-    this.$nextTick(() => {
-      this.initTearCanvas()
-    })
-  },
+      this.loadLoveFont()
+      // 先初始化绘制A动画Canvas
+      this.$nextTick(() => {
+        this.initDrawACanvas()
+      })
+    },
   beforeDestroy() {
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
@@ -77,8 +76,8 @@ export default {
         this.fontLoaded = true
       })
     },
-    // 初始化撕拉动画Canvas
-    initTearCanvas() {
+    // 初始化绘制A动画Canvas
+    initDrawACanvas() {
       const canvas = this.$refs.tearCanvas
       if (!canvas) return
       
@@ -89,7 +88,7 @@ export default {
       this.canvasContext = canvas.getContext('2d')
       
       // 绘制初始覆盖层
-      this.drawTearEffect()
+      this.drawAOverlay()
       
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
@@ -103,8 +102,8 @@ export default {
       canvas.addEventListener('touchend', this.handleTouchEnd)
     },
     
-    // 绘制撕拉效果
-    drawTearEffect() {
+    // 绘制初始覆盖层
+    drawAOverlay() {
       if (!this.canvasContext) return
       
       const canvas = this.$refs.tearCanvas
@@ -116,49 +115,134 @@ export default {
       // 填充覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
-      if (this.isTearing) {
-        // 创建撕拉效果路径
-      ctx.beginPath()
-      ctx.moveTo(0, 0)
-      
-      // 添加一些随机波动来模拟撕纸的不规则边缘
-      const baseY = Math.max(this.currentY, canvas.height * 0.2) // 限制最小撕裂高度
-        for (let x = 0; x <= canvas.width; x += 10) {
-          const randomOffset = Math.sin(x * 0.01 + this.currentY * 0.001) * 15 + 
-                             Math.random() * 10 - 5
-          const y = baseY + randomOffset
-          ctx.lineTo(x, y)
-      }
-      
-      ctx.lineTo(canvas.width, 0)
-      ctx.lineTo(0, 0)
-      ctx.closePath()
-      
-      // 设置渐变效果模拟纸张厚度
-      const gradient = ctx.createLinearGradient(0, baseY, 0, baseY + 20)
-      gradient.addColorStop(0, 'rgba(255, 245, 238, 0.95)')
-      gradient.addColorStop(1, 'rgba(255, 245, 238, 0.4)')
-        ctx.fillStyle = gradient
-        ctx.fill()
-        
-        // 绘制撕裂痕迹
-        ctx.strokeStyle = 'rgba(200, 190, 180, 0.5)'
-        ctx.lineWidth = 2
-        ctx.stroke()
-        
-        // 检查是否完成撕裂
-      if (baseY > canvas.height * 0.8) {
-        this.completeTearAnimation()
-      }
-      }
     },
     
-    // 完成撕拉动画
-    completeTearAnimation() {
+    // 绘制用户当前的笔画
+    drawUserPath() {
+      if (!this.canvasContext || this.drawingPath.length < 2) return
+      
+      const ctx = this.canvasContext
+      
+      // 重绘覆盖层
+      this.drawAOverlay()
+      
+      // 绘制用户笔画
+      ctx.beginPath()
+      ctx.moveTo(this.drawingPath[0].x, this.drawingPath[0].y)
+      
+      for (let i = 1; i < this.drawingPath.length; i++) {
+        ctx.lineTo(this.drawingPath[i].x, this.drawingPath[i].y)
+      }
+      
+      ctx.strokeStyle = '#8b4513' // 棕色线条
+      ctx.lineWidth = 5
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.stroke()
+      
+      // 绘制已完成的线段
+      this.lineSegments.forEach(segment => {
+        ctx.beginPath()
+        ctx.moveTo(segment.start.x, segment.start.y)
+        ctx.lineTo(segment.end.x, segment.end.y)
+        ctx.strokeStyle = '#8b4513'
+        ctx.lineWidth = 5
+        ctx.stroke()
+      })
+    },
+    
+    // 分析笔画是否形成A形状
+    analyzeAShape() {
+      // A形状必须包含横线和斜线的组合
+      if (this.lineSegments.length < 2) return false
+      
+      // 过滤出有效的线段（足够长）
+      const validLines = this.lineSegments.filter(segment => {
+        const dx = segment.end.x - segment.start.x
+        const dy = segment.end.y - segment.start.y
+        const length = Math.sqrt(dx * dx + dy * dy)
+        return length > Math.min(window.innerWidth, window.innerHeight) * 0.08
+      })
+      
+      if (validLines.length < 2) return false
+      
+      // 计算线段的特征
+      const lines = validLines.map(segment => {
+        const dx = segment.end.x - segment.start.x
+        const dy = segment.end.y - segment.start.y
+        const length = Math.sqrt(dx * dx + dy * dy)
+        const slope = dy / dx
+        
+        return {
+          segment,
+          dx,
+          dy,
+          length,
+          slope,
+          isVertical: Math.abs(dx) < Math.abs(dy) * 0.5,
+          isHorizontal: Math.abs(dy) < Math.abs(dx) * 0.5, // 横线判断
+          isSlant: Math.abs(slope) > 0.3 && Math.abs(slope) < 3, // 斜线判断，范围更宽松
+          isLeftSlant: slope < -0.3, // 左斜线（左上到右下）
+          isRightSlant: slope > 0.3, // 右斜线（右上到左下）
+          topPoint: dy > 0 ? segment.start : segment.end, // 上端点
+          bottomPoint: dy > 0 ? segment.end : segment.start, // 下端点
+          midPoint: { // 中点
+            x: (segment.start.x + segment.end.x) / 2,
+            y: (segment.start.y + segment.end.y) / 2
+          }
+        }
+      })
+      
+      // 必须有横线才能识别为A
+      const hasHorizontal = lines.some(line => line.isHorizontal)
+      if (!hasHorizontal) {
+        // 没有横线，直接返回false，确保必须包含横线
+        return false
+      }
+      
+      // 检查是否有斜线
+      const hasSlant = lines.some(line => line.isSlant)
+      const hasLeftSlant = lines.some(line => line.isLeftSlant)
+      const hasRightSlant = lines.some(line => line.isRightSlant)
+      
+      // 情况1：有横线和至少一条斜线
+      if (hasHorizontal && hasSlant) {
+        // 计算所有线段的中点，用于判断是否分布在A形状的位置上
+        const midPoints = lines.map(line => line.midPoint)
+        
+        // 检查中点的分布是否符合A的形状
+        if (midPoints.length >= 2) {
+          // 计算中点的y坐标范围，用于判断是否有上下分布
+          const yCoords = midPoints.map(p => p.y)
+          const minY = Math.min(...yCoords)
+          const maxY = Math.max(...yCoords)
+          const yRange = maxY - minY
+          
+          // 有足够的垂直分布，符合A的特征
+          if (yRange > Math.min(window.innerWidth, window.innerHeight) * 0.08) {
+            return true
+          }
+        }
+      }
+      
+      // 情况2：有横线、左斜线和右斜线
+      if (hasHorizontal && hasLeftSlant && hasRightSlant) {
+        // 同时满足横线和两条斜线，符合A的形状特征
+        return true
+      }
+      
+      // 所有条件都不满足，返回false
+      return false
+    },
+    
+    // 完成绘制A动画
+    completeDrawAAnimation() {
       // 添加叠化过渡效果
       const canvas = this.$refs.tearCanvas
       if (canvas) {
+        // 先绘制完成的A动画
+        this.drawCompletedA()
+        
         // 设置Canvas的过渡效果
         canvas.style.transition = 'opacity 0.8s ease-out'
         canvas.style.opacity = '0'
@@ -172,7 +256,7 @@ export default {
         canvas.removeEventListener('touchmove', this.handleTouchMove)
         canvas.removeEventListener('touchend', this.handleTouchEnd)
         
-        // 获取撕拉提示文字元素并添加过渡效果
+        // 获取提示文字元素并添加过渡效果
         const instruction = document.querySelector('.tear-instruction')
         if (instruction) {
           instruction.style.transition = 'opacity 0.8s ease-out'
@@ -180,40 +264,100 @@ export default {
         }
       }
       
-      // 延迟设置tearAnimationCompleted和开始打字机动画，确保过渡效果完成
+      // 延迟设置aAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
-        this.tearAnimationCompleted = true
+        this.aAnimationCompleted = true
         this.startTypingAnimation()
       }, 800)
     },
     
+    // 绘制完成的A效果
+    drawCompletedA() {
+      if (!this.canvasContext) return
+      
+      const canvas = this.$refs.tearCanvas
+      const ctx = this.canvasContext
+      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerY = canvas.height / 2
+      const aSize = Math.min(canvas.width, canvas.height) * 0.4
+      
+      // 清空Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      
+      // 保持原覆盖层
+      ctx.fillStyle = 'rgba(255, 245, 238, 0.95)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // 绘制完成的A
+      ctx.beginPath()
+      
+      // 左侧斜线
+      ctx.moveTo(centerX - aSize / 2, centerY + aSize / 2)
+      ctx.lineTo(centerX, centerY - aSize / 2)
+      
+      // 右侧斜线
+      ctx.lineTo(centerX + aSize / 2, centerY + aSize / 2)
+      
+      // 横线
+      ctx.moveTo(centerX - aSize / 4, centerY)
+      ctx.lineTo(centerX + aSize / 4, centerY)
+      
+      ctx.strokeStyle = '#8b4513'
+      ctx.lineWidth = 8
+      ctx.stroke()
+    },
+    
     // 鼠标事件处理
     handleMouseDown(event) {
-      this.isTearing = true
-      this.startY = event.clientY
-      this.currentY = event.clientY
+      this.isDrawing = true
+      this.drawingPath = [{ x: event.clientX - 800, y: event.clientY }]
     },
     
     handleMouseMove(event) {
-      if (this.isTearing) {
-        // 只允许向下拉动
-        const newY = Math.max(this.startY, event.clientY)
-        if (newY > this.currentY) {
-          this.currentY = newY
-          this.drawTearEffect()
-        }
+      if (this.isDrawing) {
+        this.drawingPath.push({ x: event.clientX - 800, y: event.clientY })
+        this.drawUserPath()
       }
     },
     
     handleMouseUp() {
-      if (this.isTearing) {
-        // 如果拉动距离不够，重置
-        if (this.currentY - this.startY < 100) {
-          this.currentY = this.startY
-          this.drawTearEffect()
+      if (this.isDrawing && this.drawingPath.length > 3) { // 降低线段最小长度要求
+        // 保存完成的线段
+        const startPoint = this.drawingPath[0]
+        const endPoint = this.drawingPath[this.drawingPath.length - 1]
+        
+        // 计算线段长度，只有足够长的线段才保存
+        const dx = endPoint.x - startPoint.x
+        const dy = endPoint.y - startPoint.y
+        const length = Math.sqrt(dx * dx + dy * dy)
+        
+        if (length > 50) { // 只要长度超过50px就保存
+          this.lineSegments.push({ start: startPoint, end: endPoint })
+          
+          // 分析是否形成A形状
+          if (this.analyzeAShape()) {
+            // 形成A形状，完成动画
+            this.completeDrawAAnimation()
+          } else if (this.lineSegments.length > 4) { // 增加保留的线段数量
+            // 如果画了太多线条但没形成A，重置部分线条
+            this.lineSegments = this.lineSegments.slice(-3) // 保留最近的三条线段
+            this.drawUserPath()
+          } else {
+            // 继续绘制
+            this.drawingPath = []
+          }
+        } else {
+          // 清除太短的路径
+          this.drawingPath = []
+          this.drawUserPath()
         }
-        this.isTearing = false
+      } else {
+        // 清除太短的路径
+        this.drawingPath = []
+        this.drawAOverlay()
       }
+      
+      this.isDrawing = false
     },
     
     // 触摸事件处理（移动端支持）
