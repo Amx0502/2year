@@ -21,6 +21,8 @@
         <letter4 />
         <letter5 />
         <letter6 />
+        <letter7 />
+        <letter8 />
         <Start />
         <div v-for="n in 4" :key="n" class="blank-page">
         </div>
@@ -52,6 +54,8 @@ import letter3 from './letter-3.vue'
 import letter4 from './letter-4.vue'
 import letter5 from './letter-5.vue'
 import letter6 from './letter-6.vue'
+import letter7 from './letter-7.vue'
+import letter8 from './letter-8.vue'
 
 
 import Start from './Start.vue'
@@ -72,7 +76,8 @@ export default {
     letter4,
     letter5,
     letter6,
-
+    letter7,
+    letter8,
     Start,
     Two,
 
