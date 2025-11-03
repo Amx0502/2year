@@ -171,25 +171,40 @@ export default {
 
     // 绘制用户当前的笔画
     drawUserPath() {
-      if (!this.canvasContext || this.drawingPath.length < 2) return
+      if (!this.canvasContext) return
 
       const ctx = this.canvasContext
+      // 重绘覆盖层（会自动包含淡色E模板）
+      this.drawEOverlay()
 
-      // 绘制用户笔画
-      ctx.beginPath()
-      ctx.moveTo(this.drawingPath[0].x, this.drawingPath[0].y)
+      // 绘制历史线段（最多保留2条）- 保持原始路径不变
+      this.lineSegments.forEach(segment => {
+        ctx.beginPath()
+        // 绘制完整的原始路径，而不仅仅是起点到终点的直线
+        ctx.moveTo(segment.path[0].x, segment.path[0].y)
+        for (let i = 1; i < segment.path.length; i++) {
+          ctx.lineTo(segment.path[i].x, segment.path[i].y)
+        }
+        ctx.strokeStyle = '#8b4513'
+        ctx.lineWidth = 5
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.stroke()
+      })
 
-      for (let i = 1; i < this.drawingPath.length; i++) {
-        ctx.lineTo(this.drawingPath[i].x, this.drawingPath[i].y)
+      // 绘制当前正在绘制的路径
+      if (this.drawingPath.length >= 2) {
+        ctx.beginPath()
+        ctx.moveTo(this.drawingPath[0].x, this.drawingPath[0].y)
+        for (let i = 1; i < this.drawingPath.length; i++) {
+          ctx.lineTo(this.drawingPath[i].x, this.drawingPath[i].y)
+        }
+        ctx.strokeStyle = '#8b4513'
+        ctx.lineWidth = 5
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.stroke()
       }
-
-      ctx.strokeStyle = '#8b4513' // 棕色线条
-      ctx.lineWidth = 5
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      ctx.stroke()
-
-      // 不再绘制已保存的线段，避免连接起点和终点
     },
 
     // 极度简化的E形状判断方法，更容易识别
@@ -221,27 +236,101 @@ export default {
         return false
       }
 
-      // 非常宽松的水平/垂直线判断
-      let hasHorizontalComponent = false
-      let hasVerticalComponent = false
+      // 更精确的E形状判断
+      // 1. 检测线段的方向和数量
+      const horizontalSegments = []
+      const verticalSegments = []
+      const minSegmentLength = Math.min(window.innerWidth, window.innerHeight) * 0.02
 
+      // 分析相邻点之间的线段
       for (let i = 1; i < this.drawingPath.length; i++) {
         const prevPoint = this.drawingPath[i - 1]
         const currPoint = this.drawingPath[i]
 
-        const dx = Math.abs(currPoint.x - prevPoint.x)
-        const dy = Math.abs(currPoint.y - prevPoint.y)
+        const dx = currPoint.x - prevPoint.x
+        const dy = currPoint.y - prevPoint.y
+        const length = Math.sqrt(dx * dx + dy * dy)
 
-        // 只要有任何水平或垂直趋势就算
-        if (dx > dy * 1.5) {
-          hasHorizontalComponent = true
-        } else if (dy > dx * 1.5) {
-          hasVerticalComponent = true
+        // 忽略太短的线段
+        if (length < minSegmentLength) continue
+
+        // 计算角度（相对于x轴）
+        const angle = Math.atan2(Math.abs(dy), Math.abs(dx)) * (180 / Math.PI)
+
+        // 水平线段（0-30度或150-180度）
+        if (angle < 30 || angle > 150) {
+          horizontalSegments.push({ start: prevPoint, end: currPoint, length })
+        }
+        // 垂直线段（60-120度）
+        else if (angle > 60 && angle < 120) {
+          verticalSegments.push({ start: prevPoint, end: currPoint, length })
         }
       }
 
-      // 极度简化：只要有水平和垂直的趋势，且尺寸足够，就认为是E
-      return hasHorizontalComponent && hasVerticalComponent
+      // 2. 检测水平线段的数量和分布（E应该有顶部、中间和底部三条水平线）
+      if (horizontalSegments.length < 2) return false
+      
+      // 按y坐标排序水平线段，检测是否有上下分布
+      const sortedHorizontal = [...horizontalSegments].sort((a, b) => {
+        const y1 = (a.start.y + a.end.y) / 2
+        const y2 = (b.start.y + b.end.y) / 2
+        return y1 - y2
+      })
+      
+      // 检查顶部和底部水平线是否有足够的垂直距离
+      const topY = (sortedHorizontal[0].start.y + sortedHorizontal[0].end.y) / 2
+      const bottomY = (sortedHorizontal[sortedHorizontal.length - 1].start.y + sortedHorizontal[sortedHorizontal.length - 1].end.y) / 2
+      const verticalSpread = Math.abs(bottomY - topY)
+      
+      // 垂直距离应至少为E高度的70%
+      if (verticalSpread < height * 0.7) return false
+      
+      // 3. 检测垂直线段（E应该有一条左侧垂直线）
+      if (verticalSegments.length === 0) {
+        // 如果没有明显的垂直线段，检查是否有左侧边缘
+        let hasLeftEdge = false
+        const leftmostX = minX + width * 0.1 // 左侧10%区域
+        
+        // 计算左侧区域内点的数量
+        const leftEdgePoints = this.drawingPath.filter(point => 
+          point.x <= leftmostX && 
+          point.y >= minY + height * 0.1 && 
+          point.y <= maxY - height * 0.1
+        )
+        
+        // 如果左侧区域有足够的点，认为有左侧边缘
+        hasLeftEdge = leftEdgePoints.length >= this.drawingPath.length * 0.2
+        if (!hasLeftEdge) return false
+      }
+      
+      // 4. 检查是否有中间水平线（E的特征）
+      let hasMiddleHorizontal = false
+      if (sortedHorizontal.length >= 3) {
+        // 如果有3条以上水平线段，中间的那条认为是中间水平线
+        hasMiddleHorizontal = true
+      } else if (sortedHorizontal.length === 2) {
+        // 如果只有2条水平线，检查是否有中间区域的水平趋势
+        const middleY = minY + height * 0.5
+        const middleRegionPoints = this.drawingPath.filter(point => 
+          point.y >= middleY - height * 0.15 && 
+          point.y <= middleY + height * 0.15
+        )
+        
+        // 分析中间区域的点是否有水平趋势
+        if (middleRegionPoints.length > 5) {
+          const middleXCoords = middleRegionPoints.map(p => p.x)
+          const middleXRange = Math.max(...middleXCoords) - Math.min(...middleXCoords)
+          hasMiddleHorizontal = middleXRange > width * 0.3
+        }
+      }
+      
+      // 5. 检查整体比例是否符合E的形状
+      const widthHeightRatio = width / height
+      // E的宽度通常是高度的0.6-0.8倍
+      if (widthHeightRatio < 0.4 || widthHeightRatio > 1.0) return false
+      
+      // 综合判断：需要有足够的水平线段、垂直分布、左侧边缘，最好有中间水平线
+      return hasMiddleHorizontal || (horizontalSegments.length >= 2 && verticalSpread >= height * 0.7)
     },
 
     // 完成绘制E动画
@@ -341,6 +430,22 @@ export default {
 
     handleMouseUp() {
       if (this.isDrawing && this.drawingPath.length > 4) {
+        // 保存完成的线段 - 保存完整的原始路径，不做任何改变
+        const startPoint = this.drawingPath[0]
+        const endPoint = this.drawingPath[this.drawingPath.length - 1]
+        
+        // 添加完整路径到线段数组，确保不会改变原始绘制
+        this.lineSegments.push({ 
+          start: startPoint, 
+          end: endPoint, 
+          path: [...this.drawingPath] // 保存完整的原始路径
+        })
+        
+        // 只保留最近的2条线段
+        if (this.lineSegments.length > 2) {
+          this.lineSegments = this.lineSegments.slice(-2)
+        }
+
         // 分析是否形成E形状
         if (this.analyzeEShape()) {
           // 形成E形状，完成动画
@@ -353,16 +458,17 @@ export default {
             // 错误3次，直接成功
             this.completeDrawEAnimation()
           } else {
-            // 不保存线段，直接清除当前路径
+            // 清除当前路径，但保留历史线段
             this.drawingPath = []
-            // 重新绘制界面
-            this.drawEOverlay()
+            // 重新绘制用户路径（包含历史线段）
+            this.drawUserPath()
           }
         }
       } else {
         // 清除太短的路径
         this.drawingPath = []
-        this.drawEOverlay()
+        // 重新绘制用户路径（包含历史线段）
+        this.drawUserPath()
       }
 
       this.isDrawing = false
