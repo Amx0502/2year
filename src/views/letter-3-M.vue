@@ -49,7 +49,8 @@ export default {
       savedSegments: [],
       canvasContext: null,
       templateMPoints: null,
-      templateMPath: null
+      templateMPath: null,
+      errorCount: 0 // 错误绘制计数
     }
   },
   mounted() {
@@ -573,11 +574,19 @@ export default {
         if (this.analyzeMShape()) {
           this.completeDrawMAnimation()
         } else {
-          // 清除当前绘制路径，准备下一次绘制
-          setTimeout(() => {
-            this.drawingPath = []
-            this.drawMOverlay()
-          }, 2000)
+          // 增加错误计数
+          this.errorCount++
+          // 检查是否错误3次
+          if (this.errorCount >= 3) {
+            // 错误3次，直接成功
+            this.completeDrawMAnimation()
+          } else {
+            // 清除当前绘制路径，准备下一次绘制
+            setTimeout(() => {
+              this.drawingPath = []
+              this.drawMOverlay()
+            }, 2000)
+          }
         }
       }
       this.isDrawing = false

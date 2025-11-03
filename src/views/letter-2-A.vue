@@ -12,9 +12,9 @@
         </div>
       </div>
     </div>
-    <!-- 绘制V动画Canvas -->
-    <canvas v-if="!vAnimationCompleted" ref="drawVCanvas" class="draw-v-canvas"></canvas>
-    <div v-if="!vAnimationCompleted" class="draw-v-instruction">请画出大写V打开信纸...</div>
+    <!-- 纸撕拉动画Canvas -->
+    <canvas v-if="!aAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
+    <div v-if="!aAnimationCompleted" class="tear-instruction">请画出大写A打开信纸...</div>
   </div>
 </template>
 
@@ -32,28 +32,33 @@ export default {
       showCursor: false,
       fontLoaded: false,
       textLines: [
-        { text: "top7是你亲手做的礼物。特别是那束花。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "我不会在做那个花了，真麻烦。", speaker: "她说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "我很喜欢你做的那些礼物，都说那是把自己的时间转换成思念，你的情绪、念想与爱的具象化。", speaker: "我答道", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "没事，我能用那个花你的钱哈哈哈哈哈哈。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "确实。那top9呢？", speaker: "她答道", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "top9是汽车站。", speaker: "我说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "你当时来汽车站接我是我没想到的，我以为只是在学校门口。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "小事更能体现我对你的重视。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "那你说哪里印象深刻？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "在去接你的路上，我满脑子想的是你见到我时的模样，期待", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "伴随着心中的澎湃，直至", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '114px', paddingRight: '0px' },
+        { text: "遇见你的那一刻。", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '114px', paddingRight: '0px' },
       ],
       displayedTextLines: [],
       cursorInterval: null,
-      // Canvas绘制V相关状态
-      vAnimationCompleted: false,
+      // Canvas绘制A相关状态
+      aAnimationCompleted: false,
       isDrawing: false,
       drawingPath: [],
       canvasContext: null,
-      lineSegments: []
+      lineSegments: [],
+      errorCount: 0 // 错误绘制计数,
     }
   },
   mounted() {
-    this.loadLoveFont()
-    // 先初始化绘制V动画Canvas
-    this.$nextTick(() => {
-      this.initDrawVCanvas()
-    })
-  },
+      this.loadLoveFont()
+      // 先初始化绘制A动画Canvas
+      this.$nextTick(() => {
+        this.initDrawACanvas()
+      })
+    },
   beforeDestroy() {
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
@@ -72,113 +77,105 @@ export default {
         this.fontLoaded = true
       })
     },
-    // 初始化绘制V动画Canvas
-    initDrawVCanvas() {
-      const canvas = this.$refs.drawVCanvas
+    // 初始化绘制A动画Canvas
+    initDrawACanvas() {
+      const canvas = this.$refs.tearCanvas
       if (!canvas) return
-
+      
       // 设置Canvas尺寸为视口大小
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
-
+      
       this.canvasContext = canvas.getContext('2d')
-
+      
       // 绘制初始覆盖层
-      this.drawVOverlay()
-
+      this.drawAOverlay()
+      
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
       canvas.addEventListener('mousemove', this.handleMouseMove)
       canvas.addEventListener('mouseup', this.handleMouseUp)
       canvas.addEventListener('mouseleave', this.handleMouseUp)
-
+      
       // 绑定触摸事件（移动端支持）
       canvas.addEventListener('touchstart', this.handleTouchStart)
       canvas.addEventListener('touchmove', this.handleTouchMove)
       canvas.addEventListener('touchend', this.handleTouchEnd)
     },
-
+    
     // 绘制初始覆盖层
-    drawVOverlay() {
+    drawAOverlay() {
       if (!this.canvasContext) return
-
-      const canvas = this.$refs.drawVCanvas
-      if (!canvas) return
       
+      const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-
+      
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+      
       // 填充覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // 绘制淡色V作为视觉提示
-      this.drawTemplateV()
-    },
-
-    // 绘制淡色V模板作为视觉提示
-    drawTemplateV() {
-      if (!this.canvasContext) return
-
-      const canvas = this.$refs.drawVCanvas
-      if (!canvas) return
       
+      // 绘制淡色A作为视觉提示
+      this.drawTemplateA()
+    },
+    
+    // 绘制淡色A模板作为视觉提示
+    drawTemplateA() {
+      if (!this.canvasContext) return
+      
+      const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerX = canvas.width / 2 - 500
       const centerY = canvas.height / 2
-      const vSize = Math.min(canvas.width, canvas.height) * 0.6
-
-      // 设置虚线样式
-      ctx.setLineDash([10, 5])
-      ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)' // 淡棕色虚线
-      ctx.lineWidth = 4
-      ctx.lineCap = 'round'
-
-      // 绘制虚线V
+      const aSize = Math.min(canvas.width, canvas.height) * 0.6 // A的大小
+      
+      // 使用半透明的棕色虚线绘制A的轮廓
       ctx.beginPath()
       
-      // V的顶点在底部
-      const vertexY = centerY + vSize / 3
-      
       // 左侧斜线
-      ctx.moveTo(centerX - vSize / 3, centerY - vSize / 3)
-      ctx.lineTo(centerX, vertexY)
+      ctx.moveTo(centerX - aSize / 2, centerY + aSize / 2)
+      ctx.lineTo(centerX, centerY - aSize / 2)
       
       // 右侧斜线
-      ctx.moveTo(centerX, vertexY)
-      ctx.lineTo(centerX + vSize / 3, centerY - vSize / 3)
-
+      ctx.moveTo(centerX, centerY - aSize / 2)
+      ctx.lineTo(centerX + aSize / 2, centerY + aSize / 2)
+      
+      // 横线
+      ctx.moveTo(centerX - aSize / 4, centerY)
+      ctx.lineTo(centerX + aSize / 4, centerY)
+      
+      ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)' // 淡棕色半透明
+      ctx.lineWidth = 3
+      ctx.setLineDash([5, 5]) // 虚线样式
       ctx.stroke()
-
-      // 重置线条样式
-      ctx.setLineDash([])
+      ctx.setLineDash([]) // 重置为实线
     },
-
+    
     // 绘制用户当前的笔画
     drawUserPath() {
       if (!this.canvasContext || this.drawingPath.length < 2) return
-
+      
       const ctx = this.canvasContext
-
-      // 重绘覆盖层（会自动包含淡色V模板）
-      this.drawVOverlay()
-
+      
+      // 重绘覆盖层（会自动包含淡色A模板）
+      this.drawAOverlay()
+      
       // 绘制用户笔画
       ctx.beginPath()
       ctx.moveTo(this.drawingPath[0].x, this.drawingPath[0].y)
-
+      
       for (let i = 1; i < this.drawingPath.length; i++) {
         ctx.lineTo(this.drawingPath[i].x, this.drawingPath[i].y)
       }
-
+      
       ctx.strokeStyle = '#8b4513' // 棕色线条
       ctx.lineWidth = 5
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.stroke()
-
+      
       // 绘制已完成的线段
       this.lineSegments.forEach(segment => {
         ctx.beginPath()
@@ -189,83 +186,103 @@ export default {
         ctx.stroke()
       })
     },
-
-    // 简化的V形状判断方法，更容易识别
-    analyzeVShape() {
-      // 降低点数量要求，确保V形状顶点在底部
-      if (this.lineSegments.length < 1) return false
-
-      // 对于单条线段的V形状检测（用户可能一次性画出V）
-      if (this.lineSegments.length === 1) {
-        // 检查是否有明显的转折点（V的底部顶点）
-        const hasVertex = this.drawingPath.some((point, index) => {
-          if (index > 0 && index < this.drawingPath.length - 1) {
-            const prevPoint = this.drawingPath[index - 1]
-            const nextPoint = this.drawingPath[index + 1]
-
-            // 简化的转折点检测：特别关注向下的顶点（V的底部）
-            if (point.y > prevPoint.y && point.y > nextPoint.y) {
-              return true // 向下的顶点（V的底部）
-            }
-            return false
+    
+    // 分析笔画是否形成A形状
+    analyzeAShape() {
+      // A形状必须包含横线和斜线的组合
+      if (this.lineSegments.length < 2) return false
+      
+      // 过滤出有效的线段（足够长）
+      const validLines = this.lineSegments.filter(segment => {
+        const dx = segment.end.x - segment.start.x
+        const dy = segment.end.y - segment.start.y
+        const length = Math.sqrt(dx * dx + dy * dy)
+        return length > Math.min(window.innerWidth, window.innerHeight) * 0.08
+      })
+      
+      if (validLines.length < 2) return false
+      
+      // 计算线段的特征
+      const lines = validLines.map(segment => {
+        const dx = segment.end.x - segment.start.x
+        const dy = segment.end.y - segment.start.y
+        const length = Math.sqrt(dx * dx + dy * dy)
+        const slope = dy / dx
+        
+        return {
+          segment,
+          dx,
+          dy,
+          length,
+          slope,
+          isVertical: Math.abs(dx) < Math.abs(dy) * 0.5,
+          isHorizontal: Math.abs(dy) < Math.abs(dx) * 0.5, // 横线判断
+          isSlant: Math.abs(slope) > 0.3 && Math.abs(slope) < 3, // 斜线判断，范围更宽松
+          isLeftSlant: slope < -0.3, // 左斜线（左上到右下）
+          isRightSlant: slope > 0.3, // 右斜线（右上到左下）
+          topPoint: dy > 0 ? segment.start : segment.end, // 上端点
+          bottomPoint: dy > 0 ? segment.end : segment.start, // 下端点
+          midPoint: { // 中点
+            x: (segment.start.x + segment.end.x) / 2,
+            y: (segment.start.y + segment.end.y) / 2
           }
-          return false
-        })
-
-        // 简化的上下趋势检测
-        let hasUpDownPattern = false
-        let minY = Infinity
-        let maxY = -Infinity
-        
-        // 找到最高点和最低点
-        this.drawingPath.forEach(point => {
-          minY = Math.min(minY, point.y)
-          maxY = Math.max(maxY, point.y)
-        })
-        
-        // 只要路径有一定的垂直高度变化，就认为可能有V形状
-        const heightDiff = maxY - minY
-        if (heightDiff > Math.min(window.innerHeight, window.innerWidth) * 0.1) {
-          hasUpDownPattern = true
         }
-
-        // 放宽条件：优先检测有向下顶点的情况，更符合正V形状
-        return hasVertex || hasUpDownPattern
+      })
+      
+      // 必须有横线才能识别为A
+      const hasHorizontal = lines.some(line => line.isHorizontal)
+      if (!hasHorizontal) {
+        // 没有横线，直接返回false，确保必须包含横线
+        return false
       }
-
-      // 对于两条线段的情况，简化判断，优先检测V形底部
-      if (this.lineSegments.length >= 1) {
-        // 简单检查：只要有线段有一定的长度和垂直变化，就认为可能是V的一部分
-        const hasValidSegments = this.lineSegments.some(segment => {
-          const dy = segment.end.y - segment.start.y
-          const dx = segment.end.x - segment.start.x
-          const length = Math.sqrt(dx * dx + dy * dy)
+      
+      // 检查是否有斜线
+      const hasSlant = lines.some(line => line.isSlant)
+      const hasLeftSlant = lines.some(line => line.isLeftSlant)
+      const hasRightSlant = lines.some(line => line.isRightSlant)
+      
+      // 情况1：有横线和至少一条斜线
+      if (hasHorizontal && hasSlant) {
+        // 计算所有线段的中点，用于判断是否分布在A形状的位置上
+        const midPoints = lines.map(line => line.midPoint)
+        
+        // 检查中点的分布是否符合A的形状
+        if (midPoints.length >= 2) {
+          // 计算中点的y坐标范围，用于判断是否有上下分布
+          const yCoords = midPoints.map(p => p.y)
+          const minY = Math.min(...yCoords)
+          const maxY = Math.max(...yCoords)
+          const yRange = maxY - minY
           
-          // 线段需要有一定长度，并且有明显的垂直变化，更倾向于检测V形底部
-          return length > Math.min(window.innerHeight, window.innerWidth) * 0.1 && 
-                 Math.abs(dy) > Math.abs(dx) * 0.3
-        })
-        
-        if (hasValidSegments) {
-          return true
+          // 有足够的垂直分布，符合A的特征
+          if (yRange > Math.min(window.innerWidth, window.innerHeight) * 0.08) {
+            return true
+          }
         }
       }
-
+      
+      // 情况2：有横线、左斜线和右斜线
+      if (hasHorizontal && hasLeftSlant && hasRightSlant) {
+        // 同时满足横线和两条斜线，符合A的形状特征
+        return true
+      }
+      
+      // 所有条件都不满足，返回false
       return false
     },
-
-    // 完成绘制V动画
-    completeDrawVAnimation() {
+    
+    // 完成绘制A动画
+    completeDrawAAnimation() {
       // 添加叠化过渡效果
-      const canvas = this.$refs.drawVCanvas
+      const canvas = this.$refs.tearCanvas
       if (canvas) {
-        // 先绘制完成的V动画
-        this.drawCompletedV()
-
+        // 先绘制完成的A动画
+        this.drawCompletedA()
+        
         // 设置Canvas的过渡效果
         canvas.style.transition = 'opacity 0.8s ease-out'
         canvas.style.opacity = '0'
-
+        
         // 移除事件监听器
         canvas.removeEventListener('mousedown', this.handleMouseDown)
         canvas.removeEventListener('mousemove', this.handleMouseMove)
@@ -274,113 +291,132 @@ export default {
         canvas.removeEventListener('touchstart', this.handleTouchStart)
         canvas.removeEventListener('touchmove', this.handleTouchMove)
         canvas.removeEventListener('touchend', this.handleTouchEnd)
-
+        
         // 获取提示文字元素并添加过渡效果
-        const instruction = document.querySelector('.draw-v-instruction')
+        const instruction = document.querySelector('.tear-instruction')
         if (instruction) {
           instruction.style.transition = 'opacity 0.8s ease-out'
           instruction.style.opacity = '0'
         }
       }
-
-      // 延迟设置lAnimationCompleted和开始打字机动画，确保过渡效果完成
+      
+      // 延迟设置aAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
-        this.vAnimationCompleted = true
+        this.aAnimationCompleted = true
         this.startTypingAnimation()
       }, 800)
     },
-
-    // 绘制完成的V效果
-    drawCompletedV() {
+    
+    // 绘制完成的A效果
+    drawCompletedA() {
       if (!this.canvasContext) return
-
-      const canvas = this.$refs.drawVCanvas
+      
+      const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
       const centerX = canvas.width / 2 - canvas.width * 0.25
       const centerY = canvas.height / 2
-      const vSize = Math.min(canvas.width, canvas.height) * 0.6
-
+      const aSize = Math.min(canvas.width, canvas.height) * 0.6
+      
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+      
       // 保持原覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // 绘制完成的V
+      
+      // 绘制完成的A
       ctx.beginPath()
       
-      // V的顶点在底部
-      const vertexY = centerY + vSize / 3
-      
       // 左侧斜线
-      ctx.moveTo(centerX - vSize / 3, centerY - vSize / 3)
-      ctx.lineTo(centerX, vertexY)
+      ctx.moveTo(centerX - aSize / 2, centerY + aSize / 2)
+      ctx.lineTo(centerX, centerY - aSize / 2)
       
       // 右侧斜线
-      ctx.moveTo(centerX, vertexY)
-      ctx.lineTo(centerX + vSize / 3, centerY - vSize / 3)
-
+      ctx.lineTo(centerX + aSize / 2, centerY + aSize / 2)
+      
+      // 横线
+      ctx.moveTo(centerX - aSize / 4, centerY)
+      ctx.lineTo(centerX + aSize / 4, centerY)
+      
       ctx.strokeStyle = '#8b4513'
       ctx.lineWidth = 8
       ctx.stroke()
     },
-
+    
     // 鼠标事件处理
     handleMouseDown(event) {
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - 840, y: event.clientY - 20}]
+      this.drawingPath = [{ x: event.clientX - 800, y: event.clientY }]
     },
-
+    
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX - 840, y: event.clientY - 20})
+        this.drawingPath.push({ x: event.clientX - 800, y: event.clientY })
         this.drawUserPath()
       }
     },
-
+    
     handleMouseUp() {
-      if (this.isDrawing && this.drawingPath.length > 5) {
+      if (this.isDrawing && this.drawingPath.length > 3) { // 降低线段最小长度要求
         // 保存完成的线段
         const startPoint = this.drawingPath[0]
         const endPoint = this.drawingPath[this.drawingPath.length - 1]
-
-        this.lineSegments.push({ start: startPoint, end: endPoint })
-
-        // 分析是否形成V形状
-        if (this.analyzeVShape()) {
-          // 形成V形状，完成动画
-          this.completeDrawVAnimation()
-        } else if (this.lineSegments.length > 2) {
-          // 如果画了太多线条但没形成L，重置部分线条
-          this.lineSegments = this.lineSegments.slice(-1) // 保留最近的一条线段
-          this.drawUserPath()
+        
+        // 计算线段长度，只有足够长的线段才保存
+        const dx = endPoint.x - startPoint.x
+        const dy = endPoint.y - startPoint.y
+        const length = Math.sqrt(dx * dx + dy * dy)
+        
+        if (length > 50) { // 只要长度超过50px就保存
+          this.lineSegments.push({ start: startPoint, end: endPoint })
+          
+          // 分析是否形成A形状
+          if (this.analyzeAShape()) {
+            // 形成A形状，完成动画
+            this.completeDrawAAnimation()
+          } else {
+            // 增加错误计数
+            this.errorCount++
+            // 检查是否错误3次
+            if (this.errorCount >= 3) {
+              // 错误3次，直接成功
+              this.completeDrawAAnimation()
+            } else if (this.lineSegments.length > 4) { // 增加保留的线段数量
+              // 如果画了太多线条但没形成A，重置部分线条
+              this.lineSegments = this.lineSegments.slice(-3) // 保留最近的三条线段
+              this.drawUserPath()
+            } else {
+              // 继续绘制
+              this.drawingPath = []
+            }
+          }
         } else {
-          // 继续绘制
+          // 清除太短的路径
           this.drawingPath = []
+          this.drawUserPath()
         }
       } else {
         // 清除太短的路径
         this.drawingPath = []
-        this.drawVOverlay()
+        this.drawAOverlay()
       }
-
+      
       this.isDrawing = false
     },
-
+    
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
       event.preventDefault()
       const touch = event.touches[0]
       this.handleMouseDown(touch)
     },
-
+    
     handleTouchMove(event) {
       event.preventDefault()
       const touch = event.touches[0]
       this.handleMouseMove(touch)
     },
-
+    
     handleTouchEnd() {
       this.handleMouseUp()
     },
@@ -433,7 +469,7 @@ export default {
   align-items: flex-start;
   height: 100vh;
   margin-bottom: 50px;
-  background-image: url('../assets/letters/letter-6.png');
+  background-image: url('../assets/letters/letter-2.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
@@ -459,7 +495,6 @@ export default {
 .dialogue-wrapper {
   line-height: 1.8;
   font-size: 20px;
-  writing-mode: horizontal-tb;
   height: auto;
   min-height: 100%;
 }
@@ -496,8 +531,8 @@ export default {
   color: #1976d2;
 }
 
-/* 绘制V动画样式 */
-.draw-v-canvas {
+/* 撕拉动画样式 */
+.tear-canvas {
   position: fixed;
   top: 0;
   left: 50%;
@@ -508,13 +543,14 @@ export default {
   pointer-events: all;
 }
 
-.draw-v-canvas:active {
+.tear-canvas:active {
   cursor: grabbing;
 }
 
-.draw-v-instruction {
+.tear-instruction {
   position: fixed;
-  top: 30%;
+  top: 50px;
+  transform: translateX(-50%);
   z-index: 11;
   font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;
@@ -523,18 +559,12 @@ export default {
   opacity: 0.8;
   animation: fadeInOut 2s infinite;
   pointer-events: none;
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-  display: inline-block;
 }
 
 @keyframes fadeInOut {
-
-  0%,
-  100% {
+  0%, 100% {
     opacity: 0.8;
   }
-
   50% {
     opacity: 0.4;
   }

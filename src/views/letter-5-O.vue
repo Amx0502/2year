@@ -46,7 +46,8 @@ export default {
       isDrawing: false,
       drawingPath: [],
       canvasContext: null,
-      lineSegments: []
+      lineSegments: [],
+      errorCount: 0 // 错误绘制计数
     }
   },
   mounted() {
@@ -337,13 +338,21 @@ export default {
         if (this.analyzeOShape()) {
           // 形成O形状，完成动画
           this.completeDrawOAnimation()
-        } else if (this.lineSegments.length > 2) {
-          // 如果画了太多线条但没形成L，重置部分线条
-          this.lineSegments = this.lineSegments.slice(-1) // 保留最近的一条线段
-          this.drawUserPath()
         } else {
-          // 继续绘制
-          this.drawingPath = []
+          // 增加错误计数
+          this.errorCount++
+          // 检查是否错误3次
+          if (this.errorCount >= 3) {
+            // 错误3次，直接成功
+            this.completeDrawOAnimation()
+          } else if (this.lineSegments.length > 2) {
+            // 如果画了太多线条但没形成L，重置部分线条
+            this.lineSegments = this.lineSegments.slice(-1) // 保留最近的一条线段
+            this.drawUserPath()
+          } else {
+            // 继续绘制
+            this.drawingPath = []
+          }
         }
       } else {
         // 清除太短的路径

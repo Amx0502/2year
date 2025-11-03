@@ -44,7 +44,8 @@ export default {
       isDrawing: false,
       drawingPath: [],
       canvasContext: null,
-      lineSegments: []
+      lineSegments: [],
+      errorCount: 0 // 错误绘制计数
     }
   },
   mounted() {
@@ -171,16 +172,6 @@ export default {
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.stroke()
-
-      // 绘制已完成的线段
-      this.lineSegments.forEach(segment => {
-        ctx.beginPath()
-        ctx.moveTo(segment.start.x, segment.start.y)
-        ctx.lineTo(segment.end.x, segment.end.y)
-        ctx.strokeStyle = '#8b4513'
-        ctx.lineWidth = 5
-        ctx.stroke()
-      })
     },
 
     // 分析笔画是否形成L形状
@@ -332,23 +323,21 @@ export default {
 
     handleMouseUp() {
       if (this.isDrawing && this.drawingPath.length > 5) {
-        // 保存完成的线段
-        const startPoint = this.drawingPath[0]
-        const endPoint = this.drawingPath[this.drawingPath.length - 1]
-
-        this.lineSegments.push({ start: startPoint, end: endPoint })
-
         // 分析是否形成L形状
         if (this.analyzeLShape()) {
           // 形成L形状，完成动画
           this.completeDrawLAnimation()
-        } else if (this.lineSegments.length > 2) {
-          // 如果画了太多线条但没形成L，重置部分线条
-          this.lineSegments = this.lineSegments.slice(-1) // 保留最近的一条线段
-          this.drawUserPath()
         } else {
-          // 继续绘制
-          this.drawingPath = []
+          // 增加错误计数
+          this.errorCount++
+          // 检查是否错误3次
+          if (this.errorCount >= 3) {
+            // 错误3次，直接成功
+            this.completeDrawLAnimation()
+          } else {
+            // 继续绘制
+            this.drawingPath = []
+          }
         }
       } else {
         // 清除太短的路径

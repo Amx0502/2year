@@ -12,9 +12,9 @@
         </div>
       </div>
     </div>
-    <!-- 绘制E动画Canvas -->
-    <canvas v-if="!eAnimationCompleted" ref="drawECanvas" class="draw-e-canvas"></canvas>
-    <div v-if="!eAnimationCompleted" class="draw-e-instruction">请画出大写E打开信纸...</div>
+    <!-- 纸撕拉动画Canvas -->
+    <canvas v-if="!xAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
+    <div v-if="!xAnimationCompleted" class="tear-instruction">请画出大写X打开信纸...</div>
   </div>
 </template>
 
@@ -32,30 +32,32 @@ export default {
       showCursor: false,
       fontLoaded: false,
       textLines: [
-        { text: "top6是聊天。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "聊天？这有什么印象深刻的？", speaker: "她疑惑问", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "对话是交流的过程，是双方思想的碰撞，那瞬间比海过的烟花还要灿烂，我喜欢你找我分享，谈天说地从", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "清晨到傍晚，从细碎小事到决策大事。", fontSize: '23px', marginTop: '-10px', marginBottom: '0px', paddingLeft: '105px', paddingRight: '0px' },
-        { text: "有句话怎么说来着，我想你就在，思绪万千汇聚成我的思念传达给你，哈哈哈哈哈哈有没有时不时打喷嚏。", speaker: "我想了想", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "好好好可能是有吧。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "你心中有和我最印象深刻的事top10吗？", speaker: "她问", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "top10是讲台上的我俩。", speaker: "我说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "你指的是那个创新创业？结果最后我们分却很低。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "是，那是我们相识相见的地方。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "印象深刻在哪？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "你激烈回答的样子让我觉得很有依靠，我观察着你的一举一动，那种在台上属于我们的专属时刻，把我们绑定在一起一同对抗外人，多难", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
+        { text: "得。", fontSize: '23px', marginTop: '0px', marginBottom: '0px', paddingLeft: '200px', paddingRight: '0px' }
       ],
       displayedTextLines: [],
       cursorInterval: null,
-      // Canvas绘制E相关状态
-      eAnimationCompleted: false,
+      // Canvas绘制X相关状态
+      xAnimationCompleted: false,
       isDrawing: false,
       drawingPath: [],
       canvasContext: null,
-      lineSegments: []
+      lineSegments: [],
+      errorCount: 0 // 错误绘制计数
     }
   },
   mounted() {
-    this.loadLoveFont()
-    // 先初始化绘制E动画Canvas
-    this.$nextTick(() => {
-      this.initDrawECanvas()
-    })
-  },
+      this.loadLoveFont()
+      // 先初始化绘制X动画Canvas
+      this.$nextTick(() => {
+        this.initDrawXCanvas()
+      })
+    },
   beforeDestroy() {
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
@@ -70,191 +72,170 @@ export default {
         this.fontLoaded = true
       }).catch((error) => {
         console.error('字体加载失败:', error)
-        // 降级使用系统字体
         this.fontLoaded = true
       })
     },
-    // 初始化绘制E动画Canvas
-    initDrawECanvas() {
-      const canvas = this.$refs.drawECanvas
+    // 初始化绘制X动画Canvas
+    initDrawXCanvas() {
+      const canvas = this.$refs.tearCanvas
       if (!canvas) return
-
+      
       // 设置Canvas尺寸为视口大小
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
-
+      
       this.canvasContext = canvas.getContext('2d')
-
+      
       // 绘制初始覆盖层
-      this.drawEOverlay()
-
+      this.drawXOverlay()
+      
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
       canvas.addEventListener('mousemove', this.handleMouseMove)
       canvas.addEventListener('mouseup', this.handleMouseUp)
       canvas.addEventListener('mouseleave', this.handleMouseUp)
-
+      
       // 绑定触摸事件（移动端支持）
       canvas.addEventListener('touchstart', this.handleTouchStart)
       canvas.addEventListener('touchmove', this.handleTouchMove)
       canvas.addEventListener('touchend', this.handleTouchEnd)
     },
-
+    
     // 绘制初始覆盖层
-    drawEOverlay() {
+    drawXOverlay() {
       if (!this.canvasContext) return
-
-      const canvas = this.$refs.drawECanvas
-      if (!canvas) return
-
+      
+      const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-
+      
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+      
       // 填充覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // 绘制淡色E作为视觉提示
-      this.drawTemplateE()
+      
+      // 绘制淡色X作为视觉提示
+      this.drawTemplateX()
     },
-
-    // 绘制淡色E模板作为视觉提示
-    drawTemplateE() {
+    
+    // 绘制淡色X模板作为视觉提示
+    drawTemplateX() {
       if (!this.canvasContext) return
-
-      const canvas = this.$refs.drawECanvas
-      if (!canvas) return
-
+      
+      const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2
+      const centerX = canvas.width / 2 - canvas.width * 0.25
       const centerY = canvas.height / 2
-      const eWidth = Math.min(canvas.width, canvas.height) * 0.35
-      const eHeight = eWidth * 1.5
-
-      // E的起始位置
-      const startX = centerX - eWidth / 2
-      const startY = centerY - eHeight / 2
-
+      const xSize = Math.min(canvas.width, canvas.height) * 0.6
+      
       // 设置虚线样式
       ctx.setLineDash([10, 5])
       ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)' // 淡棕色虚线
       ctx.lineWidth = 4
       ctx.lineCap = 'round'
-
-      // 绘制虚线E
+      
+      // 绘制虚线X
       ctx.beginPath()
-
-      // 左边垂直线
-      ctx.moveTo(startX, startY)
-      ctx.lineTo(startX, startY + eHeight)
-
-      // 顶部水平线
-      ctx.moveTo(startX, startY)
-      ctx.lineTo(startX + eWidth, startY)
-
-      // 中间水平线
-      ctx.moveTo(startX, startY + eHeight / 2)
-      ctx.lineTo(startX + eWidth * 0.7, startY + eHeight / 2)
-
-      // 底部水平线
-      ctx.moveTo(startX, startY + eHeight)
-      ctx.lineTo(startX + eWidth, startY + eHeight)
-
+      
+      // 左上到右下的对角线
+      ctx.moveTo(centerX - xSize / 2, centerY - xSize / 2)
+      ctx.lineTo(centerX + xSize / 2, centerY + xSize / 2)
+      
+      // 右上到左下的对角线
+      ctx.moveTo(centerX + xSize / 2, centerY - xSize / 2)
+      ctx.lineTo(centerX - xSize / 2, centerY + xSize / 2)
+      
       ctx.stroke()
-
+      
       // 重置线条样式
       ctx.setLineDash([])
     },
-
+    
     // 绘制用户当前的笔画
     drawUserPath() {
       if (!this.canvasContext || this.drawingPath.length < 2) return
-
+      
       const ctx = this.canvasContext
-
+      
+      // 重绘覆盖层（会自动包含淡色X模板）
+      this.drawXOverlay()
+      
       // 绘制用户笔画
       ctx.beginPath()
       ctx.moveTo(this.drawingPath[0].x, this.drawingPath[0].y)
-
+      
       for (let i = 1; i < this.drawingPath.length; i++) {
         ctx.lineTo(this.drawingPath[i].x, this.drawingPath[i].y)
       }
-
+      
       ctx.strokeStyle = '#8b4513' // 棕色线条
       ctx.lineWidth = 5
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.stroke()
-
-      // 不再绘制已保存的线段，避免连接起点和终点
+      
+      // 绘制已完成的线段
+      this.lineSegments.forEach(segment => {
+        ctx.beginPath()
+        ctx.moveTo(segment.start.x, segment.start.y)
+        ctx.lineTo(segment.end.x, segment.end.y)
+        ctx.strokeStyle = '#8b4513'
+        ctx.lineWidth = 5
+        ctx.stroke()
+      })
     },
-
-    // 极度简化的E形状判断方法，更容易识别
-    analyzeEShape() {
-      // 非常低的点数量要求
-      if (this.drawingPath.length < 4) {
-        return false
-      }
-
-      // 计算路径的边界框
-      const xCoords = this.drawingPath.map(point => point.x)
-      const yCoords = this.drawingPath.map(point => point.y)
-      const minX = Math.min(...xCoords)
-      const maxX = Math.max(...xCoords)
-      const minY = Math.min(...yCoords)
-      const maxY = Math.max(...yCoords)
-
-      const width = maxX - minX
-      const height = maxY - minY
-
-      // 大幅放宽宽高比要求，只要大致有E的轮廓即可
-      if (width < height * 0.2 || width > height * 1.2) {
-        return false
-      }
-
-      // 降低尺寸要求
-      const minDimension = Math.min(window.innerWidth, window.innerHeight)
-      if (height < minDimension * 0.05) {
-        return false
-      }
-
-      // 非常宽松的水平/垂直线判断
-      let hasHorizontalComponent = false
-      let hasVerticalComponent = false
-
-      for (let i = 1; i < this.drawingPath.length; i++) {
-        const prevPoint = this.drawingPath[i - 1]
-        const currPoint = this.drawingPath[i]
-
-        const dx = Math.abs(currPoint.x - prevPoint.x)
-        const dy = Math.abs(currPoint.y - prevPoint.y)
-
-        // 只要有任何水平或垂直趋势就算
-        if (dx > dy * 1.5) {
-          hasHorizontalComponent = true
-        } else if (dy > dx * 1.5) {
-          hasVerticalComponent = true
+    
+    // 分析笔画是否形成X形状
+    analyzeXShape() {
+      if (this.lineSegments.length < 2) return false
+      
+      // 简单的X形状检测：寻找两条交叉的对角线
+      const validLines = this.lineSegments.filter(segment => {
+        // 只考虑有足够长度的线段
+        const dx = segment.end.x - segment.start.x
+        const dy = segment.end.y - segment.start.y
+        const length = Math.sqrt(dx * dx + dy * dy)
+        return length > Math.min(window.innerWidth, window.innerHeight) * 0.1 // 至少是视口大小的30%
+      })
+      
+      if (validLines.length < 2) return false
+      
+      // 检查是否有两条交叉的线段，一条从左上到右下，一条从右上到左下
+      let hasDiagonal1 = false // 左上到右下
+      let hasDiagonal2 = false // 右上到左下
+      
+      validLines.forEach(segment => {
+        const dx = segment.end.x - segment.start.x
+        const dy = segment.end.y - segment.start.y
+        const slope = dy / dx
+        
+        // 判断对角线方向
+        if (Math.abs(slope) > 0.5 && Math.abs(slope) < 2.0) { // 接近30度角
+          if ((dx > 0 && dy > 0) || (dx < 0 && dy < 0)) {
+            hasDiagonal1 = true
+          } else if ((dx > 0 && dy < 0) || (dx < 0 && dy > 0)) {
+            hasDiagonal2 = true
+          }
         }
-      }
-
-      // 极度简化：只要有水平和垂直的趋势，且尺寸足够，就认为是E
-      return hasHorizontalComponent && hasVerticalComponent
+      })
+      
+      // 需要同时满足两条对角线条件
+      return hasDiagonal1 && hasDiagonal2
     },
-
-    // 完成绘制E动画
-    completeDrawEAnimation() {
+    
+    // 完成绘制X动画
+    completeDrawXAnimation() {
       // 添加叠化过渡效果
-      const canvas = this.$refs.drawECanvas
+      const canvas = this.$refs.tearCanvas
       if (canvas) {
-        // 先绘制完成的E动画
-        this.drawCompletedE()
-
+        // 先绘制交叉的X动画
+        this.drawCompletedX()
+        
         // 设置Canvas的过渡效果
         canvas.style.transition = 'opacity 0.8s ease-out'
         canvas.style.opacity = '0'
-
+        
         // 移除事件监听器
         canvas.removeEventListener('mousedown', this.handleMouseDown)
         canvas.removeEventListener('mousemove', this.handleMouseMove)
@@ -263,115 +244,118 @@ export default {
         canvas.removeEventListener('touchstart', this.handleTouchStart)
         canvas.removeEventListener('touchmove', this.handleTouchMove)
         canvas.removeEventListener('touchend', this.handleTouchEnd)
-
+        
         // 获取提示文字元素并添加过渡效果
-        const instruction = document.querySelector('.draw-e-instruction')
+        const instruction = document.querySelector('.tear-instruction')
         if (instruction) {
           instruction.style.transition = 'opacity 0.8s ease-out'
           instruction.style.opacity = '0'
         }
       }
-
-      // 延迟设置eAnimationCompleted和开始打字机动画，确保过渡效果完成
+      
+      // 延迟设置xAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
-        this.eAnimationCompleted = true
+        this.xAnimationCompleted = true
         this.startTypingAnimation()
       }, 800)
     },
-
-    // 绘制完成的E效果
-    drawCompletedE() {
+    
+    // 绘制完成的X效果
+    drawCompletedX() {
       if (!this.canvasContext) return
-
-      const canvas = this.$refs.drawECanvas
+      
+      const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2
+      const centerX = canvas.width / 2 - canvas.width * 0.25
       const centerY = canvas.height / 2
-      const eWidth = Math.min(canvas.width, canvas.height) * 0.35
-      const eHeight = eWidth * 1.5
-
-      // E的起始位置
-      const startX = centerX - eWidth / 2
-      const startY = centerY - eHeight / 2
-
+      const xSize = Math.min(canvas.width, canvas.height) * 0.6
+      
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+      
       // 保持原覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // 绘制完成的E
+      
+      // 绘制完成的X
       ctx.beginPath()
-
-      // 左边垂直线
-      ctx.moveTo(startX, startY)
-      ctx.lineTo(startX, startY + eHeight)
-
-      // 顶部水平线
-      ctx.moveTo(startX, startY)
-      ctx.lineTo(startX + eWidth, startY)
-
-      // 中间水平线
-      ctx.moveTo(startX, startY + eHeight / 2)
-      ctx.lineTo(startX + eWidth * 0.7, startY + eHeight / 2)
-
-      // 底部水平线
-      ctx.moveTo(startX, startY + eHeight)
-      ctx.lineTo(startX + eWidth, startY + eHeight)
-
+      
+      // 左上到右下的对角线
+      ctx.moveTo(centerX - xSize / 2, centerY - xSize / 2)
+      ctx.lineTo(centerX + xSize / 2, centerY + xSize / 2)
+      
+      // 右上到左下的对角线
+      ctx.moveTo(centerX + xSize / 2, centerY - xSize / 2)
+      ctx.lineTo(centerX - xSize / 2, centerY + xSize / 2)
+      
       ctx.strokeStyle = '#8b4513'
       ctx.lineWidth = 8
       ctx.stroke()
     },
-
+    
     // 鼠标事件处理
     handleMouseDown(event) {
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX + 250, y: event.clientY - 40 }]
+      this.drawingPath = [{ x: event.clientX - 220, y: event.clientY }]
     },
-
+    
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX + 250, y: event.clientY - 40 })
+        this.drawingPath.push({ x: event.clientX - 220, y: event.clientY })
         this.drawUserPath()
       }
     },
-
+    
     handleMouseUp() {
-      if (this.isDrawing && this.drawingPath.length > 4) {
-        // 分析是否形成E形状
-        if (this.analyzeEShape()) {
-          // 形成E形状，完成动画
-          this.completeDrawEAnimation()
+      if (this.isDrawing && this.drawingPath.length > 5) {
+        // 保存完成的线段
+        const startPoint = this.drawingPath[0]
+        const endPoint = this.drawingPath[this.drawingPath.length - 1]
+        
+        this.lineSegments.push({ start: startPoint, end: endPoint })
+        
+        // 分析是否形成X形状
+        if (this.analyzeXShape()) {
+          // 形成X形状，完成动画
+          this.completeDrawXAnimation()
         } else {
-          // 不保存线段，直接清除当前路径
-          this.drawingPath = []
-          // 重新绘制界面
-          this.drawEOverlay()
+          // 增加错误计数
+          this.errorCount++
+          // 检查是否错误3次
+          if (this.errorCount >= 3) {
+            // 错误3次，直接成功
+            this.completeDrawXAnimation()
+          } else if (this.lineSegments.length > 2) {
+            // 如果画了太多线条但没形成X，重置部分线条
+            this.lineSegments = this.lineSegments.slice(-1) // 保留最近的两条线段
+            this.drawUserPath()
+          } else {
+            // 继续绘制
+            this.drawingPath = []
+          }
         }
       } else {
         // 清除太短的路径
         this.drawingPath = []
-        this.drawEOverlay()
+        this.drawXOverlay()
       }
-
+      
       this.isDrawing = false
     },
-
+    
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
       event.preventDefault()
       const touch = event.touches[0]
       this.handleMouseDown(touch)
     },
-
+    
     handleTouchMove(event) {
       event.preventDefault()
       const touch = event.touches[0]
       this.handleMouseMove(touch)
     },
-
+    
     handleTouchEnd() {
       this.handleMouseUp()
     },
@@ -424,7 +408,7 @@ export default {
   align-items: flex-start;
   height: 100vh;
   margin-bottom: 50px;
-  background-image: url('../assets/letters/letter-7.png');
+  background-image: url('../assets/letters/letter-1.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
@@ -450,7 +434,6 @@ export default {
 .dialogue-wrapper {
   line-height: 1.8;
   font-size: 20px;
-  writing-mode: horizontal-tb;
   height: auto;
   min-height: 100%;
 }
@@ -487,10 +470,14 @@ export default {
   color: #1976d2;
 }
 
-/* 绘制E动画样式 */
-.draw-e-canvas {
+/* 打字机光标样式已移除 */
+
+/* 撕拉动画样式 */
+.tear-canvas {
   position: fixed;
   top: 0;
+  left: 0;
+  
   width: 100%;
   height: 100%;
   z-index: 10;
@@ -498,14 +485,14 @@ export default {
   pointer-events: all;
 }
 
-.draw-e-canvas:active {
+.tear-canvas:active {
   cursor: grabbing;
 }
 
-.draw-e-instruction {
+.tear-instruction {
   position: fixed;
   bottom: 50px;
-  transform: translateX(-5%);
+  transform: translateX(-50%);
   z-index: 11;
   font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;
@@ -517,12 +504,9 @@ export default {
 }
 
 @keyframes fadeInOut {
-
-  0%,
-  100% {
+  0%, 100% {
     opacity: 0.8;
   }
-
   50% {
     opacity: 0.4;
   }
