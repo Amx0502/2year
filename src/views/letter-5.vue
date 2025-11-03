@@ -499,8 +499,7 @@ export default {
 
 .draw-o-instruction {
   position: fixed;
-  top: 50%;
-  transform: translate(-95%, -50%);
+  top: 30%;
   z-index: 11;
   font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;

@@ -12,9 +12,9 @@
         </div>
       </div>
     </div>
-    <!-- 绘制L动画Canvas -->
-    <canvas v-if="!lAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
-    <div v-if="!lAnimationCompleted" class="tear-instruction">请画出大写L打开信纸...</div>
+    <!-- 绘制V动画Canvas -->
+    <canvas v-if="!vAnimationCompleted" ref="drawVCanvas" class="draw-v-canvas"></canvas>
+    <div v-if="!vAnimationCompleted" class="draw-v-instruction">请画出大写V打开信纸...</div>
   </div>
 </template>
 
@@ -39,8 +39,8 @@ export default {
       ],
       displayedTextLines: [],
       cursorInterval: null,
-      // Canvas绘制L相关状态
-      lAnimationCompleted: false,
+      // Canvas绘制V相关状态
+      vAnimationCompleted: false,
       isDrawing: false,
       drawingPath: [],
       canvasContext: null,
@@ -49,9 +49,9 @@ export default {
   },
   mounted() {
     this.loadLoveFont()
-    // 先初始化绘制L动画Canvas
+    // 先初始化绘制V动画Canvas
     this.$nextTick(() => {
-      this.initDrawLCanvas()
+      this.initDrawVCanvas()
     })
   },
   beforeDestroy() {
@@ -72,9 +72,9 @@ export default {
         this.fontLoaded = true
       })
     },
-    // 初始化绘制L动画Canvas
-    initDrawLCanvas() {
-      const canvas = this.$refs.tearCanvas
+    // 初始化绘制V动画Canvas
+    initDrawVCanvas() {
+      const canvas = this.$refs.drawVCanvas
       if (!canvas) return
 
       // 设置Canvas尺寸为视口大小
@@ -84,7 +84,7 @@ export default {
       this.canvasContext = canvas.getContext('2d')
 
       // 绘制初始覆盖层
-      this.drawLOverlay()
+      this.drawVOverlay()
 
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
@@ -99,10 +99,12 @@ export default {
     },
 
     // 绘制初始覆盖层
-    drawLOverlay() {
+    drawVOverlay() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawVCanvas
+      if (!canvas) return
+      
       const ctx = this.canvasContext
 
       // 清空Canvas
@@ -112,19 +114,21 @@ export default {
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 绘制淡色L作为视觉提示
-      this.drawTemplateL()
+      // 绘制淡色V作为视觉提示
+      this.drawTemplateV()
     },
 
-    // 绘制淡色L模板作为视觉提示
-    drawTemplateL() {
+    // 绘制淡色V模板作为视觉提示
+    drawTemplateV() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawVCanvas
+      if (!canvas) return
+      
       const ctx = this.canvasContext
       const centerX = canvas.width / 2 - canvas.width * 0.25
       const centerY = canvas.height / 2
-      const lSize = Math.min(canvas.width, canvas.height) * 0.6
+      const vSize = Math.min(canvas.width, canvas.height) * 0.6
 
       // 设置虚线样式
       ctx.setLineDash([10, 5])
@@ -132,16 +136,19 @@ export default {
       ctx.lineWidth = 4
       ctx.lineCap = 'round'
 
-      // 绘制虚线L
+      // 绘制虚线V
       ctx.beginPath()
-
-      // 竖线（从上到下）
-      ctx.moveTo(centerX - lSize / 4, centerY - lSize / 2)
-      ctx.lineTo(centerX - lSize / 4, centerY + lSize / 2)
-
-      // 横线（从左到右）
-      ctx.moveTo(centerX - lSize / 4, centerY + lSize / 2)
-      ctx.lineTo(centerX + lSize / 4, centerY + lSize / 2)
+      
+      // V的顶点在底部
+      const vertexY = centerY + vSize / 3
+      
+      // 左侧斜线
+      ctx.moveTo(centerX - vSize / 3, centerY - vSize / 3)
+      ctx.lineTo(centerX, vertexY)
+      
+      // 右侧斜线
+      ctx.moveTo(centerX, vertexY)
+      ctx.lineTo(centerX + vSize / 3, centerY - vSize / 3)
 
       ctx.stroke()
 
@@ -155,8 +162,8 @@ export default {
 
       const ctx = this.canvasContext
 
-      // 重绘覆盖层（会自动包含淡色L模板）
-      this.drawLOverlay()
+      // 重绘覆盖层（会自动包含淡色V模板）
+      this.drawVOverlay()
 
       // 绘制用户笔画
       ctx.beginPath()
@@ -183,78 +190,77 @@ export default {
       })
     },
 
-    // 分析笔画是否形成L形状
-    analyzeLShape() {
+    // 简化的V形状判断方法，更容易识别
+    analyzeVShape() {
+      // 降低点数量要求，确保V形状顶点在底部
       if (this.lineSegments.length < 1) return false
 
-      // 简单的L形状检测：寻找一条竖线和一条横线的组合
-      const validLines = this.lineSegments.filter(segment => {
-        // 只考虑有足够长度的线段
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-        const length = Math.sqrt(dx * dx + dy * dy)
-        return length > Math.min(window.innerWidth, window.innerHeight) * 0.15
-      })
-
-      if (validLines.length < 1) return false
-
-      // 检查是否有竖线和横线的组合
-      let hasVertical = false
-      let hasHorizontal = false
-
-      validLines.forEach(segment => {
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-
-        // 判断是否为竖线（dy > dx * 2）
-        if (Math.abs(dy) > Math.abs(dx) * 2) {
-          hasVertical = true
-        }
-        // 判断是否为横线（dx > dy * 2）
-        if (Math.abs(dx) > Math.abs(dy) * 2) {
-          hasHorizontal = true
-        }
-      })
-
-      // 对于L形状，可以是一条线段形成的近似L（带有转折点）
+      // 对于单条线段的V形状检测（用户可能一次性画出V）
       if (this.lineSegments.length === 1) {
-        const segment = this.lineSegments[0]
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-
-        // 检查是否有明显的转折点
-        const hasCorner = this.drawingPath.some((point, index) => {
+        // 检查是否有明显的转折点（V的底部顶点）
+        const hasVertex = this.drawingPath.some((point, index) => {
           if (index > 0 && index < this.drawingPath.length - 1) {
             const prevPoint = this.drawingPath[index - 1]
             const nextPoint = this.drawingPath[index + 1]
 
-            const angle1 = Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x)
-            const angle2 = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)
-
-            const angleDiff = Math.abs(angle1 - angle2)
-            // 检查角度变化是否接近90度（允许一定误差）
-            return angleDiff > Math.PI / 3 && angleDiff < 2 * Math.PI / 3
+            // 简化的转折点检测：特别关注向下的顶点（V的底部）
+            if (point.y > prevPoint.y && point.y > nextPoint.y) {
+              return true // 向下的顶点（V的底部）
+            }
+            return false
           }
           return false
         })
 
-        // 如果有转折点，并且线段既有水平又有垂直分量，也视为L
-        if (hasCorner && Math.abs(dx) > 50 && Math.abs(dy) > 50) {
+        // 简化的上下趋势检测
+        let hasUpDownPattern = false
+        let minY = Infinity
+        let maxY = -Infinity
+        
+        // 找到最高点和最低点
+        this.drawingPath.forEach(point => {
+          minY = Math.min(minY, point.y)
+          maxY = Math.max(maxY, point.y)
+        })
+        
+        // 只要路径有一定的垂直高度变化，就认为可能有V形状
+        const heightDiff = maxY - minY
+        if (heightDiff > Math.min(window.innerHeight, window.innerWidth) * 0.1) {
+          hasUpDownPattern = true
+        }
+
+        // 放宽条件：优先检测有向下顶点的情况，更符合正V形状
+        return hasVertex || hasUpDownPattern
+      }
+
+      // 对于两条线段的情况，简化判断，优先检测V形底部
+      if (this.lineSegments.length >= 1) {
+        // 简单检查：只要有线段有一定的长度和垂直变化，就认为可能是V的一部分
+        const hasValidSegments = this.lineSegments.some(segment => {
+          const dy = segment.end.y - segment.start.y
+          const dx = segment.end.x - segment.start.x
+          const length = Math.sqrt(dx * dx + dy * dy)
+          
+          // 线段需要有一定长度，并且有明显的垂直变化，更倾向于检测V形底部
+          return length > Math.min(window.innerHeight, window.innerWidth) * 0.1 && 
+                 Math.abs(dy) > Math.abs(dx) * 0.3
+        })
+        
+        if (hasValidSegments) {
           return true
         }
       }
 
-      // 需要同时满足竖线和横线条件（对于两条线段的情况）
-      return hasVertical && hasHorizontal
+      return false
     },
 
-    // 完成绘制L动画
-    completeDrawLAnimation() {
+    // 完成绘制V动画
+    completeDrawVAnimation() {
       // 添加叠化过渡效果
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawVCanvas
       if (canvas) {
-        // 先绘制完成的L动画
-        this.drawCompletedL()
+        // 先绘制完成的V动画
+        this.drawCompletedV()
 
         // 设置Canvas的过渡效果
         canvas.style.transition = 'opacity 0.8s ease-out'
@@ -270,7 +276,7 @@ export default {
         canvas.removeEventListener('touchend', this.handleTouchEnd)
 
         // 获取提示文字元素并添加过渡效果
-        const instruction = document.querySelector('.tear-instruction')
+        const instruction = document.querySelector('.draw-v-instruction')
         if (instruction) {
           instruction.style.transition = 'opacity 0.8s ease-out'
           instruction.style.opacity = '0'
@@ -279,20 +285,20 @@ export default {
 
       // 延迟设置lAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
-        this.lAnimationCompleted = true
+        this.vAnimationCompleted = true
         this.startTypingAnimation()
       }, 800)
     },
 
-    // 绘制完成的L效果
-    drawCompletedL() {
+    // 绘制完成的V效果
+    drawCompletedV() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawVCanvas
       const ctx = this.canvasContext
       const centerX = canvas.width / 2 - canvas.width * 0.25
       const centerY = canvas.height / 2
-      const lSize = Math.min(canvas.width, canvas.height) * 0.6
+      const vSize = Math.min(canvas.width, canvas.height) * 0.6
 
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -301,16 +307,19 @@ export default {
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 绘制完成的L
+      // 绘制完成的V
       ctx.beginPath()
-
-      // 竖线（从上到下）
-      ctx.moveTo(centerX - lSize / 4, centerY - lSize / 2)
-      ctx.lineTo(centerX - lSize / 4, centerY + lSize / 2)
-
-      // 横线（从左到右）
-      ctx.moveTo(centerX - lSize / 4, centerY + lSize / 2)
-      ctx.lineTo(centerX + lSize / 4, centerY + lSize / 2)
+      
+      // V的顶点在底部
+      const vertexY = centerY + vSize / 3
+      
+      // 左侧斜线
+      ctx.moveTo(centerX - vSize / 3, centerY - vSize / 3)
+      ctx.lineTo(centerX, vertexY)
+      
+      // 右侧斜线
+      ctx.moveTo(centerX, vertexY)
+      ctx.lineTo(centerX + vSize / 3, centerY - vSize / 3)
 
       ctx.strokeStyle = '#8b4513'
       ctx.lineWidth = 8
@@ -320,12 +329,12 @@ export default {
     // 鼠标事件处理
     handleMouseDown(event) {
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - 830, y: event.clientY - 20 }]
+      this.drawingPath = [{ x: event.clientX - 840, y: event.clientY - 20}]
     },
 
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX - 830, y: event.clientY - 20 })
+        this.drawingPath.push({ x: event.clientX - 840, y: event.clientY - 20})
         this.drawUserPath()
       }
     },
@@ -338,10 +347,10 @@ export default {
 
         this.lineSegments.push({ start: startPoint, end: endPoint })
 
-        // 分析是否形成L形状
-        if (this.analyzeLShape()) {
-          // 形成L形状，完成动画
-          this.completeDrawLAnimation()
+        // 分析是否形成V形状
+        if (this.analyzeVShape()) {
+          // 形成V形状，完成动画
+          this.completeDrawVAnimation()
         } else if (this.lineSegments.length > 2) {
           // 如果画了太多线条但没形成L，重置部分线条
           this.lineSegments = this.lineSegments.slice(-1) // 保留最近的一条线段
@@ -353,7 +362,7 @@ export default {
       } else {
         // 清除太短的路径
         this.drawingPath = []
-        this.drawLOverlay()
+        this.drawVOverlay()
       }
 
       this.isDrawing = false
@@ -487,8 +496,8 @@ export default {
   color: #1976d2;
 }
 
-/* 撕拉动画样式 */
-.tear-canvas {
+/* 绘制V动画样式 */
+.draw-v-canvas {
   position: fixed;
   top: 0;
   left: 50%;
@@ -499,15 +508,13 @@ export default {
   pointer-events: all;
 }
 
-.tear-canvas:active {
+.draw-v-canvas:active {
   cursor: grabbing;
 }
 
-.tear-instruction {
+.draw-v-instruction {
   position: fixed;
-  left: 95%;
-  top: 50%;
-  transform: translate(-95%, -50%);
+  top: 30%;
   z-index: 11;
   font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;
