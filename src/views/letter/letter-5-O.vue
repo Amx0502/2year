@@ -12,9 +12,9 @@
         </div>
       </div>
     </div>
-    <!-- 绘制L动画Canvas -->
-    <canvas v-if="!lAnimationCompleted" ref="tearCanvas" class="tear-canvas"></canvas>
-    <div v-if="!lAnimationCompleted" class="tear-instruction">请画出大写L打开信纸...</div>
+    <!-- 绘制O动画Canvas -->
+    <canvas v-if="!oAnimationCompleted" ref="drawOCanvas" class="draw-o-canvas"></canvas>
+    <div v-if="!oAnimationCompleted" class="draw-o-instruction">请画出大写O打开信纸...</div>
   </div>
 </template>
 
@@ -32,15 +32,17 @@ export default {
       showCursor: false,
       fontLoaded: false,
       textLines: [
-        { text: "top7是你亲手做的礼物。特别是那束花。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "我不会在做那个花了，真麻烦。", speaker: "她说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "我很喜欢你做的那些礼物，都说那是把自己的时间转换成思念，你的情绪、念想与爱的具象化。", speaker: "我答道", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "没事，我能用那个花你的钱哈哈哈哈哈哈。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "top6是聊天。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "聊天？这有什么印象深刻的？", speaker: "她疑惑问", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "对话是交流的过程，是双方思想的碰撞，那瞬间比海过的烟花还要灿烂，我喜欢你找我分享，谈天说地从", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "清晨到傍晚，从细碎小事到决策大事。", fontSize: '23px', marginTop: '-10px', marginBottom: '0px', paddingLeft: '105px', paddingRight: '0px' },
+        { text: "有句话怎么说来着，我想你就在，思绪万千汇聚成我的思念传达给你，哈哈哈哈哈哈有没有时不时打喷嚏。", speaker: "我想了想", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "好好好可能是有吧。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
       ],
       displayedTextLines: [],
       cursorInterval: null,
-      // Canvas绘制L相关状态
-      lAnimationCompleted: false,
+      // Canvas绘制O相关状态
+      oAnimationCompleted: false,
       isDrawing: false,
       drawingPath: [],
       canvasContext: null,
@@ -50,9 +52,9 @@ export default {
   },
   mounted() {
     this.loadLoveFont()
-    // 先初始化绘制L动画Canvas
+    // 先初始化绘制O动画Canvas
     this.$nextTick(() => {
-      this.initDrawLCanvas()
+      this.initDrawOCanvas()
     })
   },
   beforeDestroy() {
@@ -73,9 +75,9 @@ export default {
         this.fontLoaded = true
       })
     },
-    // 初始化绘制L动画Canvas
-    initDrawLCanvas() {
-      const canvas = this.$refs.tearCanvas
+    // 初始化绘制O动画Canvas
+    initDrawOCanvas() {
+      const canvas = this.$refs.drawOCanvas
       if (!canvas) return
 
       // 设置Canvas尺寸为视口大小
@@ -85,7 +87,7 @@ export default {
       this.canvasContext = canvas.getContext('2d')
 
       // 绘制初始覆盖层
-      this.drawLOverlay()
+      this.drawOOverlay()
 
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
@@ -100,10 +102,12 @@ export default {
     },
 
     // 绘制初始覆盖层
-    drawLOverlay() {
+    drawOOverlay() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawOCanvas
+      if (!canvas) return
+
       const ctx = this.canvasContext
 
       // 清空Canvas
@@ -113,19 +117,21 @@ export default {
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 绘制淡色L作为视觉提示
-      this.drawTemplateL()
+      // 绘制淡色O作为视觉提示
+      this.drawTemplateO()
     },
 
-    // 绘制淡色L模板作为视觉提示
-    drawTemplateL() {
+    // 绘制淡色O模板作为视觉提示
+    drawTemplateO() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawOCanvas
+      if (!canvas) return
+
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const lSize = Math.min(canvas.width, canvas.height) * 0.6
+      const radius = Math.min(canvas.width, canvas.height) * 0.25
 
       // 设置虚线样式
       ctx.setLineDash([10, 5])
@@ -133,17 +139,9 @@ export default {
       ctx.lineWidth = 4
       ctx.lineCap = 'round'
 
-      // 绘制虚线L
+      // 绘制虚线O
       ctx.beginPath()
-
-      // 竖线（从上到下）
-      ctx.moveTo(centerX - lSize / 4, centerY - lSize / 2)
-      ctx.lineTo(centerX - lSize / 4, centerY + lSize / 2)
-
-      // 横线（从左到右）
-      ctx.moveTo(centerX - lSize / 4, centerY + lSize / 2)
-      ctx.lineTo(centerX + lSize / 4, centerY + lSize / 2)
-
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
       ctx.stroke()
 
       // 重置线条样式
@@ -156,8 +154,8 @@ export default {
 
       const ctx = this.canvasContext
 
-      // 重绘覆盖层（会自动包含淡色L模板）
-      this.drawLOverlay()
+      // 重绘覆盖层（会自动包含淡色O模板）
+      this.drawOOverlay()
 
       // 绘制用户笔画
       ctx.beginPath()
@@ -172,80 +170,94 @@ export default {
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.stroke()
+
+      // 绘制已完成的线段
+      this.lineSegments.forEach(segment => {
+        ctx.beginPath()
+        ctx.moveTo(segment.start.x, segment.start.y)
+        ctx.lineTo(segment.end.x, segment.end.y)
+        ctx.strokeStyle = '#8b4513'
+        ctx.lineWidth = 5
+        ctx.stroke()
+      })
     },
 
-    // 分析笔画是否形成L形状
-    analyzeLShape() {
-      if (this.lineSegments.length < 1) return false
-
-      // 简单的L形状检测：寻找一条竖线和一条横线的组合
-      const validLines = this.lineSegments.filter(segment => {
-        // 只考虑有足够长度的线段
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-        const length = Math.sqrt(dx * dx + dy * dy)
-        return length > Math.min(window.innerWidth, window.innerHeight) * 0.15
-      })
-
-      if (validLines.length < 1) return false
-
-      // 检查是否有竖线和横线的组合
-      let hasVertical = false
-      let hasHorizontal = false
-
-      validLines.forEach(segment => {
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-
-        // 判断是否为竖线（dy > dx * 2）
-        if (Math.abs(dy) > Math.abs(dx) * 2) {
-          hasVertical = true
-        }
-        // 判断是否为横线（dx > dy * 2）
-        if (Math.abs(dx) > Math.abs(dy) * 2) {
-          hasHorizontal = true
-        }
-      })
-
-      // 对于L形状，可以是一条线段形成的近似L（带有转折点）
-      if (this.lineSegments.length === 1) {
-        const segment = this.lineSegments[0]
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-
-        // 检查是否有明显的转折点
-        const hasCorner = this.drawingPath.some((point, index) => {
-          if (index > 0 && index < this.drawingPath.length - 1) {
-            const prevPoint = this.drawingPath[index - 1]
-            const nextPoint = this.drawingPath[index + 1]
-
-            const angle1 = Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x)
-            const angle2 = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)
-
-            const angleDiff = Math.abs(angle1 - angle2)
-            // 检查角度变化是否接近90度（允许一定误差）
-            return angleDiff > Math.PI / 3 && angleDiff < 2 * Math.PI / 3
-          }
-          return false
-        })
-
-        // 如果有转折点，并且线段既有水平又有垂直分量，也视为L
-        if (hasCorner && Math.abs(dx) > 50 && Math.abs(dy) > 50) {
-          return true
-        }
+    // 简化的O形状判断方法，更容易识别
+    analyzeOShape() {
+      // 降低点数量要求
+      if (this.drawingPath.length < 5) {
+        return false
       }
 
-      // 需要同时满足竖线和横线条件（对于两条线段的情况）
-      return hasVertical && hasHorizontal
+      // 计算起点和终点的距离 - 放宽封闭性要求
+      const startPoint = this.drawingPath[0]
+      const endPoint = this.drawingPath[this.drawingPath.length - 1]
+      const endDistance = Math.sqrt(
+        Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2)
+      )
+
+      // 放宽封闭性要求，允许更大的端点距离
+      if (endDistance > Math.min(window.innerWidth, window.innerHeight) * 0.2) {
+        return false
+      }
+
+      // 计算所有点的中心点
+      let totalX = 0, totalY = 0
+      this.drawingPath.forEach(point => {
+        totalX += point.x
+        totalY += point.y
+      })
+      const centerX = totalX / this.drawingPath.length
+      const centerY = totalY / this.drawingPath.length
+
+      // 计算各点到中心的距离
+      let distances = []
+      this.drawingPath.forEach(point => {
+        const distance = Math.sqrt(
+          Math.pow(point.x - centerX, 2) + Math.pow(point.y - centerY, 2)
+        )
+        distances.push(distance)
+      })
+
+      // 计算平均距离和标准差
+      const avgDistance = distances.reduce((sum, dist) => sum + dist, 0) / distances.length
+      const variance = distances.reduce((sum, dist) => sum + Math.pow(dist - avgDistance, 2), 0) / distances.length
+      const stdDev = Math.sqrt(variance)
+
+      // 大幅放宽圆度要求，标准差与平均距离的比值可以更大
+      if (stdDev / avgDistance > 0.6) {
+        return false
+      }
+
+      // 计算路径的总长度（周长）
+      let totalLength = 0
+      for (let i = 1; i < this.drawingPath.length; i++) {
+        const dx = this.drawingPath[i].x - this.drawingPath[i - 1].x
+        const dy = this.drawingPath[i].y - this.drawingPath[i - 1].y
+        totalLength += Math.sqrt(dx * dx + dy * dy)
+      }
+
+      // 圆形周长公式：2 * π * r
+      // 大幅放宽周长比例要求
+      const idealCircumference = 2 * Math.PI * avgDistance
+      const circumferenceRatio = totalLength / idealCircumference
+
+      // 允许非常大的误差范围，0.5到2.0之间认为是圆形
+      if (circumferenceRatio < 0.5 || circumferenceRatio > 2.0) {
+        return false
+      }
+
+      // 简化后的判断：只要通过以上条件，就认为是O形状
+      return true
     },
 
-    // 完成绘制L动画
-    completeDrawLAnimation() {
+    // 完成绘制O动画
+    completeDrawOAnimation() {
       // 添加叠化过渡效果
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawOCanvas
       if (canvas) {
-        // 先绘制完成的L动画
-        this.drawCompletedL()
+        // 先绘制完成的O动画
+        this.drawCompletedO()
 
         // 设置Canvas的过渡效果
         canvas.style.transition = 'opacity 0.8s ease-out'
@@ -261,7 +273,7 @@ export default {
         canvas.removeEventListener('touchend', this.handleTouchEnd)
 
         // 获取提示文字元素并添加过渡效果
-        const instruction = document.querySelector('.tear-instruction')
+        const instruction = document.querySelector('.draw-o-instruction')
         if (instruction) {
           instruction.style.transition = 'opacity 0.8s ease-out'
           instruction.style.opacity = '0'
@@ -270,20 +282,20 @@ export default {
 
       // 延迟设置lAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
-        this.lAnimationCompleted = true
+        this.oAnimationCompleted = true
         this.startTypingAnimation()
       }, 800)
     },
 
-    // 绘制完成的L效果
-    drawCompletedL() {
+    // 绘制完成的O效果
+    drawCompletedO() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.tearCanvas
+      const canvas = this.$refs.drawOCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const lSize = Math.min(canvas.width, canvas.height) * 0.6
+      const radius = Math.min(canvas.width, canvas.height) * 0.25
 
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -292,16 +304,9 @@ export default {
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 绘制完成的L
+      // 绘制完成的O
       ctx.beginPath()
-
-      // 竖线（从上到下）
-      ctx.moveTo(centerX - lSize / 4, centerY - lSize / 2)
-      ctx.lineTo(centerX - lSize / 4, centerY + lSize / 2)
-
-      // 横线（从左到右）
-      ctx.moveTo(centerX - lSize / 4, centerY + lSize / 2)
-      ctx.lineTo(centerX + lSize / 4, centerY + lSize / 2)
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
 
       ctx.strokeStyle = '#8b4513'
       ctx.lineWidth = 8
@@ -311,29 +316,39 @@ export default {
     // 鼠标事件处理
     handleMouseDown(event) {
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - 830, y: event.clientY - 20 }]
+      this.drawingPath = [{ x: event.clientX + 250, y: event.clientY }]
     },
 
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX - 830, y: event.clientY - 20 })
+        this.drawingPath.push({ x: event.clientX + 250, y: event.clientY })
         this.drawUserPath()
       }
     },
 
     handleMouseUp() {
       if (this.isDrawing && this.drawingPath.length > 5) {
-        // 分析是否形成L形状
-        if (this.analyzeLShape()) {
-          // 形成L形状，完成动画
-          this.completeDrawLAnimation()
+        // 保存完成的线段
+        const startPoint = this.drawingPath[0]
+        const endPoint = this.drawingPath[this.drawingPath.length - 1]
+
+        this.lineSegments.push({ start: startPoint, end: endPoint })
+
+        // 分析是否形成O形状
+        if (this.analyzeOShape()) {
+          // 形成O形状，完成动画
+          this.completeDrawOAnimation()
         } else {
           // 增加错误计数
           this.errorCount++
           // 检查是否错误3次
           if (this.errorCount >= 3) {
             // 错误3次，直接成功
-            this.completeDrawLAnimation()
+            this.completeDrawOAnimation()
+          } else if (this.lineSegments.length > 2) {
+            // 如果画了太多线条但没形成L，重置部分线条
+            this.lineSegments = this.lineSegments.slice(-1) // 保留最近的一条线段
+            this.drawUserPath()
           } else {
             // 继续绘制
             this.drawingPath = []
@@ -342,7 +357,7 @@ export default {
       } else {
         // 清除太短的路径
         this.drawingPath = []
-        this.drawLOverlay()
+        this.drawOOverlay()
       }
 
       this.isDrawing = false
@@ -413,7 +428,7 @@ export default {
   align-items: flex-start;
   height: 100vh;
   margin-bottom: 50px;
-  background-image: url('../assets/letters/letter-4.png');
+  background-image: url('../../assets/letters/letter-5.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
@@ -476,11 +491,10 @@ export default {
   color: #1976d2;
 }
 
-/* 撕拉动画样式 */
-.tear-canvas {
+/* 绘制O动画样式 */
+.draw-o-canvas {
   position: fixed;
   top: 0;
-  left: 50%;
   width: 100%;
   height: 100%;
   z-index: 10;
@@ -488,15 +502,13 @@ export default {
   pointer-events: all;
 }
 
-.tear-canvas:active {
+.draw-o-canvas:active {
   cursor: grabbing;
 }
 
-.tear-instruction {
+.draw-o-instruction {
   position: fixed;
-  left: 95%;
-  top: 50%;
-  transform: translate(-95%, -50%);
+  top: 30%;
   z-index: 11;
   font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;
