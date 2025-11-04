@@ -491,7 +491,7 @@ export default {
   align-items: flex-start;
   height: 100vh;
   margin-bottom: 50px;
-  background-image: url('../../assets/letters/letter-8.png');
+  background-image: url('../../assets/letters/letter-10.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
