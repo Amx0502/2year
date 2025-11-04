@@ -5,7 +5,7 @@ import Book from '../views/Book.vue'
 import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import LoveTree from '@/components/LoveTree.vue'
 import Six from '../views/six.vue'
-import Seven from '../views/letter/letter-8-Z.vue'  
+import Seven from '../views/letter/letter-9-S.vue'  
 import Foreword from '../views/foreword.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
 
