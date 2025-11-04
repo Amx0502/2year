@@ -51,7 +51,6 @@ import '../js/APlayer.min.css'
 import _1_LoveTree from '@/components/LoveTree.vue'
 import _3_Foreword from './foreword.vue'
 import _45_LoveFlipTimer from '@/components/LoveFlipTimer.vue'
-import LOVEYOU from './LOVEYOU.vue'
 import _6_Say from './say.vue'
 import _7_HeartAnimation from './HeartAnimation.vue'
 import _8_letter1 from './letter/letter-1-X.vue'
@@ -87,6 +86,7 @@ export default {
     _15_letter8,
     _16_letter9,
     _17_letter10,
+
     Start,
 
     MusicPlayer
