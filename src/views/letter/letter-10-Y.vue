@@ -12,9 +12,9 @@
         </div>
       </div>
     </div>
-    <!-- 绘制S动画Canvas -->
-    <canvas v-if="!sAnimationCompleted" ref="drawSCanvas" class="draw-s-canvas"></canvas>
-    <div v-if="!sAnimationCompleted" class="draw-s-instruction">请画出大写S打开信纸...</div>
+    <!-- 绘制Y动画Canvas -->
+    <canvas v-if="!yAnimationCompleted" ref="drawYCanvas" class="draw-y-canvas"></canvas>
+    <div v-if="!yAnimationCompleted" class="draw-y-instruction">请画出大写Y打开信纸...</div>
   </div>
 </template>
 
@@ -41,8 +41,8 @@ export default {
       ],
       displayedTextLines: [],
       cursorInterval: null,
-      // Canvas绘制S相关状态
-      sAnimationCompleted: false,
+      // Canvas绘制Y相关状态
+      yAnimationCompleted: false,
       isDrawing: false,
       drawingPath: [],
       canvasContext: null,
@@ -52,9 +52,9 @@ export default {
   },
   mounted() {
     this.loadLoveFont()
-    // 先初始化绘制S动画Canvas
+    // 先初始化绘制Y动画Canvas
     this.$nextTick(() => {
-      this.initDrawSCanvas()
+      this.initDrawYCanvas()
     })
   },
   beforeDestroy() {
@@ -75,9 +75,9 @@ export default {
         this.fontLoaded = true
       })
     },
-    // 初始化绘制S动画Canvas
-    initDrawSCanvas() {
-      const canvas = this.$refs.drawSCanvas
+    // 初始化绘制Y动画Canvas
+    initDrawYCanvas() {
+      const canvas = this.$refs.drawYCanvas
       if (!canvas) return
 
       // 设置Canvas尺寸为视口大小
@@ -87,7 +87,7 @@ export default {
       this.canvasContext = canvas.getContext('2d')
 
       // 绘制初始覆盖层
-      this.drawSOverlay()
+      this.drawYOverlay()
 
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
@@ -102,10 +102,10 @@ export default {
     },
 
     // 绘制初始覆盖层
-    drawSOverlay() {
+    drawYOverlay() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.drawSCanvas
+      const canvas = this.$refs.drawYCanvas
       if (!canvas) return
 
       const ctx = this.canvasContext
@@ -117,49 +117,52 @@ export default {
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 绘制淡色S作为视觉提示
-      this.drawTemplateS()
+      // 绘制淡色Y作为视觉提示
+      this.drawTemplateY()
     },
 
-    // 绘制淡色S模板作为视觉提示
-    drawTemplateS() {
+    // 绘制淡色Y模板作为视觉提示
+    drawTemplateY() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.drawSCanvas
+      const canvas = this.$refs.drawYCanvas
       if (!canvas) return
 
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2
-      const centerY = canvas.height / 2 + 50
-      // 调整宽高比例，符合大写S的视觉比例
-      const sWidth = Math.min(canvas.width, canvas.height) * 0.4
-      const sHeight = Math.min(canvas.width, canvas.height) * 0.6
+      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerY = canvas.height / 2
+      const yWidth = Math.min(canvas.width, canvas.height) * 0.3
+      const yHeight = yWidth * 1.6
 
-      // 淡棕色样式
+      // Y的起始位置
+      const startX = centerX
+      const startY = centerY + 50
+
+      // 设置虚线样式
       ctx.setLineDash([10, 5])
-      ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)'
+      ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)' // 淡棕色虚线
       ctx.lineWidth = 4
-      ctx.lineCap = 'round' // 线条端点圆润，提升视觉效果
+      ctx.lineCap = 'round'
+
+      // 绘制虚线Y
       ctx.beginPath()
 
-      // 起始点：S右上角起始位置
-      const startX = centerX + sWidth * 0.2
-      const startY = centerY - sHeight * 0.6
+      // 顶部垂直线
       ctx.moveTo(startX, startY)
+      ctx.lineTo(startX, startY + yHeight * 0.5)
 
-      // 上半部分曲线（向左上凸，形成S上半弧）
-      ctx.quadraticCurveTo(
-        centerX - sWidth * 0.5, centerY - sHeight * 0.4, // 控制点向左上方
-        centerX - sWidth * - 0.001, centerY - sHeight * 0.1  // 终点在左侧偏上位置
-      )
+      // 左上对角线
+      ctx.moveTo(startX, startY)
+      ctx.lineTo(startX - yWidth / 2, startY - yHeight * 0.7)
 
-      // 下半部分曲线（向右下凸，形成S下半弧）
-      ctx.quadraticCurveTo(
-        centerX + sWidth * 0.6, centerY + sHeight * 0.3, // 控制点向右下方
-        centerX + sWidth * -0.3, centerY + sHeight * 0.4  // 终点在右侧底部
-      )
+      // 右上对角线
+      ctx.moveTo(startX, startY)
+      ctx.lineTo(startX + yWidth / 2, startY - yHeight * 0.7)
 
       ctx.stroke()
+
+      // 重置线条样式
+      ctx.setLineDash([])
     },
 
     // 绘制用户当前的笔画
@@ -167,8 +170,8 @@ export default {
       if (!this.canvasContext) return
 
       const ctx = this.canvasContext
-      // 重绘覆盖层（会自动包含淡色S模板）
-      this.drawSOverlay()
+      // 重绘覆盖层（会自动包含淡色Y模板）
+      this.drawYOverlay()
 
       // 绘制历史线段（最多保留2条）- 保持原始路径不变
       this.lineSegments.forEach(segment => {
@@ -200,12 +203,10 @@ export default {
       }
     },
 
-    // 简化的S形状判断方法，使其容易识别
-    analyzeSShape() {
-      // 简化版S形状判断：保留核心特征，移除冗余计算
-      
-      // 基础点数量检查
-      if (this.drawingPath.length < 4) {
+    // Y形状判断方法
+    analyzeYShape() {
+      // 超低的点数量要求，几乎只要有几个点就能通过
+      if (this.drawingPath.length < 3) {
         return false
       }
 
@@ -220,48 +221,81 @@ export default {
       const width = maxX - minX
       const height = maxY - minY
 
-      // 宽高比基本检查
-      if (width < height * 0.3 || width > height * 1.2) {
+      // 极度放宽的宽高比要求（Y是高大于宽的字母）
+      if (height < width * 1.2 || height > width * 4.0) {
         return false
       }
 
-      // 最小尺寸检查
+      // 极低的尺寸要求
       const minDimension = Math.min(window.innerWidth, window.innerHeight)
-      if (height < minDimension * 0.05) {
+      if (height < minDimension * 0.03) {
         return false
       }
 
-      let downCount = 0
-      
+      // 简化版Y形状检测逻辑：只要满足基本的Y趋势即可
+
+      // 1. 检查是否有足够的高度（Y是垂直字母）
+      const hasEnoughHeight = height > minDimension * 0.05
+
+      // 2. 检查是否有顶部汇聚点（Y的顶部是一个点）
+      const centerX = (minX + maxX) / 2
+      const topAreaHeight = height * 0.2
+      const topPoints = this.drawingPath.filter(p => p.y <= minY + topAreaHeight)
+      const hasTopConvergence = topPoints.length > 0 &&
+        topPoints.every(p => Math.abs(p.x - centerX) < width * 0.3)
+
+      // 3. 检查是否有两个向下的分支
+      let leftBranchCount = 0
+      let rightBranchCount = 0
+
+      // 找出可能的中心位置
+      const middleY = minY + height * 0.5
+
       for (let i = 1; i < this.drawingPath.length; i++) {
-        const diffY = this.drawingPath[i].y - this.drawingPath[i-1].y
-        if (diffY > 5) downCount++  // 明显向下移动
+        const prev = this.drawingPath[i - 1]
+        const curr = this.drawingPath[i]
+
+        // 只检查中间及以下部分
+        if (prev.y >= middleY || curr.y >= middleY) {
+          // 向左下分支趋势
+          if (curr.x < prev.x && curr.y > prev.y) {
+            leftBranchCount++
+          }
+          // 向右下分支趋势
+          else if (curr.x > prev.x && curr.y > prev.y) {
+            rightBranchCount++
+          }
+        }
       }
-      
-      // 需要既有向上又有向下的移动
-      const hasUpDownMovement = downCount > 0
-      
-      // 2. 检查是否有左右分布（确保是横向的S）
-      const leftHalfPoints = this.drawingPath.filter(p => p.x <= minX + width * 0.5)
-      const rightHalfPoints = this.drawingPath.filter(p => p.x >= minX + width * 0.5)
-      const hasLeftRightDistribution = leftHalfPoints.length > 0 && rightHalfPoints.length > 0
-      
-      // 3. 检查是否有上下分布
-      const topHalfPoints = this.drawingPath.filter(p => p.y <= minY + height * 0.5)
-      const bottomHalfPoints = this.drawingPath.filter(p => p.y >= maxY - height * 0.3)
-      const hasTopBottomDistribution = topHalfPoints.length > 0 && bottomHalfPoints.length > 0
-      
-      // 综合判断：保留核心条件
-      return hasUpDownMovement && hasLeftRightDistribution && hasTopBottomDistribution
+
+      // 只要有一定比例的分支趋势点就认为有分支
+      const totalSteps = this.drawingPath.length - 1
+      const requiredSteps = Math.max(1, Math.floor(totalSteps * 0.1)) // 最低只要10%的点有趋势即可
+      const hasTwoBranches = (leftBranchCount >= requiredSteps && rightBranchCount >= requiredSteps)
+
+      // 4. 额外的宽松判断：如果有明显的Y形轮廓（顶部一个区域，底部左右两个区域）
+      const bottomAreaHeight = height * 0.2
+      const bottomPoints = this.drawingPath.filter(p => p.y >= maxY - bottomAreaHeight)
+
+      // 底部左区域
+      const hasBottomLeftArea = bottomPoints.some(p => p.x <= centerX)
+      // 底部右区域
+      const hasBottomRightArea = bottomPoints.some(p => p.x >= centerX)
+
+      // Y形轮廓检查：有顶部汇聚和底部左右分布
+      const hasYContour = hasTopConvergence && hasBottomLeftArea && hasBottomRightArea
+
+      // 最终判断：非常宽松，只要满足基本高度和分支趋势，或者有Y形轮廓即可
+      return (hasEnoughHeight && (hasTwoBranches || hasYContour))
     },
 
-    // 完成绘制S动画
-    completeDrawSAnimation() {
+    // 完成绘制Y动画
+    completeDrawYAnimation() {
       // 添加叠化过渡效果
-      const canvas = this.$refs.drawSCanvas
+      const canvas = this.$refs.drawYCanvas
       if (canvas) {
-        // 先绘制完成的S动画
-        this.drawCompletedS()
+        // 先绘制完成的Y动画
+        this.drawCompletedY()
 
         // 设置Canvas的过渡效果
         canvas.style.transition = 'opacity 0.8s ease-out'
@@ -277,28 +311,34 @@ export default {
         canvas.removeEventListener('touchend', this.handleTouchEnd)
 
         // 获取提示文字元素并添加过渡效果
-        const instruction = document.querySelector('.draw-s-instruction')
+        const instruction = document.querySelector('.draw-y-instruction')
         if (instruction) {
           instruction.style.transition = 'opacity 0.8s ease-out'
           instruction.style.opacity = '0'
         }
       }
 
-      // 延迟设置sAnimationCompleted和开始打字机动画，确保过渡效果完成
+      // 延迟设置yAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
-        this.sAnimationCompleted = true
+        this.yAnimationCompleted = true
         this.startTypingAnimation()
       }, 800)
     },
 
-    // 绘制完成的S效果
-    drawCompletedS() {
+    // 绘制完成的Y效果
+    drawCompletedY() {
       if (!this.canvasContext) return
 
-      const canvas = this.$refs.drawSCanvas
+      const canvas = this.$refs.drawYCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2
-      const centerY = canvas.height / 2 + 50
+      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerY = canvas.height / 2
+      const yWidth = Math.min(canvas.width, canvas.height) * 0.3
+      const yHeight = yWidth * 1.6
+
+      // Y的起始位置
+      const startX = centerX
+      const startY = centerY + 50
 
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -307,44 +347,35 @@ export default {
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 使用二次贝塞尔曲线绘制大写字母S
-      const sWidth = Math.min(canvas.width, canvas.height) * 0.4
-      const sHeight = Math.min(canvas.width, canvas.height) * 0.6
-
-      ctx.strokeStyle = '#8b4513'
-      ctx.lineWidth = 6
-      ctx.lineCap = 'round' // 线条端点圆润，提升视觉效果
+      // 绘制完成的Y
       ctx.beginPath()
 
-      // 起始点：S右上角起始位置
-      const startX = centerX + sWidth * 0.2
-      const startY = centerY - sHeight * 0.6
+      // 顶部垂直线
       ctx.moveTo(startX, startY)
+      ctx.lineTo(startX, startY + yHeight * 0.5)
 
-      // 上半部分曲线（向左上凸，形成S上半弧）
-      ctx.quadraticCurveTo(
-        centerX - sWidth * 0.5, centerY - sHeight * 0.4, // 控制点向左上方
-        centerX - sWidth * - 0.001, centerY - sHeight * 0.1  // 终点在左侧偏上位置
-      )
+      // 左上对角线
+      ctx.moveTo(startX, startY)
+      ctx.lineTo(startX - yWidth / 2, startY - yHeight * 0.7)
 
-      // 下半部分曲线（向右下凸，形成S下半弧）
-      ctx.quadraticCurveTo(
-        centerX + sWidth * 0.6, centerY + sHeight * 0.3, // 控制点向右下方
-        centerX + sWidth * -0.3, centerY + sHeight * 0.4  // 终点在右侧底部
-      )
+      // 右上对角线
+      ctx.moveTo(startX, startY)
+      ctx.lineTo(startX + yWidth / 2, startY - yHeight * 0.7)
 
+      ctx.strokeStyle = '#8b4513'
+      ctx.lineWidth = 8
       ctx.stroke()
     },
 
     // 鼠标事件处理
     handleMouseDown(event) {
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX + 250, y: event.clientY - 40 }]
+      this.drawingPath = [{ x: event.clientX - 840, y: event.clientY - 40 }]
     },
 
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX + 250, y: event.clientY - 40 })
+        this.drawingPath.push({ x: event.clientX - 840, y: event.clientY - 40 })
         this.drawUserPath()
       }
     },
@@ -367,17 +398,17 @@ export default {
           this.lineSegments = this.lineSegments.slice(-2)
         }
 
-        // 分析是否形成S形状
-        if (this.analyzeSShape()) {
-          // 形成S形状，完成动画
-          this.completeDrawSAnimation()
+        // 分析是否形成Y形状
+        if (this.analyzeYShape()) {
+          // 形成Y形状，完成动画
+          this.completeDrawYAnimation()
         } else {
           // 增加错误计数
           this.errorCount++
           // 检查是否错误3次
           if (this.errorCount >= 3) {
             // 错误3次，直接成功
-            this.completeDrawSAnimation()
+            this.completeDrawYAnimation()
           } else {
             // 清除当前路径，但保留历史线段
             this.drawingPath = []
@@ -460,7 +491,7 @@ export default {
   align-items: flex-start;
   height: 100vh;
   margin-bottom: 50px;
-  background-image: url('../../assets/letters/letter-9.png');
+  background-image: url('../../assets/letters/letter-8.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
@@ -523,10 +554,11 @@ export default {
   color: #1976d2;
 }
 
-/* 绘制S动画样式 */
-.draw-s-canvas {
+/* 绘制Y动画样式 */
+.draw-y-canvas {
   position: fixed;
   top: 0;
+  left: 50%;
   width: 100%;
   height: 100%;
   z-index: 10;
@@ -534,13 +566,13 @@ export default {
   pointer-events: all;
 }
 
-.draw-s-canvas:active {
+.draw-y-canvas:active {
   cursor: grabbing;
 }
 
-.draw-s-instruction {
-  top: 5%;
+.draw-y-instruction {
   position: fixed;
+  top: 5%;
   bottom: 50px;
   transform: translateX(-5%);
   z-index: 11;
