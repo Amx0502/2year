@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Start from '../views/Start.vue'
+import Start from '../views/love.vue'
 import Book from '../views/Book.vue'
 import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import LoveTree from '@/components/LoveTree.vue'
@@ -8,6 +8,8 @@ import Six from '../views/six.vue'
 import Seven from '../views/letter/letter-9-S.vue'  
 import Foreword from '../views/foreword.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
+import LOVEYOU from '../views/LOVEYOU.vue'
+import HeartAnimation from '../views/HeartAnimation.vue'
 
 Vue.use(VueRouter)
 
@@ -51,7 +53,18 @@ const routes = [
     path: '/musicplayer',
     name: 'musicplayer',
     component: MusicPlayer
-  }
+  },
+  {
+    path: '/loveyou',
+    name: 'loveyou',
+    component: LOVEYOU
+  },
+  {
+    path: '/heartanimation',
+    name: 'heartanimation',
+    component: HeartAnimation
+  },
+
 ]
 
 const router = new VueRouter({

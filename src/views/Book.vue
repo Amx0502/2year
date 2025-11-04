@@ -14,7 +14,9 @@
         <LoveFlipTimer />
         <div class="transparent-page"></div>
         <Six />
-        <div class="cover-page7"></div>
+        <HeartAnimation />
+        <!-- <LOVEYOU /> -->
+        <!-- <div class="cover-page7"></div> -->
         <letter1 />
         <letter2 />
         <letter3 />
@@ -49,6 +51,8 @@ import '../js/APlayer.min.css'
 import LoveTree from '@/components/LoveTree.vue'
 import Foreword from './foreword.vue'
 import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
+import LOVEYOU from './LOVEYOU.vue'
+import HeartAnimation from './HeartAnimation.vue'
 import Six from './six.vue'
 import letter1 from './letter/letter-1-X.vue'
 import letter2 from './letter/letter-2-A.vue'
@@ -61,8 +65,7 @@ import letter8 from './letter/letter-8-Z.vue'
 import letter9 from './letter/letter-9-S.vue'
 import letter10 from './letter/letter-10-Y.vue'
 
-import Start from './Start.vue'
-import Two from './Two.vue'
+import Start from './love.vue'
 
 import MusicPlayer from '@/components/MusicPlayer.vue'
 
@@ -72,6 +75,8 @@ export default {
     LoveTree,
     Foreword,
     LoveFlipTimer,
+    LOVEYOU,
+    HeartAnimation,
     Six,
     letter1,
     letter2,
@@ -84,7 +89,6 @@ export default {
     letter9,
     letter10,
     Start,
-    Two,
 
     MusicPlayer
   },

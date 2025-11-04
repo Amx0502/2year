@@ -1,25 +1,14 @@
 <template>
   <div class="four-container">
-      <div class="image-container">
-        <img
-          class="top-image"
-          src="/image/six-↑.png"
-          alt="Top Image"
-        >
-      </div>
-      <div class="video-container">
-        <video
-          ref="sayVideo"
-          class="background-video"
-          :src="videoSrc"
-          autoplay
-          muted
-          @loadeddata="handleVideoLoaded"
-          @ended="handleVideoEnded"
-        >
-        </video>
-      </div>
+    <div class="image-container">
+      <video class="top-image" :src="videoSrc1" autoplay muted></video>
     </div>
+    <div class="video-container">
+      <video ref="sayVideo" class="background-video" :src="videoSrc2" autoplay muted @loadeddata="handleVideoLoaded"
+        @ended="handleVideoEnded">
+      </video>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -27,7 +16,8 @@ export default {
   name: 'Four',
   data() {
     return {
-      videoSrc: '/image/say.mp4'
+      videoSrc1: '/image/six-↑.mp4',
+      videoSrc2: '/image/say.mp4',
     }
   },
   methods: {
@@ -52,7 +42,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: rgb(255, 255, 255);
+  background-color: #fcfafc;
 }
 
 .image-container {
