@@ -8,25 +8,25 @@
     </div>
     <div class="turnClass">
       <div id="flipbook">
-        <_1_LoveTree />
+        <LoveTree_1 />
         <div class="_2_calendar"></div>
-        <_3_Foreword />
-        <_45_LoveFlipTimer />
+        <Foreword_3 />
+        <LoveFlipTimer_45 />
         <div class="transparent-page"></div>
-        <_6_Say />
-        <_7_HeartAnimation />
+        <Say_6 />
+        <HeartAnimation_7 />
         <!-- <LOVEYOU /> -->
         <!-- <div class="_4_good"></div> -->
-        <_8_letter1 />
-        <_9_letter2 />
-        <_10_letter3 />
-        <_11_letter4 />
-        <_12_letter5 />
-        <_13_letter6 />
-        <_14_letter7 />
-        <_15_letter8 />
-        <_16_letter9 />
-        <_17_letter10 />
+        <letter1_8 />
+        <letter2_9 />
+        <letter3_10 />
+        <letter4_11 />
+        <letter5_12 />
+        <letter6_13 />
+        <letter7_14 />
+        <letter8_15 />
+        <letter9_16 />
+        <letter10_17 />
         <Start />
         <div v-for="n in 1" :key="n" class="blank-page">
         </div>
@@ -48,21 +48,21 @@ import '../js/turn.js'
 import '../js/APlayer.min.js'
 import '../js/APlayer.min.css'
 
-import _1_LoveTree from '@/components/LoveTree.vue'
-import _3_Foreword from './foreword.vue'
-import _45_LoveFlipTimer from '@/components/LoveFlipTimer.vue'
-import _6_Say from './say.vue'
-import _7_HeartAnimation from './HeartAnimation.vue'
-import _8_letter1 from './letter/letter-1-X.vue'
-import _9_letter2 from './letter/letter-2-A.vue'
-import _10_letter3 from './letter/letter-3-M.vue'
-import _11_letter4 from './letter/letter-4-L.vue'
-import _12_letter5 from './letter/letter-5-O.vue'
-import _13_letter6 from './letter/letter-6-V.vue'
-import _14_letter7 from './letter/letter-7-E.vue'
-import _15_letter8 from './letter/letter-8-Z.vue'
-import _16_letter9 from './letter/letter-9-S.vue'
-import _17_letter10 from './letter/letter-10-Y.vue'
+import LoveTree_1 from '@/components/LoveTree.vue'
+import Foreword_3 from './foreword.vue'
+import LoveFlipTimer_45 from '@/components/LoveFlipTimer.vue'
+import Say_6 from './say.vue'
+import HeartAnimation_7 from './HeartAnimation.vue'
+import letter1_8 from './letter/letter-1-X.vue'
+import letter2_9 from './letter/letter-2-A.vue'
+import letter3_10 from './letter/letter-3-M.vue'
+import letter4_11 from './letter/letter-4-L.vue'
+import letter5_12 from './letter/letter-5-O.vue'
+import letter6_13 from './letter/letter-6-V.vue'
+import letter7_14 from './letter/letter-7-E.vue'
+import letter8_15 from './letter/letter-8-Z.vue'
+import letter9_16 from './letter/letter-9-S.vue'
+import letter10_17 from './letter/letter-10-Y.vue'
 
 import Start from './love.vue'
 
@@ -71,21 +71,21 @@ import MusicPlayer from '@/components/MusicPlayer.vue'
 export default {
   name: 'Home',
   components: {
-    _1_LoveTree,
-    _3_Foreword,
-    _45_LoveFlipTimer,
-    _6_Say,
-    _7_HeartAnimation,
-    _8_letter1,
-    _9_letter2,
-    _10_letter3,
-    _11_letter4,
-    _12_letter5,
-    _13_letter6,
-    _14_letter7,
-    _15_letter8,
-    _16_letter9,
-    _17_letter10,
+    LoveTree_1,
+    Foreword_3,
+    LoveFlipTimer_45,
+    Say_6,
+    HeartAnimation_7,
+    letter1_8,
+    letter2_9,
+    letter3_10,
+    letter4_11,
+    letter5_12,
+    letter6_13,
+    letter7_14,
+    letter8_15,
+    letter9_16,
+    letter10_17,
 
     Start,
 
