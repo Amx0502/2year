@@ -136,7 +136,7 @@ export default {
       const sHeight = Math.min(canvas.width, canvas.height) * 0.6
 
       // 淡棕色样式
-      ctx.setLineDash([10, 5])
+      ctx.setLineDash([10, 5]) // 只在模板中设置虚线
       ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)'
       ctx.lineWidth = 4
       ctx.lineCap = 'round' // 线条端点圆润，提升视觉效果
@@ -173,6 +173,8 @@ export default {
       // 绘制历史线段（最多保留2条）- 保持原始路径不变
       this.lineSegments.forEach(segment => {
         ctx.beginPath()
+        // 清除虚线设置，确保用户绘制的是实线
+        ctx.setLineDash([])
         // 绘制完整的原始路径，而不仅仅是起点到终点的直线
         ctx.moveTo(segment.path[0].x, segment.path[0].y)
         for (let i = 1; i < segment.path.length; i++) {
@@ -188,6 +190,8 @@ export default {
       // 绘制当前正在绘制的路径
       if (this.drawingPath.length >= 2) {
         ctx.beginPath()
+        // 清除虚线设置，确保用户绘制的是实线
+        ctx.setLineDash([])
         ctx.moveTo(this.drawingPath[0].x, this.drawingPath[0].y)
         for (let i = 1; i < this.drawingPath.length; i++) {
           ctx.lineTo(this.drawingPath[i].x, this.drawingPath[i].y)
