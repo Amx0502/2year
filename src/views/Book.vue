@@ -8,27 +8,27 @@
     </div>
     <div class="turnClass">
       <div id="flipbook">
-        <LoveTree />
-        <div class="cover-page"></div>
-        <Foreword />
-        <LoveFlipTimer />
+        <_1_LoveTree />
+        <div class="_2_calendar"></div>
+        <_3_Foreword />
+        <_45_LoveFlipTimer />
         <div class="transparent-page"></div>
-        <Six />
-        <HeartAnimation />
+        <_6_Say />
+        <_7_HeartAnimation />
         <!-- <LOVEYOU /> -->
-        <!-- <div class="cover-page7"></div> -->
-        <letter1 />
-        <letter2 />
-        <letter3 />
-        <letter4 />
-        <letter5 />
-        <letter6 />
-        <letter7 />
-        <letter8 />
-        <letter9 />
-        <letter10 />
+        <!-- <div class="_4_good"></div> -->
+        <_8_letter1 />
+        <_9_letter2 />
+        <_10_letter3 />
+        <_11_letter4 />
+        <_12_letter5 />
+        <_13_letter6 />
+        <_14_letter7 />
+        <_15_letter8 />
+        <_16_letter9 />
+        <_17_letter10 />
         <Start />
-        <div v-for="n in 4" :key="n" class="blank-page">
+        <div v-for="n in 1" :key="n" class="blank-page">
         </div>
       </div>
     </div>
@@ -48,22 +48,22 @@ import '../js/turn.js'
 import '../js/APlayer.min.js'
 import '../js/APlayer.min.css'
 
-import LoveTree from '@/components/LoveTree.vue'
-import Foreword from './foreword.vue'
-import LoveFlipTimer from '@/components/LoveFlipTimer.vue'
+import _1_LoveTree from '@/components/LoveTree.vue'
+import _3_Foreword from './foreword.vue'
+import _45_LoveFlipTimer from '@/components/LoveFlipTimer.vue'
 import LOVEYOU from './LOVEYOU.vue'
-import HeartAnimation from './HeartAnimation.vue'
-import Six from './six.vue'
-import letter1 from './letter/letter-1-X.vue'
-import letter2 from './letter/letter-2-A.vue'
-import letter3 from './letter/letter-3-M.vue'
-import letter4 from './letter/letter-4-L.vue'
-import letter5 from './letter/letter-5-O.vue'
-import letter6 from './letter/letter-6-V.vue'
-import letter7 from './letter/letter-7-E.vue'
-import letter8 from './letter/letter-8-Z.vue'
-import letter9 from './letter/letter-9-S.vue'
-import letter10 from './letter/letter-10-Y.vue'
+import _6_Say from './say.vue'
+import _7_HeartAnimation from './HeartAnimation.vue'
+import _8_letter1 from './letter/letter-1-X.vue'
+import _9_letter2 from './letter/letter-2-A.vue'
+import _10_letter3 from './letter/letter-3-M.vue'
+import _11_letter4 from './letter/letter-4-L.vue'
+import _12_letter5 from './letter/letter-5-O.vue'
+import _13_letter6 from './letter/letter-6-V.vue'
+import _14_letter7 from './letter/letter-7-E.vue'
+import _15_letter8 from './letter/letter-8-Z.vue'
+import _16_letter9 from './letter/letter-9-S.vue'
+import _17_letter10 from './letter/letter-10-Y.vue'
 
 import Start from './love.vue'
 
@@ -72,22 +72,21 @@ import MusicPlayer from '@/components/MusicPlayer.vue'
 export default {
   name: 'Home',
   components: {
-    LoveTree,
-    Foreword,
-    LoveFlipTimer,
-    LOVEYOU,
-    HeartAnimation,
-    Six,
-    letter1,
-    letter2,
-    letter3,
-    letter4,
-    letter5,
-    letter6,
-    letter7,
-    letter8,
-    letter9,
-    letter10,
+    _1_LoveTree,
+    _3_Foreword,
+    _45_LoveFlipTimer,
+    _6_Say,
+    _7_HeartAnimation,
+    _8_letter1,
+    _9_letter2,
+    _10_letter3,
+    _11_letter4,
+    _12_letter5,
+    _13_letter6,
+    _14_letter7,
+    _15_letter8,
+    _16_letter9,
+    _17_letter10,
     Start,
 
     MusicPlayer
@@ -253,7 +252,7 @@ export default {
     z-index: 1;
     border-radius: 20px;
 
-    .cover-page {
+    ._2_calendar {
       width: 100%;
       height: 100%;
       background-color: #f5f5f5;
@@ -264,7 +263,7 @@ export default {
       overflow: hidden;
     }
 
-    .cover-page7 {
+    ._4_good {
       width: 100%;
       height: 100%;
       background-color: #f5f5f5;

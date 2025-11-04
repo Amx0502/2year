@@ -208,17 +208,6 @@ export default {
 </style>
 
 <style>
-html,
-body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    font-family: "微软雅黑", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    perspective: 1000px;
-    background:
-        radial-gradient(1200px 600px at 50% 45%, rgba(255, 255, 255, .65), rgba(255, 255, 255, 0) 60%),
-        radial-gradient(circle at 50% 45%, #fff4f7 0%, #c9eaff 100%);
-}
 
 .stage {
     position: relative;
