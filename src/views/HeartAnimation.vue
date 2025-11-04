@@ -3,20 +3,14 @@
         <div class="petal-container">
             <div class="petal" v-for="n in 10" :key="n"></div>
         </div>
-
-        <!-- <audio ref="backgroundMusic"
-            src="https://lf26-music-east.douyinstatic.com/obj/ies-music-hj/7495920705440140091.mp3" loop playsinline>
-            您的浏览器不支持音频播放
-        </audio> -->
-
         <div class="stage" id="stage" ref="stage" @mousemove="handleMouseMove">
-            <div class="center-title" id="title">for you ♥怡</div>
+            <div class="center-title" id="title" @click="play" style="transition: opacity 0.5s ease;">
+                for you ♥怡
+                <div class="click-hint" id="clickHint"
+                    style="margin-left: 100px;margin-top: 20px; font-size: 14px; color: rgba(255, 105, 180, 0.8); opacity: 0.9; font-weight: normal; animation: hintPulse 2s ease-in-out infinite; transition: opacity 0.5s ease;">
+                    请点击</div>
+            </div>
         </div>
-
-        <!-- <div class="logo">
-            <img src="" alt="Logo">
-            <p></p>
-        </div> -->
     </div>
 </template>
 
@@ -48,8 +42,10 @@ export default {
             timers: []
         }
     },
-    mounted() {
-        this.play();
+    // 移除自动播放，改为点击触发
+    beforeUnmount() {
+        // 清理定时器
+        this.timers.forEach(timer => clearTimeout(timer));
     },
     beforeUnmount() {
         // 清理定时器
@@ -143,12 +139,12 @@ export default {
 
             const lockedMessages = this.$refs.stage.querySelectorAll('.msg.locked');
             lockedMessages.forEach(el => {
-                el.classList.remove('pulse');
+                // el.classList.remove('pulse');
                 const jitter = this.rand(0, 200);
                 const burstTimer = setTimeout(() => el.classList.add('burst'), jitter);
                 this.timers.push(burstTimer);
 
-                el.addEventListener('animationend', () => el.remove(), { once: true });
+                // el.addEventListener('animationend', () => el.remove(), { once: true });
             });
         },
         play() {
@@ -168,17 +164,39 @@ export default {
             oldMessages.forEach(n => n.remove());
 
             const title = document.getElementById('title');
+            const hint = document.getElementById('clickHint');
+            // 先设置为0实现渐隐效果
             title.style.opacity = 0;
-
-            const TOTAL = 220;
-            for (let i = 0; i < TOTAL; i++) {
-                this.createMsg(i, TOTAL);
+            // 隐藏提示文字 - 使用opacity实现平滑过渡
+            if (hint) {
+                hint.style.opacity = 0;
+                // 等过渡完成后再设置display:none完全隐藏（可选）
+                setTimeout(() => {
+                    hint.style.display = 'none';
+                }, 500);
             }
 
-            const titleTimer = setTimeout(() => {
-                title.style.opacity = 1;
-            }, 1400);
-            this.timers.push(titleTimer);
+            // 等待渐隐完成后再创建消息
+            setTimeout(() => {
+                const TOTAL = 100;
+                for (let i = 0; i < TOTAL; i++) {
+                    this.createMsg(i, TOTAL);
+                }
+
+                // 创建消息后等待一段时间再让标题渐现
+                const titleTimer = setTimeout(() => {
+                    title.style.opacity = 1;
+                    // 同时显示提示文字 - 先设置display:block再设置opacity实现平滑过渡
+                    const hint = document.getElementById('clickHint');
+                    if (hint) {
+                        hint.style.display = 'none';
+                        // 强制重排后再设置opacity以触发过渡
+                        void hint.offsetWidth;
+                        hint.style.opacity = 0.9;
+                    }
+                }, 1400);
+                this.timers.push(titleTimer);
+            }, 500); // 等待500ms以匹配CSS过渡时间
 
             const TOTAL_TIME_MS = (8.6 + 0.35 + 0.3 + 2.2) * 1000;
 
@@ -208,7 +226,6 @@ export default {
 </style>
 
 <style>
-
 .stage {
     position: relative;
     width: 100%;
@@ -353,11 +370,45 @@ export default {
     font-weight: 800;
     letter-spacing: .12em;
     font-size: clamp(18px, 4vmin, 28px);
-    color: rgba(255, 105, 180, .6);
-    text-shadow: 0 2px 10px rgba(255, 105, 180, .15);
-    opacity: .0;
-    pointer-events: none;
-    animation: titleIn 1.2s ease 0.8s both;
+    color: rgba(255, 105, 180, .8);
+    text-shadow: 0 2px 10px rgba(255, 105, 180, .3);
+    opacity: 1;
+    cursor: pointer;
+    animation: titlePulse 2s ease-in-out infinite;
+    user-select: none;
+}
+
+.center-title:hover {
+    color: rgba(255, 105, 180, 1);
+    text-shadow: 0 2px 15px rgba(255, 105, 180, .5);
+    transform: translate(-50%, -50%) scale(1.05);
+    transition: all 0.3s ease;
+}
+
+@keyframes titlePulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.02);
+    }
+}
+
+@keyframes hintPulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.05);
+    }
 }
 
 @keyframes titleIn {
