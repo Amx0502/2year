@@ -6,6 +6,7 @@ import router from './router'
 import '@/js/sakura.js'
 
 Vue.config.productionTip = false
+Vue.config.devtools = false;
 
 new Vue({
   router,

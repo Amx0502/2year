@@ -35,7 +35,7 @@ export default {
         { text: "top4是我们共戴的耳机。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "我现在都不意外你说什么了。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "哈哈哈哈哈哈，是我和你在一起看电影、看电视剧、看动漫的时候。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "你还送了我耳机呢，不过这个耳机确实挺好用的，隔音。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '0px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "你还送了我耳机呢，不过这个耳机确实挺好用的，隔音。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "没有绕来绕去的耳机线，就像我们靠在一起的肩膀，不用刻意迁就，共享同一段剧情的幸福感。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "耳机里是角色的对话，耳边是你的吐槽，这种两个人安安静静、又彼此惦记的时刻，比任何精彩剧情都让人记牢。", speaker: "我想了想", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
       ],
