@@ -45,7 +45,7 @@ export default {
         { text: "top3呢？", speaker: "她", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "嗯。。。top3是分开的痛苦。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "什么痛苦？", speaker: "她似乎知道", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "我们两次分开的难受，距离的无力，难熬的情绪与翻红的眼眶交织。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '0px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "我们两次分开的难受，距离的无力，难熬的情绪与翻红的眼眶交织。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "这次我想紧握你的手！", speaker: "我坚定地说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '70px', paddingRight: '0px', isInput: true },
       ],
