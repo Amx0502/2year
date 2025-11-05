@@ -7,7 +7,17 @@
             :class="{ 'she': line.speaker === 'she', 'me': line.speaker === 'me' }"
             :style="{ fontSize: line.fontSize, marginTop: line.marginTop, marginBottom: line.marginBottom, paddingLeft: line.paddingLeft, paddingRight: line.paddingRight }">
             <div v-if="line.speaker" class="speaker">{{ line.speaker }}：</div>
-            <span class="text">{{ line.text }}</span>
+            <template v-if="line.isInput">
+              <textarea 
+                v-model="line.text" 
+                type="text" 
+                class="text-input"
+                placeholder="请输入回复..."
+                @input="handleInputChange(index, $event)"
+                :style="{ fontSize: line.fontSize }"
+              ></textarea>
+            </template>
+            <span v-else class="text">{{ line.text }}</span>
           </div>
         </div>
       </div>
@@ -32,12 +42,12 @@ export default {
       showCursor: false,
       fontLoaded: false,
       textLines: [
-        { text: "top6是聊天。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "聊天？这有什么印象深刻的？", speaker: "她疑惑问", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "对话是交流的过程，是双方思想的碰撞，那瞬间比海过的烟花还要灿烂，我喜欢你找我分享，谈天说地从", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "清晨到傍晚，从细碎小事到决策大事。", fontSize: '23px', marginTop: '-10px', marginBottom: '0px', paddingLeft: '105px', paddingRight: '0px' },
-        { text: "有句话怎么说来着，我想你就在，思绪万千汇聚成我的思念传达给你，哈哈哈哈哈哈有没有时不时打喷嚏。", speaker: "我想了想", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "好好好可能是有吧。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "top3呢？", speaker: "她", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "嗯。。。top3是分开的痛苦。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "什么痛苦？", speaker: "她似乎知道", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "我们两次分开的难受，距离的无力，难熬的情绪与翻红的眼眶交织。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '0px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "这次我想紧握你的手！", speaker: "我坚定地说", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '70px', paddingRight: '0px', isInput: true },
       ],
       displayedTextLines: [],
       cursorInterval: null,
@@ -437,6 +447,14 @@ export default {
       this.isDrawing = false
     },
 
+    // 处理输入框内容变化
+    handleInputChange(index, event) {
+      // 更新textLines中的原始数据，确保数据一致性
+      if (this.textLines[index] && this.textLines[index].isInput) {
+        this.textLines[index].text = event.target.value
+      }
+    },
+    
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
       event.preventDefault()
@@ -555,6 +573,31 @@ export default {
 .text {
   flex: 1;
   white-space: pre-wrap;
+}
+
+.text-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
+  line-height: 1.8;
+  color: #3c3c3c;
+  transition: border-color 0.3s ease;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  height: 290px;
+  max-width: 300px;
+  overflow-wrap: break-word;
+}
+
+.text-input:focus {
+  border-color: #3c3c3c;
+}
+
+.text-input::placeholder {
+  color: rgba(60, 60, 60, 0.5);
+  font-style: italic;
 }
 
 .she {

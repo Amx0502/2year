@@ -174,69 +174,27 @@ export default {
       ctx.stroke()
     },
 
-    // 分析笔画是否形成L形状
+    // 简化的L形状判断逻辑
     analyzeLShape() {
-      if (this.lineSegments.length < 1) return false
-
-      // 简单的L形状检测：寻找一条竖线和一条横线的组合
-      const validLines = this.lineSegments.filter(segment => {
-        // 只考虑有足够长度的线段
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-        const length = Math.sqrt(dx * dx + dy * dy)
-        return length > Math.min(window.innerWidth, window.innerHeight) * 0.15
-      })
-
-      if (validLines.length < 1) return false
-
-      // 检查是否有竖线和横线的组合
-      let hasVertical = false
-      let hasHorizontal = false
-
-      validLines.forEach(segment => {
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-
-        // 判断是否为竖线（dy > dx * 2）
-        if (Math.abs(dy) > Math.abs(dx) * 2) {
-          hasVertical = true
+      // 只要路径足够长，就认为是一个有效的L形状
+      if (this.drawingPath.length >= 10) {
+        // 计算总长度
+        let totalLength = 0
+        for (let i = 1; i < this.drawingPath.length; i++) {
+          const dx = this.drawingPath[i].x - this.drawingPath[i-1].x
+          const dy = this.drawingPath[i].y - this.drawingPath[i-1].y
+          totalLength += Math.sqrt(dx * dx + dy * dy)
         }
-        // 判断是否为横线（dx > dy * 2）
-        if (Math.abs(dx) > Math.abs(dy) * 2) {
-          hasHorizontal = true
-        }
-      })
-
-      // 对于L形状，可以是一条线段形成的近似L（带有转折点）
-      if (this.lineSegments.length === 1) {
-        const segment = this.lineSegments[0]
-        const dx = segment.end.x - segment.start.x
-        const dy = segment.end.y - segment.start.y
-
-        // 检查是否有明显的转折点
-        const hasCorner = this.drawingPath.some((point, index) => {
-          if (index > 0 && index < this.drawingPath.length - 1) {
-            const prevPoint = this.drawingPath[index - 1]
-            const nextPoint = this.drawingPath[index + 1]
-
-            const angle1 = Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x)
-            const angle2 = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)
-
-            const angleDiff = Math.abs(angle1 - angle2)
-            // 检查角度变化是否接近90度（允许一定误差）
-            return angleDiff > Math.PI / 3 && angleDiff < 2 * Math.PI / 3
-          }
-          return false
-        })
-
-        // 如果有转折点，并且线段既有水平又有垂直分量，也视为L
-        if (hasCorner && Math.abs(dx) > 50 && Math.abs(dy) > 50) {
-          return true
-        }
+        
+        // 判断是否有足够的长度（屏幕最小边的15%）
+        const minLength = Math.min(window.innerWidth, window.innerHeight) * 0.15
+        
+        // 简化判断：只要路径长度足够，就认为是有效的L
+        return totalLength >= minLength
       }
-
-      // 需要同时满足竖线和横线条件（对于两条线段的情况）
-      return hasVertical && hasHorizontal
+      
+      // 错误次数达到2次时，直接认为成功
+      return this.errorCount >= 2
     },
 
     // 完成绘制L动画
@@ -330,9 +288,9 @@ export default {
         } else {
           // 增加错误计数
           this.errorCount++
-          // 检查是否错误3次
-          if (this.errorCount >= 3) {
-            // 错误3次，直接成功
+          // 检查是否错误2次
+          if (this.errorCount >= 2) {
+            // 错误2次，直接成功
             this.completeDrawLAnimation()
           } else {
             // 继续绘制

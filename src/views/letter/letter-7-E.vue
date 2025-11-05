@@ -32,12 +32,12 @@ export default {
       showCursor: false,
       fontLoaded: false,
       textLines: [
-        { text: "top6是聊天。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "聊天？这有什么印象深刻的？", speaker: "她疑惑问", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "对话是交流的过程，是双方思想的碰撞，那瞬间比海过的烟花还要灿烂，我喜欢你找我分享，谈天说地从", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "清晨到傍晚，从细碎小事到决策大事。", fontSize: '23px', marginTop: '-10px', marginBottom: '0px', paddingLeft: '105px', paddingRight: '0px' },
-        { text: "有句话怎么说来着，我想你就在，思绪万千汇聚成我的思念传达给你，哈哈哈哈哈哈有没有时不时打喷嚏。", speaker: "我想了想", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "好好好可能是有吧。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "top4是我们共戴的耳机。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "我现在都不意外你说什么了。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "哈哈哈哈哈哈，是我和你在一起看电影、看电视剧、看动漫的时候。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "你还送了我耳机呢，不过这个耳机确实挺好用的，隔音。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '0px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "没有绕来绕去的耳机线，就像我们靠在一起的肩膀，不用刻意迁就，共享同一段剧情的幸福感。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "耳机里是角色的对话，耳边是你的吐槽，这种两个人安安静静、又彼此惦记的时刻，比任何精彩剧情都让人记牢。", speaker: "我想了想", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
       ],
       displayedTextLines: [],
       cursorInterval: null,
@@ -269,40 +269,40 @@ export default {
 
       // 2. 检测水平线段的数量和分布（E应该有顶部、中间和底部三条水平线）
       if (horizontalSegments.length < 2) return false
-      
+
       // 按y坐标排序水平线段，检测是否有上下分布
       const sortedHorizontal = [...horizontalSegments].sort((a, b) => {
         const y1 = (a.start.y + a.end.y) / 2
         const y2 = (b.start.y + b.end.y) / 2
         return y1 - y2
       })
-      
+
       // 检查顶部和底部水平线是否有足够的垂直距离
       const topY = (sortedHorizontal[0].start.y + sortedHorizontal[0].end.y) / 2
       const bottomY = (sortedHorizontal[sortedHorizontal.length - 1].start.y + sortedHorizontal[sortedHorizontal.length - 1].end.y) / 2
       const verticalSpread = Math.abs(bottomY - topY)
-      
+
       // 垂直距离应至少为E高度的70%
       if (verticalSpread < height * 0.7) return false
-      
+
       // 3. 检测垂直线段（E应该有一条左侧垂直线）
       if (verticalSegments.length === 0) {
         // 如果没有明显的垂直线段，检查是否有左侧边缘
         let hasLeftEdge = false
         const leftmostX = minX + width * 0.1 // 左侧10%区域
-        
+
         // 计算左侧区域内点的数量
-        const leftEdgePoints = this.drawingPath.filter(point => 
-          point.x <= leftmostX && 
-          point.y >= minY + height * 0.1 && 
+        const leftEdgePoints = this.drawingPath.filter(point =>
+          point.x <= leftmostX &&
+          point.y >= minY + height * 0.1 &&
           point.y <= maxY - height * 0.1
         )
-        
+
         // 如果左侧区域有足够的点，认为有左侧边缘
         hasLeftEdge = leftEdgePoints.length >= this.drawingPath.length * 0.2
         if (!hasLeftEdge) return false
       }
-      
+
       // 4. 检查是否有中间水平线（E的特征）
       let hasMiddleHorizontal = false
       if (sortedHorizontal.length >= 3) {
@@ -311,11 +311,11 @@ export default {
       } else if (sortedHorizontal.length === 2) {
         // 如果只有2条水平线，检查是否有中间区域的水平趋势
         const middleY = minY + height * 0.5
-        const middleRegionPoints = this.drawingPath.filter(point => 
-          point.y >= middleY - height * 0.15 && 
+        const middleRegionPoints = this.drawingPath.filter(point =>
+          point.y >= middleY - height * 0.15 &&
           point.y <= middleY + height * 0.15
         )
-        
+
         // 分析中间区域的点是否有水平趋势
         if (middleRegionPoints.length > 5) {
           const middleXCoords = middleRegionPoints.map(p => p.x)
@@ -323,12 +323,12 @@ export default {
           hasMiddleHorizontal = middleXRange > width * 0.3
         }
       }
-      
+
       // 5. 检查整体比例是否符合E的形状
       const widthHeightRatio = width / height
       // E的宽度通常是高度的0.6-0.8倍
       if (widthHeightRatio < 0.4 || widthHeightRatio > 1.0) return false
-      
+
       // 综合判断：需要有足够的水平线段、垂直分布、左侧边缘，最好有中间水平线
       return hasMiddleHorizontal || (horizontalSegments.length >= 2 && verticalSpread >= height * 0.7)
     },
@@ -433,14 +433,14 @@ export default {
         // 保存完成的线段 - 保存完整的原始路径，不做任何改变
         const startPoint = this.drawingPath[0]
         const endPoint = this.drawingPath[this.drawingPath.length - 1]
-        
+
         // 添加完整路径到线段数组，确保不会改变原始绘制
-        this.lineSegments.push({ 
-          start: startPoint, 
-          end: endPoint, 
+        this.lineSegments.push({
+          start: startPoint,
+          end: endPoint,
           path: [...this.drawingPath] // 保存完整的原始路径
         })
-        
+
         // 只保留最近的2条线段
         if (this.lineSegments.length > 2) {
           this.lineSegments = this.lineSegments.slice(-2)
