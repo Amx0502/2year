@@ -20,15 +20,15 @@ export default {
     data() {
         return {
             tips: [
-                '想念在风里飘', '月亮为你亮', '喜欢你很久了', '你是我的心动', '温柔落在人间',
-                '星光都为你闪', '梦里有你真好', '世界因你柔软', '心跳为你加速', '有你真好',
-                '你是独一无二的光', '遇见你是浪漫的开始', '晚风也温柔了', '你的笑融化星河',
-                '想陪你看星星', '今夜的梦给你', '宇宙都在偏爱你', '你是人间的奇迹',
-                '拥抱要紧一点', '想你成习惯了', '一瞬也是永恒', '你眼里有星星', '你的温柔让我沦陷',
-                '风都是甜的', '为你心动不止', '想成为你的例外', '心有桃花一片', '你是我梦里的光',
-                '想和你看海', '此刻的风想你', '遇见你后时间变慢', '所有浪漫都与你有关',
-                '想靠近你一点', '你的名字是我心事', '心软是因为你', '想牵你的手看日落',
-                '每次想你星星都亮了', '心跳藏不住', '有你世界亮一点', '甜在风里也在心里'
+                '你的古板', '你的家人', '你的经历', '你是我的心动', '你的情感',
+                '你的拧巴', '你的家乡', '你的缺点', '你的灵动', '有你真好',
+                '你是独一无二的光', '遇见你是浪漫的开始', '你的喜好', '你的笑融化星河',
+                '想陪你看星星', '你的朋友', '你的血型', '你是人间的奇迹', '你的腼腆',
+                '你的名字', '想你成习惯了', '你的性格', '你的不堪', '你的温柔让我沦陷',
+                '你的样子', '你的嘴巴', '想成为你的例外', '你的开朗', '你是我梦里的光',
+                '想和你看海', '此刻的风想你', '你的人格', '你的鼻子', '你的心跳',
+                '想靠近你一点', '你的耳朵', '你的眼睛', '你的难过', '你的微笑',
+                '你的美丽', '你的星座', '你的体面', '你的生气', '你的浪漫', '你的固执',
             ],
             directions: [
                 { dx: '0vw', dy: '-80vh' }, { dx: '0vw', dy: '80vh' },
@@ -185,18 +185,83 @@ export default {
 
                 // 创建消息后等待一段时间再让标题渐现
                 const titleTimer = setTimeout(() => {
+                    // 初始化标题内容为空
+                    title.innerHTML = '<span></span><span style="display: block; margin-top: 10px;"></span>';
                     title.style.opacity = 1;
-                    // 同时显示提示文字 - 先设置display:block再设置opacity实现平滑过渡
+                    
+                    // 定义要显示的文本内容
+                    const text1 = '我会!';
+                    const text2 = '喜欢你的全部';
+                    const allText = text1 + text2;
+                    
+                    // 获取两个span元素
+                    const span1 = title.querySelector('span:first-child');
+                    const span2 = title.querySelector('span:last-child');
+                    
+                    // 生成从浅粉到深粉的颜色数组
+                    function generatePinkColors(count) {
+                        const colors = [];
+                        for (let i = 0; i < count; i++) {
+                            // 计算从浅粉到深粉的渐变值
+                            // RGB值从粉色系渐变: 浅粉(#FFC0CB)到深粉(#FF1493)
+                            const r = 255; // 红色保持最大值
+                            const g = Math.floor(192 - (192 - 20) * (i / (count - 1))); // 绿色渐变
+                            const b = Math.floor(203 - (203 - 147) * (i / (count - 1))); // 蓝色渐变
+                            colors.push(`rgb(${r}, ${g}, ${b})`);
+                        }
+                        return colors;
+                    }
+                    
+                    const colors = generatePinkColors(allText.length);
+                    
+                    // 打字机动画函数
+                    let index1 = 0;
+                    let index2 = 0;
+                    let phase = 1; // 1: 正在打第一行, 2: 正在打第二行
+                    let colorIndex = 0;
+                    
+                    function typewriter() {
+                        if (phase === 1) {
+                            if (index1 < text1.length) {
+                                // 使用span包裹每个文字并设置不同颜色
+                                const charSpan = document.createElement('span');
+                                charSpan.textContent = text1.charAt(index1);
+                                charSpan.style.color = colors[colorIndex];
+                                span1.appendChild(charSpan);
+                                
+                                index1++;
+                                colorIndex++;
+                                setTimeout(typewriter, 100); // 每个字200ms
+                            } else {
+                                phase = 2;
+                                setTimeout(typewriter, 200); // 第一行完成后停顿500ms
+                            }
+                        } else if (phase === 2) {
+                            if (index2 < text2.length) {
+                                // 使用span包裹每个文字并设置不同颜色
+                                const charSpan = document.createElement('span');
+                                charSpan.textContent = text2.charAt(index2);
+                                charSpan.style.color = colors[colorIndex];
+                                span2.appendChild(charSpan);
+                                
+                                index2++;
+                                colorIndex++;
+                                setTimeout(typewriter, 100); // 每个字200ms
+                            }
+                        }
+                    }
+                    
+                    // 开始打字机动画
+                    typewriter();
+                    
+                    // 隐藏提示文字，不再显示
                     const hint = document.getElementById('clickHint');
                     if (hint) {
                         hint.style.display = 'none';
-                        // 强制重排后再设置opacity以触发过渡
-                        void hint.offsetWidth;
-                        hint.style.opacity = 0.9;
                     }
-                }, 1400);
+                }, 200);
                 this.timers.push(titleTimer);
-            }, 500); // 等待500ms以匹配CSS过渡时间
+            }, 300); // 等待500ms以匹配CSS过渡时间
 
             const TOTAL_TIME_MS = (8.6 + 0.35 + 0.3 + 2.2) * 1000;
 
