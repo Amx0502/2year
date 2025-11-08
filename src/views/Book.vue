@@ -27,7 +27,8 @@
         <letter8_15 />
         <letter9_16 />
         <letter10_17 />
-        <Start />
+        <!-- <Start /> -->
+        <ToBeContinue_18 />
         <div v-for="n in 1" :key="n" class="blank-page">
         </div>
       </div>
@@ -63,6 +64,7 @@ import letter7_14 from './letter/letter-7-E.vue'
 import letter8_15 from './letter/letter-8-Z.vue'
 import letter9_16 from './letter/letter-9-S.vue'
 import letter10_17 from './letter/letter-10-Y.vue'
+import ToBeContinue_18 from './To be Continue.vue'
 
 import Start from './love.vue'
 
@@ -86,6 +88,7 @@ export default {
     letter8_15,
     letter9_16,
     letter10_17,
+    ToBeContinue_18,
 
     Start,
 
@@ -112,8 +115,8 @@ export default {
           autoCenter: true,
           height: 650,
           width: 1300,
-          // pages: 13,
-          duration: 1000,
+          duration: 1000, // 适当缩短翻页动画时长
+          acceleration: true, // 开启硬件加速
           when: {
             turned: () => {
               // 页面翻转后更新当前页码
@@ -151,19 +154,6 @@ export default {
         this.currentPage = pageNum;
       }
     },
-
-    // 获取随机的粉色调颜色
-    getRandomPinkColor() {
-      const pinks = [
-        'rgba(255, 105, 180, 0.5)',
-        'rgba(255, 182, 193, 0.5)',
-        'rgba(255, 192, 203, 0.5)',
-        'rgba(255, 228, 225, 0.5)',
-        'rgba(255, 160, 122, 0.5)'
-      ];
-      return pinks[Math.floor(Math.random() * pinks.length)];
-    },
-    // 创建翻页时的特效
   },
   mounted() {
     this.onTurn();
@@ -175,6 +165,10 @@ export default {
   },
 
   beforeDestroy() {
+    // 清理turn.js实例
+  if ($("#flipbook").turn("is")) {
+    $("#flipbook").turn("destroy");
+  }
     // 清理Three.js资源
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
