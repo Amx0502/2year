@@ -27,10 +27,10 @@
         <letter8_15 />
         <letter9_16 />
         <letter10_17 />
-        <!-- <Start /> -->
         <ToBeContinue_18 />
-        <div v-for="n in 1" :key="n" class="blank-page">
-        </div>
+        <Start />
+        <InTheEnd_19 />
+        <!-- <div v-for="n in 1" :key="n" class="blank-page"></div> -->
       </div>
     </div>
     <div class="page-info">
@@ -64,7 +64,8 @@ import letter7_14 from './letter/letter-7-E.vue'
 import letter8_15 from './letter/letter-8-Z.vue'
 import letter9_16 from './letter/letter-9-S.vue'
 import letter10_17 from './letter/letter-10-Y.vue'
-import ToBeContinue_18 from './To be Continue.vue'
+import ToBeContinue_18 from './To be continue.vue'
+import InTheEnd_19 from './In the end.vue'
 
 import Start from './love.vue'
 
@@ -89,6 +90,7 @@ export default {
     letter9_16,
     letter10_17,
     ToBeContinue_18,
+    InTheEnd_19,
 
     Start,
 

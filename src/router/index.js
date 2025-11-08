@@ -10,7 +10,6 @@ import Foreword from '../views/foreword.vue'
 import MusicPlayer from '../components/MusicPlayer.vue'
 import LOVEYOU from '../views/LOVEYOU.vue'
 import HeartAnimation from '../views/HeartAnimation.vue'
-import ToBeContinue from '../views/To be Continue.vue'
 
 Vue.use(VueRouter)
 
@@ -64,11 +63,6 @@ const routes = [
     path: '/heartanimation',
     name: 'heartanimation',
     component: HeartAnimation
-  },
-  {
-    path: '/tobecontinue',
-    name: 'tobecontinue',
-    component: ToBeContinue
   },
 ]
 
