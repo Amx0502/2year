@@ -28,8 +28,8 @@
         <letter9_16 />
         <letter10_17 />
         <ToBeContinue_18 />
-        <Start />
-        <InTheEnd_19 />
+        <love_19 />
+        <InTheEnd_20 />
         <!-- <div v-for="n in 1" :key="n" class="blank-page"></div> -->
       </div>
     </div>
@@ -65,9 +65,8 @@ import letter8_15 from './letter/letter-8-Z.vue'
 import letter9_16 from './letter/letter-9-S.vue'
 import letter10_17 from './letter/letter-10-Y.vue'
 import ToBeContinue_18 from './To be continue.vue'
-import InTheEnd_19 from './In the end.vue'
-
-import Start from './love.vue'
+import love_19 from './love.vue'
+import InTheEnd_20 from './In the end.vue'
 
 import MusicPlayer from '@/components/MusicPlayer.vue'
 
@@ -90,9 +89,8 @@ export default {
     letter9_16,
     letter10_17,
     ToBeContinue_18,
-    InTheEnd_19,
-
-    Start,
+    love_19,
+    InTheEnd_20,
 
     MusicPlayer
   },
@@ -168,9 +166,9 @@ export default {
 
   beforeDestroy() {
     // 清理turn.js实例
-  if ($("#flipbook").turn("is")) {
-    $("#flipbook").turn("destroy");
-  }
+    if ($("#flipbook").turn("is")) {
+      $("#flipbook").turn("destroy");
+    }
     // 清理Three.js资源
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
@@ -328,13 +326,13 @@ export default {
     transition: all 0.2s ease;
     z-index: 1;
   }
-  
+
   .prev-btn:hover,
   .next-btn:hover {
     transform: rotate(0deg) translateY(-0.5px);
     box-shadow: 4px 4px 0 #5d4037;
   }
-  
+
   .prev-btn:active,
   .next-btn:active {
     transform: rotate(0deg) translateY(0);
