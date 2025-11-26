@@ -9,7 +9,7 @@
     <div class="turnClass">
       <div id="flipbook">
         <LoveTree_1 />
-        <div class="_2_calendar"></div>
+        <div class="calendar_2"></div>
         <Foreword_3 />
         <LoveFlipTimer_45 />
         <div class="transparent-page"></div>
@@ -27,9 +27,11 @@
         <letter8_15 />
         <letter9_16 />
         <letter10_17 />
-        <ToBeContinue_18 />
-        <love_19 />
-        <InTheEnd_20 />
+        <Say2_18 />
+        <div class="good_19"></div>
+        <ToBeContinue_20 />
+        <love_21 />
+        <InTheEnd_22 />
         <!-- <div v-for="n in 1" :key="n" class="blank-page"></div> -->
       </div>
     </div>
@@ -64,9 +66,10 @@ import letter7_14 from './letter/letter-7-E.vue'
 import letter8_15 from './letter/letter-8-Z.vue'
 import letter9_16 from './letter/letter-9-S.vue'
 import letter10_17 from './letter/letter-10-Y.vue'
-import ToBeContinue_18 from './To be continue.vue'
-import love_19 from './love.vue'
-import InTheEnd_20 from './In the end.vue'
+import Say2_18 from './say2.vue'
+import ToBeContinue_20 from './To be continue.vue'
+import love_21 from './love.vue'
+import InTheEnd_22 from './In the end.vue'
 
 import MusicPlayer from '@/components/MusicPlayer.vue'
 
@@ -88,9 +91,10 @@ export default {
     letter8_15,
     letter9_16,
     letter10_17,
-    ToBeContinue_18,
-    love_19,
-    InTheEnd_20,
+    Say2_18,
+    ToBeContinue_20,
+    love_21,
+    InTheEnd_22,
 
     MusicPlayer
   },
@@ -246,7 +250,7 @@ export default {
     z-index: 1;
     border-radius: 20px;
 
-    ._2_calendar {
+    .calendar_2 {
       width: 100%;
       height: 100%;
       background-color: #f5f5f5;
@@ -257,7 +261,7 @@ export default {
       overflow: hidden;
     }
 
-    ._4_good {
+    .good_19 {
       width: 100%;
       height: 100%;
       background-color: #f5f5f5;
