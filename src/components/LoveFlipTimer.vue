@@ -253,6 +253,7 @@ const photoUrls = [
   '/images/17.jpg',
   '/images/18.jpg',
   '/images/19.jpg',
+  '/images/20.jpg',
   '/video/1.mp4',
   '/video/2.mp4',
   '/video/3.mp4',
