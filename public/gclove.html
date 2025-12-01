@@ -1,673 +1,675 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            body {
-                margin: 0;
-                overflow: hidden;
-                background-color: #050505;
-                font-family: 'Microsoft YaHei', sans-serif;
-            }
 
-            /* 状态显示 HUD */
-            #hud-panel {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                background: rgba(0, 0, 0, 0.6);
-                padding: 15px;
-                border-radius: 8px;
-                border: 1px solid rgba(0, 255, 255, 0.3);
-                color: #00ffff;
-                pointer-events: none;
-                user-select: none;
-                z-index: 10;
-                width: 220px;
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050505;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
 
-            #hud-status {
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 5px;
-            }
+        /* 状态显示 HUD */
+        #hud-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+            width: 220px;
+        }
 
-            #hud-detail {
-                font-size: 12px;
-                color: #aaa;
-                line-height: 1.5;
-            }
+        #hud-status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
-            /* 输入面板 */
-            #input-panel {
-                position: absolute;
-                bottom: 20px;
-                left: 20px;
-                background: rgba(20, 20, 30, 0.9);
-                padding: 20px;
-                border-radius: 12px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                color: white;
-                width: 280px;
-                z-index: 10;
-                transition: opacity 0.3s;
-                opacity: 0.3;
-            }
+        #hud-detail {
+            font-size: 12px;
+            color: #aaa;
+            line-height: 1.5;
+        }
 
-            #input-panel:hover {
-                opacity: 1;
-            }
+        /* 输入面板 */
+        #input-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 30, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 280px;
+            z-index: 10;
+            transition: opacity 0.3s;
+            opacity: 0.3;
+        }
 
-            input {
-                width: 100%;
-                padding: 8px;
-                margin-bottom: 10px;
-                border-radius: 4px;
-                border: 1px solid #444;
-                background: rgba(0, 0, 0, 0.5);
-                color: white;
-                box-sizing: border-box;
-            }
+        #input-panel:hover {
+            opacity: 1;
+        }
 
-            label {
-                font-size: 12px;
-                color: #aaa;
-                display: block;
-                margin-bottom: 5px;
-            }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            box-sizing: border-box;
+        }
 
-            /* 隐藏的摄像头视频 */
-            #video-feed {
-                position: absolute;
-                top: 0;
-                left: 0;
-                opacity: 0;
-                z-index: -1;
-                pointer-events: none;
-            }
+        label {
+            font-size: 12px;
+            color: #aaa;
+            display: block;
+            margin-bottom: 5px;
+        }
 
-            /* 加载遮罩 */
-            #loader {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: #000;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                color: #00ffff;
-                z-index: 999;
-                transition: opacity 0.5s;
-            }
-        </style>
+        /* 隐藏的摄像头视频 */
+        #video-feed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
 
-        <script src="./js/three.min.js"></script>
-        <script src="./js/tween.umd.js"></script>
-        <script src="./js/camera_utils.js" crossorigin="anonymous">
-        </script>
-        <script src="./js/control_utils.js" crossorigin="anonymous">
-        </script>
-        <script src="./js/hands.js" crossorigin="anonymous"></script>
-    </head>
-    <div class="xl-chrome-ext-bar_4DB361DE-01F7-4376-B494-639E489D19ED"
-        id="xl_chrome_ext_4DB361DE-01F7-4376-B494-639E489D19ED" data-v-app="" style="display: block;">
-        <div class="">
-            <div id="xl_chrome_ext_video_tag_wrapper_4DB361DE-01F7-4376-B494-639E489D19ED" config="[object Object]"
-                uiversion="v2" exception="false" latestvideosrc="" isshowvideotag="false" isshowdownloadbar="true"
-                isshowcloudaddbar="false">
-                <div class="_video_op_wrapper_96mx8_1" config="[object Object]" uiversion="v2" style="display: none;">
-                    <ul class="_video_op_list_96mx8_17">
-                        <li class="_op_item_96mx8_39 _download_96mx8_45"><span class="_op_icon_96mx8_25"></span><span
-                                class="_op_text_96mx8_31">下载</span></li>
-                        <li class="_op_item_96mx8_39 _screen_96mx8_51"><span class="_op_icon_96mx8_25"></span><span
-                                class="_op_text_96mx8_31">投屏</span></li>
-                    </ul>
-                </div>
+        /* 加载遮罩 */
+        #loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00ffff;
+            z-index: 999;
+            transition: opacity 0.5s;
+        }
+    </style>
+
+    <script src="./js/three.min.js"></script>
+    <script src="./js/tween.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<div class="xl-chrome-ext-bar_4DB361DE-01F7-4376-B494-639E489D19ED"
+    id="xl_chrome_ext_4DB361DE-01F7-4376-B494-639E489D19ED" data-v-app="" style="display: block;">
+    <div class="">
+        <div id="xl_chrome_ext_video_tag_wrapper_4DB361DE-01F7-4376-B494-639E489D19ED" config="[object Object]"
+            uiversion="v2" exception="false" latestvideosrc="" isshowvideotag="false" isshowdownloadbar="true"
+            isshowcloudaddbar="false">
+            <div class="_video_op_wrapper_96mx8_1" config="[object Object]" uiversion="v2" style="display: none;">
+                <ul class="_video_op_list_96mx8_17">
+                    <li class="_op_item_96mx8_39 _download_96mx8_45"><span class="_op_icon_96mx8_25"></span><span
+                            class="_op_text_96mx8_31">下载</span></li>
+                    <li class="_op_item_96mx8_39 _screen_96mx8_51"><span class="_op_icon_96mx8_25"></span><span
+                            class="_op_text_96mx8_31">投屏</span></li>
+                </ul>
             </div>
-            <div class="badge_wrapper_4DB361DE-01F7-4376-B494-639E489D19ED _badge_wrapper_wnbzb_1"
-                id="badge_wrapper_4DB361DE-01F7-4376-B494-639E489D19ED">
-                <div class="_logo_wnbzb_24"></div><span class="_line_wnbzb_32"></span>
-                <div class="_text_wrapper_wnbzb_39"><span class="_download_icon_wnbzb_51"></span><span
-                        class="_text_wnbzb_39">高速下载</span></div>
-            </div><!----><!----><!----><!---->
-            <div class="_container_wq4mj_4"><!----></div>
+        </div>
+        <div class="badge_wrapper_4DB361DE-01F7-4376-B494-639E489D19ED _badge_wrapper_wnbzb_1"
+            id="badge_wrapper_4DB361DE-01F7-4376-B494-639E489D19ED">
+            <div class="_logo_wnbzb_24"></div><span class="_line_wnbzb_32"></span>
+            <div class="_text_wrapper_wnbzb_39"><span class="_download_icon_wnbzb_51"></span><span
+                    class="_text_wnbzb_39">高速下载</span></div>
+        </div><!----><!----><!----><!---->
+        <div class="_container_wq4mj_4"><!----></div>
+    </div>
+</div>
+
+<body>
+
+
+
+    <div id="hud-panel">
+        <div id="hud-status" style="color: rgb(0, 255, 255);">✌️ 识别：双指</div>
+        <div id="hud-detail">
+            👆 单指：第一个字<br>
+            ✌️ 双指：第二个字<br>
+            🖐 张手：变爱心<br>
+            ✊ 握拳：爆炸表白
         </div>
     </div>
-    <body>
 
+    <div id="input-panel" style="display: none;">
+        <label>名字</label>
+        <input type="text" id="input-name" value="sy">
+        <label>表白内容</label>
+        <input type="text" id="input-msg" value="我永远爱你">
+        <div style="font-size:10px; color:#666; margin-top:5px;">* 鼠标悬停可修改内容</div>
+    </div>
 
+    <video id="video-feed" playsinline=""></video>
 
-        <div id="hud-panel">
-            <div id="hud-status" style="color: rgb(0, 255, 255);">✌️ 识别：双指</div>
-            <div id="hud-detail">
-                👆 单指：第一个字<br>
-                ✌️ 双指：第二个字<br>
-                🖐 张手：变爱心<br>
-                ✊ 握拳：爆炸表白
-            </div>
-        </div>
+    <script>
+        // --- 核心配置 ---
+        const PARTICLE_COUNT = 30000;
+        const PARTICLE_SIZE = 0.18;
 
-        <div id="input-panel" style="display: none;">
-            <label>名字</label>
-            <input type="text" id="input-name" value="sy">
-            <label>表白内容</label>
-            <input type="text" id="input-msg" value="我永远爱你">
-            <div style="font-size:10px; color:#666; margin-top:5px;">* 鼠标悬停可修改内容</div>
-        </div>
+        // --- 全局变量 ---
+        let scene, camera, renderer, particles;
+        let particlePositions, colors, targetPositions;
+        let geometry;
 
-        <video id="video-feed" playsinline=""></video>
+        // 状态控制
+        let isExploding = false;
+        let explosionVelocities = [];
+        let isTextState = false; // 控制是否需要智能回正
 
-        <script>
-            // --- 核心配置 ---
-            const PARTICLE_COUNT = 30000;
-            const PARTICLE_SIZE = 0.18;
+        // 画布相关
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-            // --- 全局变量 ---
-            let scene, camera, renderer, particles;
-            let particlePositions, colors, targetPositions;
-            let geometry;
+        // 手势状态机
+        let lastGesture = 'none';
+        let gestureFrameCount = 0;
+        const GESTURE_THRESHOLD = 10;
 
-            // 状态控制
-            let isExploding = false;
-            let explosionVelocities = [];
-            let isTextState = false; // 控制是否需要智能回正
+        // 启动入口
+        initThree();
+        initMediaPipe();
+        animate();
 
-            // 画布相关
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+        // =========================================================
+        // 1. THREE.JS 粒子系统部分
+        // =========================================================
+        function initThree() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050505);
+            scene.fog = new THREE.FogExp2(0x050505, 0.02);
 
-            // 手势状态机
-            let lastGesture = 'none';
-            let gestureFrameCount = 0;
-            const GESTURE_THRESHOLD = 10;
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 35;
 
-            // 启动入口
-            initThree();
-            initMediaPipe();
-            animate();
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.appendChild(renderer.domElement);
 
-            // =========================================================
-            // 1. THREE.JS 粒子系统部分
-            // =========================================================
-            function initThree() {
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x050505);
-                scene.fog = new THREE.FogExp2(0x050505, 0.02);
+            initParticles();
+            calculateSpherePositions();
+            window.addEventListener('resize', onWindowResize);
+        }
 
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.z = 35;
+        function initParticles() {
+            geometry = new THREE.BufferGeometry();
+            particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+            colors = new Float32Array(PARTICLE_COUNT * 3);
+            targetPositions = new Float32Array(PARTICLE_COUNT * 3);
 
-                renderer = new THREE.WebGLRenderer({
-                    antialias: true
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particlePositions[i * 3] = (Math.random() - 0.5) * 50;
+                particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 50;
+                particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+                colors[i * 3] = 0;
+                colors[i * 3 + 1] = 0.8;
+                colors[i * 3 + 2] = 1;
+                explosionVelocities.push({
+                    x: 0,
+                    y: 0,
+                    z: 0
                 });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                document.body.appendChild(renderer.domElement);
-
-                initParticles();
-                calculateSpherePositions();
-                window.addEventListener('resize', onWindowResize);
             }
 
-            function initParticles() {
-                geometry = new THREE.BufferGeometry();
-                particlePositions = new Float32Array(PARTICLE_COUNT * 3);
-                colors = new Float32Array(PARTICLE_COUNT * 3);
-                targetPositions = new Float32Array(PARTICLE_COUNT * 3);
+            geometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    particlePositions[i * 3] = (Math.random() - 0.5) * 50;
-                    particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 50;
-                    particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 50;
-                    colors[i * 3] = 0;
-                    colors[i * 3 + 1] = 0.8;
-                    colors[i * 3 + 2] = 1;
-                    explosionVelocities.push({
-                        x: 0,
-                        y: 0,
-                        z: 0
-                    });
-                }
+            const material = new THREE.PointsMaterial({
+                size: PARTICLE_SIZE,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                transparent: true,
+                opacity: 0.8
+            });
 
-                geometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
 
-                const material = new THREE.PointsMaterial({
-                    size: PARTICLE_SIZE,
-                    vertexColors: true,
-                    blending: THREE.AdditiveBlending,
-                    depthWrite: false,
-                    transparent: true,
-                    opacity: 0.8
-                });
+        // --- 智能文字转粒子算法 ---
+        function getTextPositions(textStr, fontSize = 100) {
+            ctx.font = `bold ${fontSize}px "Microsoft YaHei"`;
+            const textWidth = Math.ceil(ctx.measureText(textStr).width);
 
-                particles = new THREE.Points(geometry, material);
-                scene.add(particles);
-            }
+            const dynamicWidth = textWidth + 60;
+            const dynamicHeight = Math.max(fontSize * 1.5, 200);
 
-            // --- 智能文字转粒子算法 ---
-            function getTextPositions(textStr, fontSize = 100) {
-                ctx.font = `bold ${fontSize}px "Microsoft YaHei"`;
-                const textWidth = Math.ceil(ctx.measureText(textStr).width);
+            canvas.width = dynamicWidth;
+            canvas.height = dynamicHeight;
 
-                const dynamicWidth = textWidth + 60;
-                const dynamicHeight = Math.max(fontSize * 1.5, 200);
+            ctx.clearRect(0, 0, dynamicWidth, dynamicHeight);
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${fontSize}px "Microsoft YaHei"`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(textStr, dynamicWidth / 2, dynamicHeight / 2);
 
-                canvas.width = dynamicWidth;
-                canvas.height = dynamicHeight;
+            const data = ctx.getImageData(0, 0, dynamicWidth, dynamicHeight).data;
+            const validPositions = [];
 
-                ctx.clearRect(0, 0, dynamicWidth, dynamicHeight);
-                ctx.fillStyle = 'white';
-                ctx.font = `bold ${fontSize}px "Microsoft YaHei"`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(textStr, dynamicWidth / 2, dynamicHeight / 2);
-
-                const data = ctx.getImageData(0, 0, dynamicWidth, dynamicHeight).data;
-                const validPositions = [];
-
-                for (let y = 0; y < dynamicHeight; y += 2) {
-                    for (let x = 0; x < dynamicWidth; x += 2) {
-                        if (data[(y * dynamicWidth + x) * 4 + 3] > 128) {
-                            const posX = (x - dynamicWidth / 2) * 0.15;
-                            const posY = -(y - dynamicHeight / 2) * 0.15;
-                            for (let k = 0; k < 3; k++) {
-                                validPositions.push({
-                                    x: posX,
-                                    y: posY,
-                                    z: (Math.random() - 0.5) * 2.5
-                                });
-                            }
-                        }
-                    }
-                }
-                return validPositions;
-            }
-
-            function getHeartPositions() {
-                const points = [];
-                for (let i = 0; i < 9000; i++) {
-                    const t = Math.random() * Math.PI * 2;
-                    const r = Math.sqrt(Math.random());
-                    let x = 16 * Math.pow(Math.sin(t), 3);
-                    let y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-                    let z = r * 6 * Math.sin(Math.random() * Math.PI * 2) * Math.cos(t);
-                    x *= 0.35;
-                    y *= 0.35;
-                    z *= 0.35;
-                    y += 2;
-                    points.push({
-                        x,
-                        y,
-                        z
-                    });
-                }
-                return points;
-            }
-
-            // --- 变形核心逻辑 ---
-            function morphTo(newPoints, colorHex, isText = false) {
-                isExploding = false;
-                isTextState = isText;
-
-                const colorObj = new THREE.Color(colorHex);
-
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    if (i < newPoints.length) {
-                        targetPositions[i * 3] = newPoints[i].x;
-                        targetPositions[i * 3 + 1] = newPoints[i].y;
-                        targetPositions[i * 3 + 2] = newPoints[i].z;
-                    } else {
-                        targetPositions[i * 3] = (Math.random() - 0.5) * 90;
-                        targetPositions[i * 3 + 1] = (Math.random() - 0.5) * 90;
-                        targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 90;
-                    }
-                }
-
-                const startColor = {
-                    r: colors[0],
-                    g: colors[1],
-                    b: colors[2]
-                };
-                new TWEEN.Tween(startColor)
-                    .to({
-                        r: colorObj.r,
-                        g: colorObj.g,
-                        b: colorObj.b
-                    }, 1000)
-                    .onUpdate(() => {
-                        for (let i = 0; i < PARTICLE_COUNT; i++) {
-                            const dim = (i < newPoints.length) ? 1.0 : 0.15;
-                            colors[i * 3] = startColor.r * dim;
-                            colors[i * 3 + 1] = startColor.g * dim;
-                            colors[i * 3 + 2] = startColor.b * dim;
-                        }
-                        geometry.attributes.color.needsUpdate = true;
-                    })
-                    .easing(TWEEN.Easing.Quadratic.Out)
-                    .start();
-            }
-
-            // --- 预设动作封装 ---
-            function showCharacter(index) {
-                const name = document.getElementById('input-name').value;
-                const char = name[index] || name[name.length - 1];
-                morphTo(getTextPositions(char, 120), 0x00ffff, true);
-            }
-
-            // 【修改】全名功能保留逻辑，但移除了手势触发，可作为备用
-            function showFullName() {
-                const name = document.getElementById('input-name').value;
-                morphTo(getTextPositions(name, 80), 0x00ffff, true);
-            }
-
-            function morphToHeart() {
-                morphTo(getHeartPositions(), 0xff0044, false);
-            }
-
-            function calculateSpherePositions() {
-                const points = [];
-                for (let i = 0; i < 5000; i++) {
-                    points.push({
-                        x: (Math.random() - 0.5) * 30,
-                        y: (Math.random() - 0.5) * 30,
-                        z: (Math.random() - 0.5) * 30
-                    });
-                }
-                morphTo(points, 0x00ffff, false);
-            }
-
-            function explodeAndShowMsg() {
-                if (isExploding) return;
-                isExploding = true;
-                isTextState = false;
-
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    explosionVelocities[i].x = (Math.random() - 0.5) * 3.5;
-                    explosionVelocities[i].y = (Math.random() - 0.5) * 3.5;
-                    explosionVelocities[i].z = (Math.random() - 0.5) * 3.5;
-                }
-
-                setTimeout(() => {
-                    const msg = document.getElementById('input-msg').value;
-                    morphTo(getTextPositions(msg, 60), 0xff88aa, true);
-                }, 1200);
-            }
-
-            // =========================================================
-            // 2. AI 手势识别部分 (核心修改：移除三指逻辑)
-            // =========================================================
-            function initMediaPipe() {
-                // 检查浏览器是否支持MediaDevices API
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    console.log('浏览器不支持getUserMedia API，自动启动备用模式...');
-                    
-                    // 显示不支持的提示
-                    const statusDiv = document.getElementById('hud-status');
-                    if (statusDiv) {
-                        statusDiv.innerHTML = "⌨️ 使用键盘控制";
-                        statusDiv.style.color = "#ffff00";
-                    }
-                    
-                    // 移除加载遮罩
-                    const loader = document.getElementById('loader');
-                    if (loader) {
-                        loader.style.opacity = 0;
-                        setTimeout(() => loader.remove(), 500);
-                    }
-                    
-                    // 立即启动备用模式
-                    initFallbackMode();
-                    return;
-                }
-                
-                // 继续使用原有的初始化逻辑，但增加更多安全检查
-                try {
-                    const videoElement = document.getElementById('video-feed');
-                    if (!videoElement) {
-                        console.error('视频元素不存在');
-                        initFallbackMode();
-                        return;
-                    }
-                    
-                    // 确保Hands构造函数存在
-                    if (typeof Hands === 'undefined') {
-                        console.error('Hands构造函数不存在');
-                        initFallbackMode();
-                        return;
-                    }
-                    
-                    const hands = new Hands({
-                        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-                    });
-
-                    hands.setOptions({
-                        maxNumHands: 1,
-                        modelComplexity: 1,
-                        minDetectionConfidence: 0.6,
-                        minTrackingConfidence: 0.6
-                    });
-
-                    hands.onResults(onHandsResults);
-
-                    // 确保Camera构造函数存在
-                    if (typeof Camera === 'undefined') {
-                        console.error('Camera构造函数不存在');
-                        initFallbackMode();
-                        return;
-                    }
-
-                    const cameraUtils = new Camera(videoElement, {
-                        onFrame: async () => {
-                            try {
-                                await hands.send({
-                                    image: videoElement
-                                });
-                            } catch (err) {
-                                // 静默忽略帧处理错误
-                            }
-                        },
-                        width: 640,
-                        height: 480
-                    });
-
-                    // 检查是否存在loader元素
-                    const loader = document.getElementById('loader');
-                    
-                    // 尝试启动摄像头，添加更健壮的错误处理
-                    try {
-                        cameraUtils.start()
-                            .then(() => {
-                                if (loader) {
-                                    loader.style.opacity = 0;
-                                    setTimeout(() => loader.remove(), 1000);
-                                }
-                            })
-                            .catch(err => {
-                                console.error('摄像头启动错误:', err);
-                                if (loader) {
-                                    loader.style.opacity = 0;
-                                    setTimeout(() => loader.remove(), 1000);
-                                }
-                                
-                                // 直接启动备用模式，不显示警告对话框
-                                initFallbackMode();
+            for (let y = 0; y < dynamicHeight; y += 2) {
+                for (let x = 0; x < dynamicWidth; x += 2) {
+                    if (data[(y * dynamicWidth + x) * 4 + 3] > 128) {
+                        const posX = (x - dynamicWidth / 2) * 0.15;
+                        const posY = -(y - dynamicHeight / 2) * 0.15;
+                        for (let k = 0; k < 3; k++) {
+                            validPositions.push({
+                                x: posX,
+                                y: posY,
+                                z: (Math.random() - 0.5) * 2.5
                             });
-                    } catch (e) {
-                        console.error('初始化错误:', e);
-                        if (loader) {
-                            loader.style.display = 'none';
                         }
-                        initFallbackMode();
                     }
-                } catch (e) {
-                    console.error('严重错误:', e);
-                    // 确保无论如何都启动备用模式
-                    initFallbackMode();
                 }
             }
+            return validPositions;
+        }
 
-            function onHandsResults(results) {
-                let detectedGesture = 'none';
+        function getHeartPositions() {
+            const points = [];
+            for (let i = 0; i < 9000; i++) {
+                const t = Math.random() * Math.PI * 2;
+                const r = Math.sqrt(Math.random());
+                let x = 16 * Math.pow(Math.sin(t), 3);
+                let y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+                let z = r * 6 * Math.sin(Math.random() * Math.PI * 2) * Math.cos(t);
+                x *= 0.35;
+                y *= 0.35;
+                z *= 0.35;
+                y += 2;
+                points.push({
+                    x,
+                    y,
+                    z
+                });
+            }
+            return points;
+        }
 
-                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                    const lm = results.multiHandLandmarks[0];
-                    let fingerCount = 0;
+        // --- 变形核心逻辑 ---
+        function morphTo(newPoints, colorHex, isText = false) {
+            isExploding = false;
+            isTextState = isText;
 
-                    // 简易手指计数逻辑
-                    if (lm[8].y < lm[6].y) fingerCount++; // 食指
-                    if (lm[12].y < lm[10].y) fingerCount++; // 中指
-                    if (lm[16].y < lm[14].y) fingerCount++; // 无名指
-                    if (lm[20].y < lm[18].y) fingerCount++; // 小指
-                    if (Math.abs(lm[4].x - lm[0].x) > Math.abs(lm[3].x - lm[0].x)) fingerCount++; // 拇指
+            const colorObj = new THREE.Color(colorHex);
 
-                    // --- 状态分类 (优化版) ---
-                    if (fingerCount === 0) detectedGesture = 'fist';
-                    else if (fingerCount === 1) detectedGesture = 'one';
-                    else if (fingerCount === 2) detectedGesture = 'two';
-                    // 【关键修改】 3指 被视为无操作 (死区)，防止误触
-                    else if (fingerCount >= 4) detectedGesture = 'open'; // 4指或5指都算张开
-                }
-
-                // 防抖逻辑
-                if (detectedGesture === lastGesture) {
-                    gestureFrameCount++;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                if (i < newPoints.length) {
+                    targetPositions[i * 3] = newPoints[i].x;
+                    targetPositions[i * 3 + 1] = newPoints[i].y;
+                    targetPositions[i * 3 + 2] = newPoints[i].z;
                 } else {
-                    gestureFrameCount = 0;
-                    lastGesture = detectedGesture;
-                }
-
-                if (gestureFrameCount === GESTURE_THRESHOLD) {
-                    handleGestureAction(detectedGesture);
+                    targetPositions[i * 3] = (Math.random() - 0.5) * 90;
+                    targetPositions[i * 3 + 1] = (Math.random() - 0.5) * 90;
+                    targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 90;
                 }
             }
 
-            function handleGestureAction(gesture) {
-                const statusDiv = document.getElementById('hud-status');
-                if (!statusDiv) return;
+            const startColor = {
+                r: colors[0],
+                g: colors[1],
+                b: colors[2]
+            };
+            new TWEEN.Tween(startColor)
+                .to({
+                    r: colorObj.r,
+                    g: colorObj.g,
+                    b: colorObj.b
+                }, 1000)
+                .onUpdate(() => {
+                    for (let i = 0; i < PARTICLE_COUNT; i++) {
+                        const dim = (i < newPoints.length) ? 1.0 : 0.15;
+                        colors[i * 3] = startColor.r * dim;
+                        colors[i * 3 + 1] = startColor.g * dim;
+                        colors[i * 3 + 2] = startColor.b * dim;
+                    }
+                    geometry.attributes.color.needsUpdate = true;
+                })
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+        }
 
-                switch (gesture) {
-                    case 'one':
-                        statusDiv.innerText = "👆 识别：单指";
-                        statusDiv.style.color = "#00ffff";
-                        showCharacter(0);
-                        break;
-                    case 'two':
-                        statusDiv.innerText = "✌️ 识别：双指";
-                        statusDiv.style.color = "#00ffff";
-                        showCharacter(1);
-                        break;
-                    case 'open':
-                        statusDiv.innerText = "🖐 识别：张手";
-                        statusDiv.style.color = "#ff0044";
-                        morphToHeart();
-                        break;
-                    case 'fist':
-                        statusDiv.innerText = "✊ 识别：握拳";
-                        statusDiv.style.color = "#ffaa00";
-                        explodeAndShowMsg();
-                        break;
-                }
+        // --- 预设动作封装 ---
+        function showCharacter(index) {
+            const name = document.getElementById('input-name').value;
+            const char = name[index] || name[name.length - 1];
+            morphTo(getTextPositions(char, 120), 0x00ffff, true);
+        }
+
+        // 【修改】全名功能保留逻辑，但移除了手势触发，可作为备用
+        function showFullName() {
+            const name = document.getElementById('input-name').value;
+            morphTo(getTextPositions(name, 80), 0x00ffff, true);
+        }
+
+        function morphToHeart() {
+            morphTo(getHeartPositions(), 0xff0044, false);
+        }
+
+        function calculateSpherePositions() {
+            const points = [];
+            for (let i = 0; i < 5000; i++) {
+                points.push({
+                    x: (Math.random() - 0.5) * 30,
+                    y: (Math.random() - 0.5) * 30,
+                    z: (Math.random() - 0.5) * 30
+                });
             }
-            
-            // 备用模式：当摄像头不可用时，通过键盘控制
-            function initFallbackMode() {
-                console.log('启动备用交互模式');
-                
-                // 显示备用控制提示
+            morphTo(points, 0x00ffff, false);
+        }
+
+        function explodeAndShowMsg() {
+            if (isExploding) return;
+            isExploding = true;
+            isTextState = false;
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                explosionVelocities[i].x = (Math.random() - 0.5) * 3.5;
+                explosionVelocities[i].y = (Math.random() - 0.5) * 3.5;
+                explosionVelocities[i].z = (Math.random() - 0.5) * 3.5;
+            }
+
+            setTimeout(() => {
+                const msg = document.getElementById('input-msg').value;
+                morphTo(getTextPositions(msg, 60), 0xff88aa, true);
+            }, 1200);
+        }
+
+        // =========================================================
+        // 2. AI 手势识别部分 (核心修改：移除三指逻辑)
+        // =========================================================
+        function initMediaPipe() {
+            // 检查浏览器是否支持MediaDevices API
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.log('浏览器不支持getUserMedia API，自动启动备用模式...');
+
+                // 显示不支持的提示
                 const statusDiv = document.getElementById('hud-status');
                 if (statusDiv) {
                     statusDiv.innerHTML = "⌨️ 使用键盘控制";
                     statusDiv.style.color = "#ffff00";
                 }
-                
-                const detailDiv = document.getElementById('hud-detail');
-                if (detailDiv) {
-                    detailDiv.innerHTML = 
-                        "1键：第一个字<br>" +
-                        "2键：第二个字<br>" +
-                        "空格键：变爱心<br>" +
-                        "Enter键：爆炸表白<br>";
+
+                // 移除加载遮罩
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.style.opacity = 0;
+                    setTimeout(() => loader.remove(), 500);
                 }
-                
-                // 添加键盘事件监听
-                document.addEventListener('keydown', (e) => {
-                    switch(e.key) {
-                        case '1':
-                            showCharacter(0);
-                            break;
-                        case '2':
-                            showCharacter(1);
-                            break;
-                        case ' ':
-                            morphToHeart();
-                            break;
-                        case 'Enter':
-                            explodeAndShowMsg();
-                            break;
-                    }
+
+                // 立即启动备用模式
+                initFallbackMode();
+                return;
+            }
+
+            // 继续使用原有的初始化逻辑，但增加更多安全检查
+            try {
+                const videoElement = document.getElementById('video-feed');
+                if (!videoElement) {
+                    console.error('视频元素不存在');
+                    initFallbackMode();
+                    return;
+                }
+
+                // 确保Hands构造函数存在
+                if (typeof Hands === 'undefined') {
+                    console.error('Hands构造函数不存在');
+                    initFallbackMode();
+                    return;
+                }
+
+                const hands = new Hands({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
                 });
-            }
 
-            // =========================================================
-            // 3. 动画循环 (含智能旋转逻辑)
-            // =========================================================
-            function animate() {
-                requestAnimationFrame(animate);
-                TWEEN.update();
+                hands.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.6,
+                    minTrackingConfidence: 0.6
+                });
 
-                const positions = geometry.attributes.position.array;
+                hands.onResults(onHandsResults);
 
-                // --- 智能旋转逻辑 ---
-                if (isTextState) {
-                    // 文字状态：平滑回正 + 微幅呼吸摆动
-                    const targetRotation = Math.sin(Date.now() * 0.001) * 0.2;
-                    particles.rotation.y += (targetRotation - particles.rotation.y) * 0.05;
-                } else {
-                    // 非文字状态：全景匀速旋转
-                    particles.rotation.y += 0.002;
-                    particles.rotation.y = particles.rotation.y % (Math.PI * 2);
+                // 确保Camera构造函数存在
+                if (typeof Camera === 'undefined') {
+                    console.error('Camera构造函数不存在');
+                    initFallbackMode();
+                    return;
                 }
 
-                if (isExploding) {
-                    for (let i = 0; i < PARTICLE_COUNT; i++) {
-                        const i3 = i * 3;
-                        positions[i3] += explosionVelocities[i].x;
-                        positions[i3 + 1] += explosionVelocities[i].y;
-                        positions[i3 + 2] += explosionVelocities[i].z;
-                        explosionVelocities[i].x *= 0.92;
-                        explosionVelocities[i].y *= 0.92;
-                        explosionVelocities[i].z *= 0.92;
+                const cameraUtils = new Camera(videoElement, {
+                    onFrame: async () => {
+                        try {
+                            await hands.send({
+                                image: videoElement
+                            });
+                        } catch (err) {
+                            // 静默忽略帧处理错误
+                        }
+                    },
+                    width: 640,
+                    height: 480
+                });
+
+                // 检查是否存在loader元素
+                const loader = document.getElementById('loader');
+
+                // 尝试启动摄像头，添加更健壮的错误处理
+                try {
+                    cameraUtils.start()
+                        .then(() => {
+                            if (loader) {
+                                loader.style.opacity = 0;
+                                setTimeout(() => loader.remove(), 1000);
+                            }
+                        })
+                        .catch(err => {
+                            console.error('摄像头启动错误:', err);
+                            if (loader) {
+                                loader.style.opacity = 0;
+                                setTimeout(() => loader.remove(), 1000);
+                            }
+
+                            // 直接启动备用模式，不显示警告对话框
+                            initFallbackMode();
+                        });
+                } catch (e) {
+                    console.error('初始化错误:', e);
+                    if (loader) {
+                        loader.style.display = 'none';
                     }
-                } else {
-                    for (let i = 0; i < PARTICLE_COUNT; i++) {
-                        const i3 = i * 3;
-                        const speed = 0.08 + (i % 20) * 0.002;
-                        positions[i3] += (targetPositions[i3] - positions[i3]) * speed;
-                        positions[i3 + 1] += (targetPositions[i3 + 1] - positions[i3 + 1]) * speed;
-                        positions[i3 + 2] += (targetPositions[i3 + 2] - positions[i3 + 2]) * speed;
-                    }
+                    initFallbackMode();
                 }
+            } catch (e) {
+                console.error('严重错误:', e);
+                // 确保无论如何都启动备用模式
+                initFallbackMode();
+            }
+        }
 
-                geometry.attributes.position.needsUpdate = true;
-                renderer.render(scene, camera);
+        function onHandsResults(results) {
+            let detectedGesture = 'none';
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const lm = results.multiHandLandmarks[0];
+                let fingerCount = 0;
+
+                // 简易手指计数逻辑
+                if (lm[8].y < lm[6].y) fingerCount++; // 食指
+                if (lm[12].y < lm[10].y) fingerCount++; // 中指
+                if (lm[16].y < lm[14].y) fingerCount++; // 无名指
+                if (lm[20].y < lm[18].y) fingerCount++; // 小指
+                if (Math.abs(lm[4].x - lm[0].x) > Math.abs(lm[3].x - lm[0].x)) fingerCount++; // 拇指
+
+                // --- 状态分类 (优化版) ---
+                if (fingerCount === 0) detectedGesture = 'fist';
+                else if (fingerCount === 1) detectedGesture = 'one';
+                else if (fingerCount === 2) detectedGesture = 'two';
+                // 【关键修改】 3指 被视为无操作 (死区)，防止误触
+                else if (fingerCount >= 4) detectedGesture = 'open'; // 4指或5指都算张开
             }
 
-            function onWindowResize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
+            // 防抖逻辑
+            if (detectedGesture === lastGesture) {
+                gestureFrameCount++;
+            } else {
+                gestureFrameCount = 0;
+                lastGesture = detectedGesture;
             }
-        </script><canvas data-engine="three.js r160" width="1071" height="1366"
-            style="display: block; width: 714px; height: 911px;"></canvas>
 
-        <script src="./js/hands_solution_packed_assets_loader.js"
-            crossorigin="anonymous"></script>
-        <script src="./js/hands_solution_simd_wasm_bin.js"
-            crossorigin="anonymous"></script>
-    </body>
+            if (gestureFrameCount === GESTURE_THRESHOLD) {
+                handleGestureAction(detectedGesture);
+            }
+        }
+
+        function handleGestureAction(gesture) {
+            const statusDiv = document.getElementById('hud-status');
+            if (!statusDiv) return;
+
+            switch (gesture) {
+                case 'one':
+                    statusDiv.innerText = "👆 识别：单指";
+                    statusDiv.style.color = "#00ffff";
+                    showCharacter(0);
+                    break;
+                case 'two':
+                    statusDiv.innerText = "✌️ 识别：双指";
+                    statusDiv.style.color = "#00ffff";
+                    showCharacter(1);
+                    break;
+                case 'open':
+                    statusDiv.innerText = "🖐 识别：张手";
+                    statusDiv.style.color = "#ff0044";
+                    morphToHeart();
+                    break;
+                case 'fist':
+                    statusDiv.innerText = "✊ 识别：握拳";
+                    statusDiv.style.color = "#ffaa00";
+                    explodeAndShowMsg();
+                    break;
+            }
+        }
+
+        // 备用模式：当摄像头不可用时，通过键盘控制
+        function initFallbackMode() {
+            console.log('启动备用交互模式');
+
+            // 显示备用控制提示
+            const statusDiv = document.getElementById('hud-status');
+            if (statusDiv) {
+                statusDiv.innerHTML = "⌨️ 使用键盘控制";
+                statusDiv.style.color = "#ffff00";
+            }
+
+            const detailDiv = document.getElementById('hud-detail');
+            if (detailDiv) {
+                detailDiv.innerHTML =
+                    "1键：第一个字<br>" +
+                    "2键：第二个字<br>" +
+                    "空格键：变爱心<br>" +
+                    "Enter键：爆炸表白<br>";
+            }
+
+            // 添加键盘事件监听
+            document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case '1':
+                        showCharacter(0);
+                        break;
+                    case '2':
+                        showCharacter(1);
+                        break;
+                    case ' ':
+                        morphToHeart();
+                        break;
+                    case 'Enter':
+                        explodeAndShowMsg();
+                        break;
+                }
+            });
+        }
+
+        // =========================================================
+        // 3. 动画循环 (含智能旋转逻辑)
+        // =========================================================
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+
+            const positions = geometry.attributes.position.array;
+
+            // --- 智能旋转逻辑 ---
+            if (isTextState) {
+                // 文字状态：平滑回正 + 微幅呼吸摆动
+                const targetRotation = Math.sin(Date.now() * 0.001) * 0.2;
+                particles.rotation.y += (targetRotation - particles.rotation.y) * 0.05;
+            } else {
+                // 非文字状态：全景匀速旋转
+                particles.rotation.y += 0.002;
+                particles.rotation.y = particles.rotation.y % (Math.PI * 2);
+            }
+
+            if (isExploding) {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const i3 = i * 3;
+                    positions[i3] += explosionVelocities[i].x;
+                    positions[i3 + 1] += explosionVelocities[i].y;
+                    positions[i3 + 2] += explosionVelocities[i].z;
+                    explosionVelocities[i].x *= 0.92;
+                    explosionVelocities[i].y *= 0.92;
+                    explosionVelocities[i].z *= 0.92;
+                }
+            } else {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const i3 = i * 3;
+                    const speed = 0.08 + (i % 20) * 0.002;
+                    positions[i3] += (targetPositions[i3] - positions[i3]) * speed;
+                    positions[i3 + 1] += (targetPositions[i3 + 1] - positions[i3 + 1]) * speed;
+                    positions[i3 + 2] += (targetPositions[i3 + 2] - positions[i3 + 2]) * speed;
+                }
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script><canvas data-engine="three.js r160" width="1071" height="1366"
+        style="display: block; width: 714px; height: 911px;"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands_solution_packed_assets_loader.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands_solution_simd_wasm_bin.js"
+        crossorigin="anonymous"></script>
+</body>
+
 </html>
