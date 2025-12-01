@@ -53,6 +53,17 @@ export default {
                     if (this.player && this.player.lrc) {
                         this.player.template.lrcButton.click();
                     }
+                    
+                    // 添加艺术家点击跳转到gclove.html的功能
+                    if (this.player && this.player.template) {
+                        const artistElement = this.player.template.author;
+                        if (artistElement && artistElement.textContent.includes('王俊凯')) {
+                            artistElement.style.cursor = 'pointer';
+                            artistElement.addEventListener('click', () => {
+                                window.open('/gclove.html', '_blank');
+                            });
+                        }
+                    }
                 }, 1000)
 
                 // 移除可能导致问题的可视化代码，确保播放器基本功能正常
