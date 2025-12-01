@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="<%= BASE_URL %>sakura.ico">
         <style>
             body {
                 margin: 0;
@@ -105,13 +106,13 @@
             }
         </style>
 
-        <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous">
+        <script src="./js/three.min.js"></script>
+        <script src="./js/tween.umd.js"></script>
+        <script src="./js/camera_utils.js" crossorigin="anonymous">
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous">
+        <script src="./js/control_utils.js" crossorigin="anonymous">
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+        <script src="./js/hands.js" crossorigin="anonymous"></script>
     </head>
     <div class="xl-chrome-ext-bar_4DB361DE-01F7-4376-B494-639E489D19ED"
         id="xl_chrome_ext_4DB361DE-01F7-4376-B494-639E489D19ED" data-v-app="" style="display: block;">
@@ -402,40 +403,113 @@
             // 2. AI 手势识别部分 (核心修改：移除三指逻辑)
             // =========================================================
             function initMediaPipe() {
-                const videoElement = document.getElementById('video-feed');
-                const hands = new Hands({
-                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-                });
-
-                hands.setOptions({
-                    maxNumHands: 1,
-                    modelComplexity: 1,
-                    minDetectionConfidence: 0.6,
-                    minTrackingConfidence: 0.6
-                });
-
-                hands.onResults(onHandsResults);
-
-                const cameraUtils = new Camera(videoElement, {
-                    onFrame: async () => {
-                        await hands.send({
-                            image: videoElement
-                        });
-                    },
-                    width: 640,
-                    height: 480
-                });
-
-                cameraUtils.start()
-                    .then(() => {
-                        const loader = document.getElementById('loader');
+                // 检查浏览器是否支持MediaDevices API
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.log('浏览器不支持getUserMedia API，自动启动备用模式...');
+                    
+                    // 显示不支持的提示
+                    const statusDiv = document.getElementById('hud-status');
+                    if (statusDiv) {
+                        statusDiv.innerHTML = "⌨️ 使用键盘控制";
+                        statusDiv.style.color = "#ffff00";
+                    }
+                    
+                    // 移除加载遮罩
+                    const loader = document.getElementById('loader');
+                    if (loader) {
                         loader.style.opacity = 0;
-                        setTimeout(() => loader.remove(), 1000);
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert("摄像头启动失败，请检查权限或 HTTPS 环境");
+                        setTimeout(() => loader.remove(), 500);
+                    }
+                    
+                    // 立即启动备用模式
+                    initFallbackMode();
+                    return;
+                }
+                
+                // 继续使用原有的初始化逻辑，但增加更多安全检查
+                try {
+                    const videoElement = document.getElementById('video-feed');
+                    if (!videoElement) {
+                        console.error('视频元素不存在');
+                        initFallbackMode();
+                        return;
+                    }
+                    
+                    // 确保Hands构造函数存在
+                    if (typeof Hands === 'undefined') {
+                        console.error('Hands构造函数不存在');
+                        initFallbackMode();
+                        return;
+                    }
+                    
+                    const hands = new Hands({
+                        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
                     });
+
+                    hands.setOptions({
+                        maxNumHands: 1,
+                        modelComplexity: 1,
+                        minDetectionConfidence: 0.6,
+                        minTrackingConfidence: 0.6
+                    });
+
+                    hands.onResults(onHandsResults);
+
+                    // 确保Camera构造函数存在
+                    if (typeof Camera === 'undefined') {
+                        console.error('Camera构造函数不存在');
+                        initFallbackMode();
+                        return;
+                    }
+
+                    const cameraUtils = new Camera(videoElement, {
+                        onFrame: async () => {
+                            try {
+                                await hands.send({
+                                    image: videoElement
+                                });
+                            } catch (err) {
+                                // 静默忽略帧处理错误
+                            }
+                        },
+                        width: 640,
+                        height: 480
+                    });
+
+                    // 检查是否存在loader元素
+                    const loader = document.getElementById('loader');
+                    
+                    // 尝试启动摄像头，添加更健壮的错误处理
+                    try {
+                        cameraUtils.start()
+                            .then(() => {
+                                if (loader) {
+                                    loader.style.opacity = 0;
+                                    setTimeout(() => loader.remove(), 1000);
+                                }
+                            })
+                            .catch(err => {
+                                console.error('摄像头启动错误:', err);
+                                if (loader) {
+                                    loader.style.opacity = 0;
+                                    setTimeout(() => loader.remove(), 1000);
+                                }
+                                
+                                // 直接启动备用模式，不显示警告对话框
+                                initFallbackMode();
+                            });
+                    } catch (e) {
+                        console.error('初始化错误:', e);
+                        if (loader) {
+                            loader.style.display = 'none';
+                        }
+                        initFallbackMode();
+                    }
+                } catch (e) {
+                    console.error('严重错误:', e);
+                    // 确保无论如何都启动备用模式
+                    initFallbackMode();
+                }
             }
 
             function onHandsResults(results) {
@@ -475,6 +549,7 @@
 
             function handleGestureAction(gesture) {
                 const statusDiv = document.getElementById('hud-status');
+                if (!statusDiv) return;
 
                 switch (gesture) {
                     case 'one':
@@ -487,7 +562,6 @@
                         statusDiv.style.color = "#00ffff";
                         showCharacter(1);
                         break;
-                        // 已移除 case 'three'
                     case 'open':
                         statusDiv.innerText = "🖐 识别：张手";
                         statusDiv.style.color = "#ff0044";
@@ -499,6 +573,45 @@
                         explodeAndShowMsg();
                         break;
                 }
+            }
+            
+            // 备用模式：当摄像头不可用时，通过键盘控制
+            function initFallbackMode() {
+                console.log('启动备用交互模式');
+                
+                // 显示备用控制提示
+                const statusDiv = document.getElementById('hud-status');
+                if (statusDiv) {
+                    statusDiv.innerHTML = "⌨️ 使用键盘控制";
+                    statusDiv.style.color = "#ffff00";
+                }
+                
+                const detailDiv = document.getElementById('hud-detail');
+                if (detailDiv) {
+                    detailDiv.innerHTML = 
+                        "1键：第一个字<br>" +
+                        "2键：第二个字<br>" +
+                        "空格键：变爱心<br>" +
+                        "Enter键：爆炸表白<br>";
+                }
+                
+                // 添加键盘事件监听
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case '1':
+                            showCharacter(0);
+                            break;
+                        case '2':
+                            showCharacter(1);
+                            break;
+                        case ' ':
+                            morphToHeart();
+                            break;
+                        case 'Enter':
+                            explodeAndShowMsg();
+                            break;
+                    }
+                });
             }
 
             // =========================================================
@@ -553,9 +666,9 @@
         </script><canvas data-engine="three.js r160" width="1071" height="1366"
             style="display: block; width: 714px; height: 911px;"></canvas>
 
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands_solution_packed_assets_loader.js"
+        <script src="./js/hands_solution_packed_assets_loader.js"
             crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands_solution_simd_wasm_bin.js"
+        <script src="./js/hands_solution_simd_wasm_bin.js"
             crossorigin="anonymous"></script>
     </body>
 </html>
