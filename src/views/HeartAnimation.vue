@@ -188,16 +188,16 @@ export default {
                     // 初始化标题内容为空
                     title.innerHTML = '<span></span><span style="display: block; margin-top: 10px;"></span>';
                     title.style.opacity = 1;
-                    
+
                     // 定义要显示的文本内容
                     const text1 = '我会!';
                     const text2 = '喜欢你的全部';
                     const allText = text1 + text2;
-                    
+
                     // 获取两个span元素
                     const span1 = title.querySelector('span:first-child');
                     const span2 = title.querySelector('span:last-child');
-                    
+
                     // 生成从浅粉到深粉的颜色数组
                     function generatePinkColors(count) {
                         const colors = [];
@@ -211,15 +211,15 @@ export default {
                         }
                         return colors;
                     }
-                    
+
                     const colors = generatePinkColors(allText.length);
-                    
+
                     // 打字机动画函数
                     let index1 = 0;
                     let index2 = 0;
                     let phase = 1; // 1: 正在打第一行, 2: 正在打第二行
                     let colorIndex = 0;
-                    
+
                     function typewriter() {
                         if (phase === 1) {
                             if (index1 < text1.length) {
@@ -228,7 +228,7 @@ export default {
                                 charSpan.textContent = text1.charAt(index1);
                                 charSpan.style.color = colors[colorIndex];
                                 span1.appendChild(charSpan);
-                                
+
                                 index1++;
                                 colorIndex++;
                                 setTimeout(typewriter, 100); // 每个字200ms
@@ -243,17 +243,17 @@ export default {
                                 charSpan.textContent = text2.charAt(index2);
                                 charSpan.style.color = colors[colorIndex];
                                 span2.appendChild(charSpan);
-                                
+
                                 index2++;
                                 colorIndex++;
                                 setTimeout(typewriter, 100); // 每个字200ms
                             }
                         }
                     }
-                    
+
                     // 开始打字机动画
                     typewriter();
-                    
+
                     // 隐藏提示文字，不再显示
                     const hint = document.getElementById('clickHint');
                     if (hint) {
@@ -297,6 +297,11 @@ export default {
     height: 100%;
     transform-style: preserve-3d;
     transition: transform 0.2s ease-out;
+    user-select: none;
+    /* 禁止文字被选中 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .msg {
@@ -317,6 +322,11 @@ export default {
     will-change: transform, opacity;
     background: var(--bg);
     transition: color .3s ease, text-shadow .3s ease;
+    user-select: none;
+    /* 禁止文字被选中 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 @keyframes flight {
@@ -361,6 +371,11 @@ export default {
     transition: opacity .28s ease;
     transform-origin: 0 100%;
     transform: rotate(-45deg);
+    user-select: none;
+    /* 禁止文字被选中 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .msg::after {
@@ -441,6 +456,9 @@ export default {
     cursor: pointer;
     animation: titlePulse 2s ease-in-out infinite;
     user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .center-title:hover {

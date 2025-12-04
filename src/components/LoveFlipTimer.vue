@@ -1,9 +1,5 @@
 <template>
   <div class="love-flip-timer">
-    <div id="loading-screen" :class="{ hidden: isLoaded }">
-      <!-- 加载屏幕 -->
-    </div>
-
     <div class="overlay-div">
       <div class="overlay-text">我们相恋了</div>
       <div class="clock-container">
@@ -343,7 +339,11 @@ export default {
       // 当前图片索引（用于轮流显示）
       currentImageIndex: 0,
       // 起始日期显示
-      startDate: '2023.10.27 18:30'
+      startDate: '2023.10.27 18:30',
+      // 自动滚动控制
+      isAutoScrolling: false,
+      isAtBottom: false,
+      lastMouseY: 0 // 用于检测鼠标移动方向
     };
   },
   mounted() {
@@ -355,6 +355,9 @@ export default {
       
       // 添加鼠标滚轮事件监听
       this.addWheelListeners();
+      
+      // 添加鼠标移动事件监听（用于检测向上移动）
+      document.addEventListener('mousemove', this.handleMouseMove);
       
       // 添加页面可见性变化监听
       document.addEventListener('visibilitychange', this.handleVisibilityChange);
@@ -369,6 +372,9 @@ export default {
       
       // 移除鼠标滚轮事件监听
       this.removeWheelListeners();
+      
+      // 移除鼠标移动事件监听
+      document.removeEventListener('mousemove', this.handleMouseMove);
       
       // 移除页面可见性变化监听
       document.removeEventListener('visibilitychange', this.handleVisibilityChange);
@@ -498,7 +504,7 @@ export default {
     resumeAnimations() {
       this.startTimer();
       if (this.isLoaded) {
-        this.autoScroll();
+        this.startAutoScroll();
       }
     },
 
@@ -528,8 +534,8 @@ export default {
       if (this.loadedImages === this.totalImages) {
         setTimeout(() => {
           this.isLoaded = true;
-          this.autoScroll();
-        }, 500);
+          this.startAutoScroll(); // 启动自动滚动
+        }, 1000);
       }
     },
 
@@ -581,6 +587,15 @@ export default {
       const gallery = this.$refs.imagesGallery;
       if (gallery) {
         gallery.scrollTop = this.scrollPosition;
+        
+        // 如果用户向上滚动，重置底部状态并可能重启自动滚动
+        if (scrollDirection < 0) {
+          this.isAtBottom = false;
+          // 如果自动滚动已停止，可以选择自动重启
+          if (!this.isAutoScrolling) {
+            this.startAutoScroll();
+          }
+        }
       }
       
       // 检查是否需要加载更多图片
@@ -649,20 +664,77 @@ export default {
     
     // 自动滚动
     autoScroll() {
-      if (!this.isLoaded || document.hidden) return;
+      if (!this.isLoaded || document.hidden || !this.isAutoScrolling) return;
 
       this.checkColumns();
       // 定期清理离开视口过远的元素
       this.manageColumnElements();
       
+      const gallery = this.$refs.imagesGallery;
+      if (!gallery) return;
+      
+      // 检查是否已滚动到底部
+      if (gallery.scrollTop + gallery.clientHeight >= gallery.scrollHeight - 10) {
+        // 滚动到底部，停止自动滚动
+        this.isAtBottom = true;
+        this.stopAutoScroll();
+        return;
+      }
+      
       // 使用固定的自动滚动速度
       this.scrollPosition += this.autoScrollSpeed;
-      const gallery = this.$refs.imagesGallery;
-      if (gallery) {
-        gallery.scrollTop = this.scrollPosition;
-      }
+      gallery.scrollTop = this.scrollPosition;
 
       this.animationId = requestAnimationFrame(() => this.autoScroll());
+    },
+    
+    // 启动自动滚动
+    startAutoScroll() {
+      if (this.isAutoScrolling) return;
+      
+      this.isAutoScrolling = true;
+      this.isAtBottom = false;
+      
+      // 清除之前的动画
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+        this.animationId = null;
+      }
+      
+      this.autoScroll();
+    },
+    
+    // 停止自动滚动
+    stopAutoScroll() {
+      this.isAutoScrolling = false;
+      
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+        this.animationId = null;
+      }
+    },
+    
+    // 处理鼠标移动事件，检测向上移动
+    handleMouseMove(event) {
+      const gallery = this.$refs.imagesGallery;
+      if (!gallery) return;
+      
+      // 只有当鼠标在图片画廊区域内移动时才检测
+      const galleryRect = gallery.getBoundingClientRect();
+      if (event.clientX >= galleryRect.left && event.clientX <= galleryRect.right &&
+          event.clientY >= galleryRect.top && event.clientY <= galleryRect.bottom) {
+        
+        // 检测鼠标是否向上移动
+        if (event.clientY < this.lastMouseY) {
+          // 鼠标向上移动，并且当前处于底部停止状态
+          if (this.isAtBottom) {
+            this.startAutoScroll();
+          }
+        }
+        
+        // 更新上次鼠标Y位置
+        this.lastMouseY = event.clientY;
+      }
     }
   }
 };
@@ -676,6 +748,10 @@ export default {
   height: 100vh;
   font-family: 'romantic', sans-serif;
   overflow: hidden;
+    user-select: none; /* 禁止文字被选中 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 @font-face {
@@ -684,32 +760,6 @@ export default {
   font-weight: normal;
   font-style: normal;
 }
-
-/* 加载屏幕 */
-#loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
-  /* 纯白背景 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 2rem;
-  font-weight: bold;
-  color: black;
-  z-index: 9999;
-  transition: opacity 1s ease-out, visibility 1s ease-out;
-}
-
-#loading-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
-
 
 /* 覆盖层 */
 .overlay-div {
@@ -726,6 +776,10 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+    user-select: none; /* 禁止文字被选中 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .overlay-text {
@@ -737,6 +791,10 @@ export default {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    user-select: none; /* 禁止文字被选中 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .start-date {
@@ -747,6 +805,10 @@ export default {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    user-select: none; /* 禁止文字被选中 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* 翻页倒计时样式 */
@@ -764,7 +826,7 @@ export default {
 }
 
 .unit {
-  font-size: 20px;
+  font-size: 30px;
   font-weight: bold;
   color: #ffffff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);

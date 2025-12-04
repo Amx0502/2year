@@ -665,7 +665,7 @@ export default {
         setTimeout(() => {
           clockBox.style.transition = 'opacity 0.5s';
           clockBox.style.opacity = '1';
-        }, 10);
+        }, 100);
 
         // 设置时钟定时器
         const together = new Date();
@@ -696,7 +696,7 @@ export default {
         if (progress >= str.length) {
           clearInterval(timer);
         }
-      }, 75);
+      }, 100);
     },
     timeElapse(date) {
       const current = new Date();
@@ -794,6 +794,10 @@ export default {
 
 #code {
   display: none;
+  user-select: none; /* 禁止文字被选中 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 #clock-box {

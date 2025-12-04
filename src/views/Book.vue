@@ -329,6 +329,11 @@ export default {
     font-family: 'Write', cursive, 'Comic Sans MS', sans-serif;
     transition: all 0.2s ease;
     z-index: 1;
+    user-select: none;
+    /* 禁止文字被选中 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
 
   .prev-btn:hover,
