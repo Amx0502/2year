@@ -16,7 +16,7 @@ export default {
   name: 'Say',
   data() {
     return {
-      videoSrc1: '/image/six-↑.mp4',
+      videoSrc1: '/image/nineteen-↑.mp4',
       videoSrc2: '/image/say2.mp4',
     }
   },
