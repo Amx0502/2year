@@ -9,6 +9,10 @@
       <div class="box" :style="textStyle">
         {{ anniversaryText }}
       </div>
+      <!-- 新文字展示区域 -->
+      <div v-if="showNewText" class="new-text" :style="newTextStyle">
+        {{ newText }}
+      </div>
     </div>
 
   </div>
@@ -43,6 +47,7 @@ export default {
       textBlur: 20,
       handwritingProgress: 0,
       heartbeatTimer: null,
+      textOpacity: 0, // 添加文本透明度属性
 
       // 鼠标位置用于视差效果
       mouseX: 0,
@@ -53,6 +58,18 @@ export default {
       // 互动状态
       isHovering: false,
       lastInteractionTime: 0,
+      
+      // 连续点击检测相关
+      clickCount: 0,
+      lastClickTime: 0,
+      clickTimeout: null,
+      clickInterval: 500, // 两次点击之间的最大间隔时间
+      
+      // 新文字展示相关
+      showNewText: false,
+      newText: 'XAM LOVE ZSY',
+      newTextOpacity: 0,
+      newTextScale: 0.8,
       settings: {
         particles: {
           length: 500, // maximum amount of particles
@@ -139,11 +156,55 @@ export default {
         transition: 'transform 0.1s ease'
       };
     },
+    
+    // 新文字的样式
+    newTextStyle() {
+      return {
+        opacity: this.newTextOpacity,
+        transform: `scale(${this.newTextScale})`,
+        textShadow: `0 0 10px rgba(255, 160, 176, 0.8), 0 0 20px rgba(255, 160, 176, 0.6), 0 0 30px rgba(255, 160, 176, 0.4)`,
+        transition: 'all 0.3s ease'
+      };
+    }
 
   },
   methods: {
 
     handleClick() {
+      // 连续三次点击检测逻辑
+      const currentTime = Date.now();
+      
+      // 清除之前的点击超时定时器
+      if (this.clickTimeout) {
+        clearTimeout(this.clickTimeout);
+      }
+      
+      // 如果两次点击间隔小于指定时间，增加点击计数
+      if (currentTime - this.lastClickTime < this.clickInterval) {
+        this.clickCount++;
+      } else {
+        // 否则重置点击计数
+        this.clickCount = 1;
+      }
+      
+      // 更新最后点击时间
+      this.lastClickTime = currentTime;
+      
+      // 设置新的点击超时定时器
+      this.clickTimeout = setTimeout(() => {
+        this.clickCount = 0;
+      }, this.clickInterval);
+      
+      // 如果连续点击了三次
+      if (this.clickCount === 3) {
+        // 执行交互功能
+        this.triggerSpecialEffect();
+        this.clickCount = 0; // 重置点击计数
+      }
+    },
+    
+    // 触发特殊效果：移除粒子并显示新文字
+    triggerSpecialEffect() {
       // 清除动画定时器
       if (this.heartbeatTimer) {
         clearInterval(this.heartbeatTimer);
@@ -153,27 +214,93 @@ export default {
         cancelAnimationFrame(this.textAnimationId);
         this.textAnimationId = null;
       }
-
-      const video = this.$refs.video;
-      if (video) {
-        // 显示并播放视频
-        video.style.display = 'block';
-        video.currentTime = 0;
-        video.play();
-
-        // 隐藏其他元素
-        const canvas = this.$refs.canvas;
-        const sparkleCanvas = this.$refs.sparkleCanvas;
-        const box = this.$el.querySelector('.box');
-        if (canvas) canvas.style.display = 'none';
-        if (sparkleCanvas) sparkleCanvas.style.display = 'none';
-        if (box) box.style.display = 'none';
-
-        // 3秒后跳转到About页面
-        setTimeout(() => {
-          this.$router.push('/about');
-        }, 3000);
+      
+      // 平滑移除粒子效果
+      this.smoothRemoveParticles();
+    },
+    
+    // 平滑移除粒子效果
+    smoothRemoveParticles() {
+      // 停止生成新粒子
+      this.particleRate = 0;
+      
+      // 让现有粒子逐渐消失
+      const fadeOutStartTime = Date.now();
+      const fadeOutDuration = 1500; // 1.5秒淡出
+      
+      const fadeOutParticles = () => {
+        const elapsed = Date.now() - fadeOutStartTime;
+        const progress = Math.min(elapsed / fadeOutDuration, 1);
+        
+        // 逐渐降低所有粒子的透明度
+        if (this.particles) {
+          // 降低闪光粒子的透明度
+          for (let i = 0; i < this.sparkleParticles.length; i++) {
+            this.sparkleParticles[i].opacity *= 0.98;
+          }
+        }
+        
+        if (progress < 1) {
+          requestAnimationFrame(fadeOutParticles);
+        } else {
+          // 完全移除粒子
+          this.removeParticlesCompletely();
+        }
+      };
+      
+      fadeOutParticles();
+    },
+    
+    // 完全移除粒子
+    removeParticlesCompletely() {
+      // 停止粒子动画
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+        this.animationId = null;
       }
+      if (this.sparkleAnimationId) {
+        cancelAnimationFrame(this.sparkleAnimationId);
+        this.sparkleAnimationId = null;
+      }
+      
+      // 清空画布
+      if (this.context && this.$refs.canvas) {
+        this.context.clearRect(0, 0, this.$refs.canvas.width, this.$refs.canvas.height);
+      }
+      if (this.sparkleContext && this.$refs.sparkleCanvas) {
+        this.sparkleContext.clearRect(0, 0, this.$refs.sparkleCanvas.width, this.$refs.sparkleCanvas.height);
+      }
+      
+      // 隐藏"怡"字
+      this.textOpacity = 0;
+      
+      // 显示新文字
+      this.showNewText = true;
+      this.animateNewText();
+    },
+    
+    // 新文字渐显动画
+    animateNewText() {
+      const startTime = Date.now();
+      const duration = 2000; // 2秒渐显
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // 使用缓动函数让动画更自然
+        const easeProgress = this.easeInOutCubic(progress);
+        
+        // 更新新文字的透明度和缩放
+        this.newTextOpacity = easeProgress;
+        this.newTextScale = 0.4 + (easeProgress * 0.4); // 从0.8缩放到1.2
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      animate();
     },
     initSparkleEffect() {
       const sparkleCanvas = this.$refs.sparkleCanvas;
@@ -641,6 +768,31 @@ export default {
   z-index: 10;
   text-align: center;
   position: absolute;
+  user-select: none; /* 禁止文字被选中 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 新文字样式 */
+.new-text {
+  color: #ffb6c1;
+  font-size: 6rem;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  z-index: 15;
+  text-align: center;
+  position: absolute;
+  background: linear-gradient(45deg, #ffb6c1, #ff69b4, #ff1493);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.2rem;
+  white-space: nowrap;
+  user-select: none; /* 禁止文字被选中 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* GIF边框容器 */
