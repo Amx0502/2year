@@ -27,6 +27,8 @@
         <letter8_15 />
         <letter9_16 />
         <letter10_17 />
+        <CatBlack_18 />
+        <CatWhite_18 />
         <Say2_18 />
         <div class="good_19"></div>
         <ToBeContinue_20 />
@@ -66,6 +68,8 @@ import letter7_14 from './letter/letter-7-E.vue'
 import letter8_15 from './letter/letter-8-Z.vue'
 import letter9_16 from './letter/letter-9-S.vue'
 import letter10_17 from './letter/letter-10-Y.vue'
+import CatBlack_18 from './cat-black.vue'
+import CatWhite_18 from './cat-white.vue'
 import Say2_18 from './say2.vue'
 import ToBeContinue_20 from './To be continue.vue'
 import love_21 from './love.vue'
@@ -91,6 +95,8 @@ export default {
     letter8_15,
     letter9_16,
     letter10_17,
+    CatBlack_18,
+    CatWhite_18,
     Say2_18,
     ToBeContinue_20,
     love_21,
