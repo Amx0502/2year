@@ -1,7 +1,7 @@
 <template>
   <div class="four-container">
     <div class="image-container">
-      <video ref="firstVideo" class="top-image" :src="videoSrc1" autoplay muted @ended="handleFirstVideoEnded"></video>
+      <video ref="firstVideo" class="top-image" :src="videoSrc1" autoplay muted loop></video>
     </div>
   </div>
 </template>
@@ -15,13 +15,7 @@ export default {
     }
   },
   methods: {
-    handleFirstVideoEnded() {
-      // First video ended, start playing the second video
-      const secondVideo = this.$refs.sayVideo;
-      if (secondVideo) {
-        secondVideo.play();
-      }
-    },
+    // 视频已设置loop属性，无需额外处理
   }
 }
 </script>
@@ -29,34 +23,16 @@ export default {
 <style scoped>
 .four-container {
   display: flex;
-  height: 100vh;
-  background-color: #fcfafc;
+  background-color: #0d97ed;
 }
 
 .image-container {
   width: 100%;
   display: flex;
-  align-items: center;
 }
 
 .top-image {
   width: 100%;
   height: 100%;
-}
-
-.video-container {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.background-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  margin-right: 3px;
 }
 </style>
