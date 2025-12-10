@@ -267,7 +267,7 @@ export default {
       overflow: hidden;
     }
 
-    .good_19 {
+    .good_21 {
       width: 100%;
       height: 100%;
       background-color: #f5f5f5;
