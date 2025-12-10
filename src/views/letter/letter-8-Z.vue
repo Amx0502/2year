@@ -62,6 +62,8 @@ export default {
   },
   mounted() {
     this.loadLoveFont()
+    // 从localStorage加载保存的输入内容
+    this.loadSavedInput()
     // 先初始化绘制Z动画Canvas
     this.$nextTick(() => {
       this.initDrawZCanvas()
@@ -452,6 +454,39 @@ export default {
       // 更新textLines中的原始数据，确保数据一致性
       if (this.textLines[index] && this.textLines[index].isInput) {
         this.textLines[index].text = event.target.value
+        // 保存到localStorage
+        this.saveInputToLocalStorage()
+      }
+    },
+    
+    // 从localStorage加载保存的输入内容
+    loadSavedInput() {
+      try {
+        const savedInput = localStorage.getItem(this.localStorageKey)
+        if (savedInput) {
+          const parsedInput = JSON.parse(savedInput)
+          // 查找isInput为true的行并更新文本
+          this.textLines.forEach((line, index) => {
+            if (line.isInput && parsedInput[index] !== undefined) {
+              this.textLines[index].text = parsedInput[index]
+            }
+          })
+        }
+      } catch (error) {
+        console.error('加载保存的输入内容失败:', error)
+      }
+    },
+    
+    // 保存输入内容到localStorage
+    saveInputToLocalStorage() {
+      try {
+        // 只保存isInput为true的行的文本
+        const inputData = this.textLines.map(line => {
+          return line.isInput ? line.text : null
+        })
+        localStorage.setItem(this.localStorageKey, JSON.stringify(inputData))
+      } catch (error) {
+        console.error('保存输入内容失败:', error)
       }
     },
     
@@ -484,13 +519,22 @@ export default {
         // 复制所有属性，包括样式属性
         this.displayedTextLines.push({
           ...currentLine,
-          text: '',
+          text: currentLine.isInput ? currentLine.text : '', // 如果是输入框且有保存的内容，直接显示
           fontSize: currentLine.fontSize,
           marginTop: currentLine.marginTop,
           marginBottom: currentLine.marginBottom,
           paddingLeft: currentLine.paddingLeft,
           paddingRight: currentLine.paddingRight
         })
+      }
+
+      // 如果是输入框，直接显示完整内容并跳过打字动画
+      if (currentLine.isInput) {
+        this.displayedTextLines[this.currentLineIndex].text = currentLine.text
+        this.currentLineIndex++
+        this.currentCharIndex = 0
+        this.typingTimer = setTimeout(() => this.startTypingAnimation(), this.lineDelay)
+        return
       }
 
       if (this.currentCharIndex < currentLine.text.length) {

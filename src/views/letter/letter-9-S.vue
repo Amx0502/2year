@@ -35,7 +35,7 @@ export default {
         { text: "top2是与你共同经历的属于我们的第一次。", speaker: "我说", fontSize: '23px', marginTop: '15px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "哈哈哈哈哈哈哈比如？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "比如，一起爬山，玩密室、剧本杀，一起DIY，一起去游乐场等等。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
-        { text: "我还想和你去做更多更多幸福有意义的事情，想一起去海边看日出，一起去旅游，一起穿情侣衣——想把生活里每一个没经历过的瞬间，都变成和你有关的”第一次“。", speaker: "我", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
+        { text: "我还想和你去做更多更多幸福有意义的事情，想一起去海边看日出，一起去旅游，一起穿情侣装——想把生活里每一个没经历过的瞬间，都变成和你有关的”第一次“。", speaker: "我", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
         { text: "我也是！", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '40px', paddingRight: '0px' },
       ],
       displayedTextLines: [],
