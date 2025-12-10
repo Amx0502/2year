@@ -256,6 +256,7 @@ const photoUrls = [
   '/video/4.mp4',
   '/video/5.mp4',
   '/video/6.mp4',
+  '/video/7.mp4',
 ];
 
 
