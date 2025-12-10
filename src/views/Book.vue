@@ -28,12 +28,12 @@
         <letter9_16 />
         <letter10_17 />
         <CatBlack_18 />
-        <CatWhite_18 />
-        <Say2_18 />
-        <div class="good_19"></div>
-        <ToBeContinue_20 />
-        <love_21 />
-        <InTheEnd_22 />
+        <CatWhite_19 />
+        <Say2_20 />
+        <div class="good_21"></div>
+        <ToBeContinue_22 />
+        <love_23 />
+        <InTheEnd_24 />
         <!-- <div v-for="n in 1" :key="n" class="blank-page"></div> -->
       </div>
     </div>
@@ -69,11 +69,11 @@ import letter8_15 from './letter/letter-8-Z.vue'
 import letter9_16 from './letter/letter-9-S.vue'
 import letter10_17 from './letter/letter-10-Y.vue'
 import CatBlack_18 from './cat-black.vue'
-import CatWhite_18 from './cat-white.vue'
-import Say2_18 from './say2.vue'
-import ToBeContinue_20 from './To be continue.vue'
-import love_21 from './love.vue'
-import InTheEnd_22 from './In the end.vue'
+import CatWhite_19 from './cat-white.vue'
+import Say2_20 from './say2.vue'
+import ToBeContinue_22 from './To be continue.vue'
+import love_23 from './love.vue'
+import InTheEnd_24 from './In the end.vue'
 
 import MusicPlayer from '@/components/MusicPlayer.vue'
 
@@ -96,11 +96,11 @@ export default {
     letter9_16,
     letter10_17,
     CatBlack_18,
-    CatWhite_18,
-    Say2_18,
-    ToBeContinue_20,
-    love_21,
-    InTheEnd_22,
+    CatWhite_19,
+    Say2_20,
+    ToBeContinue_22,
+    love_23,
+    InTheEnd_24,
 
     MusicPlayer
   },
