@@ -41,8 +41,42 @@
       第 {{ currentPage }} / {{ totalPages }} 页
     </div>
     <div class="navigation-buttons">
-      <button class="prev-btn" @click="goToPreviousPage">上一页</button>
-      <button class="next-btn" @click="goToNextPage">下一页</button>
+      <button class="prev-btn" @click="goToPreviousPage">
+        上一页
+        <div class="heart1">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
+          </svg>
+        </div>
+        <div class="heart2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
+          </svg>
+        </div>
+        <div class="heart3">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
+          </svg>
+        </div>
+      </button>
+      <button class="next-btn" @click="goToNextPage">
+        下一页
+        <div class="heart1">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
+          </svg>
+        </div>
+        <div class="heart2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
+          </svg>
+        </div>
+        <div class="heart3">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
+          </svg>
+        </div>
+      </button>
     </div>
     <MusicPlayer />
   </div>
@@ -314,27 +348,27 @@ export default {
     justify-content: center;
     align-items: center;
     margin-top: 20px;
-    gap: 30px;
-    width: 300px;
+    gap: 50px;
+    width: 100%;
     z-index: 100;
   }
 
   .prev-btn,
   .next-btn {
-    width: 100px;
-    height: 40px;
-    background: transparent;
-    color: #ffffff;
-    border: 2px solid #5d4037;
+    font-size: 2.2rem;
+    padding: 0.7rem 2.4rem;
+    letter-spacing: .3rem;
+    border-radius: 1.5rem;
+    background-color: transparent;
+    color: rgb(255, 255, 255);
+    border: none;
+    text-shadow: 0 0 3px #ffc0cb;
+    overflow: hidden;
     cursor: pointer;
-    font-size: 20px;
-    border-radius: 8px;
-    position: relative;
-    transform: rotate(-1deg);
-    box-shadow: 3px 3px 0 #5d4037;
+    transition: 0.7s;
+    z-index: 2;
     font-family: 'Write', cursive, 'Comic Sans MS', sans-serif;
-    transition: all 0.2s ease;
-    z-index: 1;
+    font-weight: bold;
     user-select: none;
     /* 禁止文字被选中 */
     -webkit-user-select: none;
@@ -342,42 +376,81 @@ export default {
     -ms-user-select: none;
   }
 
-  .prev-btn:hover,
-  .next-btn:hover {
-    transform: rotate(0deg) translateY(-0.5px);
-    box-shadow: 4px 4px 0 #5d4037;
-  }
-
-  .prev-btn:active,
-  .next-btn:active {
-    transform: rotate(0deg) translateY(0);
-    box-shadow: 1px 1px 0 #5d4037;
-  }
-
-  .prev-btn::before,
-  .next-btn::before {
-    content: '';
+  .prev-btn .heart1 svg,
+  .next-btn .heart1 svg,
+  .prev-btn .heart2 svg,
+  .next-btn .heart2 svg,
+  .prev-btn .heart3 svg,
+  .next-btn .heart3 svg {
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    opacity: 0;
+    fill: rgb(255, 0, 43);
+    stroke: none;
+    transition: 0.7s;
+    animation: moveHeart 5s ease-in-out infinite alternate-reverse;
+  }
+
+  .prev-btn .heart1 svg,
+  .next-btn .heart1 svg {
+    left: 4.5rem;
+    top: 1.8rem;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .prev-btn .heart2 svg,
+  .next-btn .heart2 svg {
+    left: 0.8rem;
+    top: 0.3rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    transform: rotate(-20deg);
+  }
+
+  .prev-btn .heart3 svg,
+  .next-btn .heart3 svg {
+    right: 1rem;
+    top: 0.5rem;
+    width: 1.4rem;
+    height: 1.4rem;
+    transform: rotate(20deg);
+    z-index: -1;
+  }
+
+  @keyframes moveHeart {
+    0% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .prev-btn:hover .heart1 svg,
+  .next-btn:hover .heart1 svg,
+  .prev-btn:hover .heart2 svg,
+  .next-btn:hover .heart2 svg,
+  .prev-btn:hover .heart3 svg,
+  .next-btn:hover .heart3 svg {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px #ff6e6e);
   }
 
   .prev-btn:hover,
   .next-btn:hover {
-    box-shadow: 0 8px 16px rgba(238, 90, 111, 0.5);
-  }
-
-  .prev-btn:hover::before,
-  .next-btn:hover::before {
-    left: 100%;
+    color: rgb(255, 255, 255);
+    box-shadow: 0 0 10px inset #ff002b;
+    scale: 105%;
   }
 
   .prev-btn:active,
   .next-btn:active {
-    box-shadow: 0 2px 4px rgba(238, 90, 111, 0.3);
+    scale: 100%;
   }
 
   .page-info {
