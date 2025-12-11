@@ -365,9 +365,16 @@ turnMethods = {
             left -= size.width/4;
         }
       
+      } else {
+        // 单页模式下始终居中
+        left = 0;
       }
 
-      $(this).css({marginLeft: left});
+      // 添加平滑过渡效果
+      $(this).css({
+        marginLeft: left,
+        transition: 'margin-left ' + data.opts.duration + 'ms ease-in-out'
+      });
     }
 
     return this;
@@ -857,6 +864,10 @@ turnMethods = {
         turnMethods._movePages.call(this, 1, 0);
         this.turn('size', size.width, size.height).
           turn('update');
+        // 切换显示模式后重新居中页面，确保页面不会偏移
+        if (data.opts.autoCenter) {
+          this.turn('center');
+        }
       }
 
       return this;
@@ -1244,6 +1255,7 @@ turnMethods = {
 
     }
 
+    // 修复：在计算当前页和下一页时，考虑显示模式可能会在翻页过程中改变
     if (data.display=='single') {
       current = view[0];
       next = newView[0];
@@ -1252,7 +1264,8 @@ turnMethods = {
       next = newView[0];
     } else if (view[0] && page<view[0]) {
       current = view[0];
-      next = newView[1];
+      // 修复：当可能切换到单页模式时，确保next不是undefined
+      next = newView[1] || newView[0];
     }
 
     var optsCorners = data.opts.turnCorners.split(','),
@@ -1474,7 +1487,17 @@ turnMethods = {
       if (tpage==opts.next || tpage==opts.page) {
         delete dd.tpage;
 
+        // 修复：在调用_fitPage前确保页面位置正确，避免从双页到单页切换时页面偏移
+        if (dd.display=='single') {
+          // 单页模式下确保下一页不是undefined
+          tpage = tpage || opts.next || opts.page;
+        }
         turnMethods._fitPage.call(turn, tpage || opts.next, true);
+        
+        // 翻页完成后移除过渡效果
+        setTimeout(function() {
+          turn.css({transition: 'none'});
+        }, 0);
       }
 
     } else {
@@ -1482,6 +1505,9 @@ turnMethods = {
       turnMethods._removeMv.call(turn, opts.page);
       turnMethods._updateShadow.call(turn);
       turn.turn('update');
+      
+      // 翻页取消后移除过渡效果
+      turn.css({transition: 'none'});
 
     }
     
