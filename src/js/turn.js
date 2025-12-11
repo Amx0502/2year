@@ -1183,7 +1183,7 @@ turnMethods = {
 
   // Sets a page without effect
 
-  _fitPage: function(page) {
+  _fitPage: function(page, noCenter) {
 
     var data = this.data(),
       newView = this.turn('view', page);
@@ -1218,7 +1218,8 @@ turnMethods = {
     this.trigger('turned', [page, newView]);
     this.turn('update');
 
-    if (data.opts.autoCenter)
+    // 只有在noCenter不为true时才调用center方法
+    if (data.opts.autoCenter && !noCenter)
       this.turn('center');
 
   },
@@ -1292,6 +1293,11 @@ turnMethods = {
     }
 
     this.turn('update');
+
+    // 在翻页动画开始前进行居中，使两个动画同步进行
+    if (data.opts.autoCenter) {
+      this.turn('center');
+    }
 
     flipData.point = actualPoint;
     
