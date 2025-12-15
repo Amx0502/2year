@@ -257,6 +257,7 @@ const photoUrls = [
   '/video/5.mp4',
   '/video/6.mp4',
   '/video/7.mp4',
+  '/video/8.mp4',
 ];
 
 
@@ -344,7 +345,10 @@ export default {
       // 自动滚动控制
       isAutoScrolling: false,
       isAtBottom: false,
-      lastMouseY: 0 // 用于检测鼠标移动方向
+      lastMouseY: 0, // 用于检测鼠标移动方向
+      // 触摸相关变量
+      startY: 0,
+      isTouching: false
     };
   },
   mounted() {
@@ -356,6 +360,9 @@ export default {
       
       // 添加鼠标滚轮事件监听
       this.addWheelListeners();
+      
+      // 添加触摸事件监听
+      this.addTouchListeners();
       
       // 添加鼠标移动事件监听（用于检测向上移动）
       document.addEventListener('mousemove', this.handleMouseMove);
@@ -373,6 +380,9 @@ export default {
       
       // 移除鼠标滚轮事件监听
       this.removeWheelListeners();
+      
+      // 移除触摸事件监听
+      this.removeTouchListeners();
       
       // 移除鼠标移动事件监听
       document.removeEventListener('mousemove', this.handleMouseMove);
@@ -661,6 +671,86 @@ export default {
         gallery.removeEventListener('wheel', this.handleWheel);
       }
       window.removeEventListener('wheel', this.handleWheel);
+    },
+    
+    // 添加触摸事件监听
+    addTouchListeners() {
+      const gallery = this.$refs.imagesGallery;
+      if (gallery) {
+        gallery.addEventListener('touchstart', this.handleTouchStart, { passive: true });
+        gallery.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+        gallery.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+      }
+    },
+    
+    // 移除触摸事件监听
+    removeTouchListeners() {
+      const gallery = this.$refs.imagesGallery;
+      if (gallery) {
+        gallery.removeEventListener('touchstart', this.handleTouchStart);
+        gallery.removeEventListener('touchmove', this.handleTouchMove);
+        gallery.removeEventListener('touchend', this.handleTouchEnd);
+      }
+    },
+    
+    // 处理触摸开始事件
+    handleTouchStart(event) {
+      // 记录触摸开始位置
+      this.startY = event.touches[0].clientY;
+      this.isTouching = true;
+      
+      // 如果正在自动滚动，停止它
+      if (this.isAutoScrolling) {
+        this.stopAutoScroll();
+      }
+    },
+    
+    // 处理触摸移动事件
+    handleTouchMove(event) {
+      if (!this.isTouching) return;
+      
+      // 阻止默认滚动行为
+      event.preventDefault();
+      
+      // 计算触摸移动距离
+      const currentY = event.touches[0].clientY;
+      const deltaY = currentY - this.startY;
+      
+      // 定义滚动步长系数
+      const touchScrollFactor = 1.2; // 触摸滑动灵敏度
+      
+      // 调整滚动位置（与触摸方向相反）
+      this.scrollPosition -= deltaY * touchScrollFactor;
+      
+      // 确保滚动位置不会小于0
+      this.scrollPosition = Math.max(0, this.scrollPosition);
+      
+      // 应用滚动位置
+      const gallery = this.$refs.imagesGallery;
+      if (gallery) {
+        gallery.scrollTop = this.scrollPosition;
+        
+        // 如果用户向上滚动（deltaY < 0），重置底部状态
+        if (deltaY < 0) {
+          this.isAtBottom = false;
+        }
+      }
+      
+      // 更新触摸开始位置
+      this.startY = currentY;
+      
+      // 检查是否需要加载更多图片
+      this.checkColumns();
+    },
+    
+    // 处理触摸结束事件
+    handleTouchEnd() {
+      this.isTouching = false;
+      
+      // 如果触摸结束后不是在底部，可以选择重启自动滚动
+      if (!this.isAtBottom && this.isLoaded) {
+        this.startAutoScroll();
+      }
     },
     
     // 自动滚动
