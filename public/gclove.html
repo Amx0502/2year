@@ -368,8 +368,28 @@
 
                 setTimeout(() => {
                     const msg = document.getElementById('input-msg').value;
-                    morphTo(getTextPositions(msg, 60), 0xff88aa, true);
+                    // 响应式字体大小：手机端40，平板端50，电脑端60
+                    const fontSize = getResponsiveFontSize();
+                    morphTo(getTextPositions(msg, fontSize), 0xff88aa, true);
                 }, 1200);
+            }
+            
+            // 获取响应式字体大小
+            function getResponsiveFontSize() {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                const minDimension = Math.min(width, height);
+                
+                // 根据屏幕最小边长决定字体大小
+                if (minDimension < 400) {
+                    return 35; // 小屏手机
+                } else if (minDimension < 600) {
+                    return 45; // 大屏手机
+                } else if (minDimension < 900) {
+                    return 55; // 平板
+                } else {
+                    return 65; // 电脑大屏
+                }
             }
 
             // =========================================================
@@ -453,27 +473,50 @@
                 }
             }
             
-            // 备用模式：当摄像头不可用时，通过键盘控制
+            // 备用模式：当摄像头不可用时，通过键盘或触摸控制
             function initFallbackMode() {
                 console.log('启动备用交互模式');
                 
+                // 检测是否为触摸设备
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                
                 // 显示备用控制提示
                 const statusDiv = document.getElementById('hud-status');
-                if (statusDiv) {
-                    statusDiv.innerHTML = "⌨️ 使用键盘控制";
-                    statusDiv.style.color = "#ffff00";
-                }
-                
                 const detailDiv = document.getElementById('hud-detail');
-                if (detailDiv) {
-                    detailDiv.innerHTML = 
-                        "1键：第一个字<br>" +
-                        "2键：第二个字<br>" +
-                        "空格键：变爱心<br>" +
-                        "Enter键：爆炸表白<br>";
-                }
                 
-                // 添加键盘事件监听
+                if (isTouchDevice) {
+                    // 手机/平板触摸控制
+                    if (statusDiv) {
+                        statusDiv.innerHTML = "👆 点击屏幕控制";
+                        statusDiv.style.color = "#ffff00";
+                    }
+                    if (detailDiv) {
+                        detailDiv.innerHTML = 
+                            "👆 单击：第一个字<br>" +
+                            "👆👆 双击：第二个字<br>" +
+                            "👆 长按：变爱心<br>" +
+                            "✌️ 双指长按：爆炸表白<br>";
+                    }
+                    initTouchControls();
+                } else {
+                    // 电脑键盘控制
+                    if (statusDiv) {
+                        statusDiv.innerHTML = "⌨️ 使用键盘控制";
+                        statusDiv.style.color = "#ffff00";
+                    }
+                    if (detailDiv) {
+                        detailDiv.innerHTML = 
+                            "1键：第一个字<br>" +
+                            "2键：第二个字<br>" +
+                            "空格键：变爱心<br>" +
+                            "Enter键：爆炸表白<br>";
+                    }
+                    initKeyboardControls();
+                }
+            }
+            
+            // 键盘控制
+            function initKeyboardControls() {
                 document.addEventListener('keydown', (e) => {
                     switch(e.key) {
                         case '1':
@@ -490,6 +533,119 @@
                             break;
                     }
                 });
+            }
+            
+            // 触摸控制
+            function initTouchControls() {
+                let touchStartTime = 0;
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let longPressTimer = null;
+                let lastTapTime = 0;
+                let tapCount = 0;
+                const LONG_PRESS_DURATION = 500; // 长按阈值（毫秒）
+                const DOUBLE_TAP_DURATION = 300; // 双击阈值（毫秒）
+                
+                const canvas = document.querySelector('canvas');
+                if (!canvas) return;
+                
+                // 阻止默认触摸行为
+                canvas.style.touchAction = 'none';
+                
+                canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    
+                    const touch = e.touches[0];
+                    touchStartTime = Date.now();
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    
+                    // 双指检测 - 启动双指长按定时器
+                    if (e.touches.length >= 2) {
+                        longPressTimer = setTimeout(() => {
+                            explodeAndShowMsg();
+                            updateStatus("✊ 双指长按", "#ffaa00");
+                            longPressTimer = null;
+                        }, LONG_PRESS_DURATION);
+                        return;
+                    }
+                    
+                    // 设置长按定时器
+                    longPressTimer = setTimeout(() => {
+                        morphToHeart();
+                        updateStatus("🖐 长按", "#ff0044");
+                        longPressTimer = null;
+                    }, LONG_PRESS_DURATION);
+                    
+                }, { passive: false });
+                
+                canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    
+                    // 如果移动距离过大，取消长按
+                    if (longPressTimer) {
+                        const touch = e.touches[0];
+                        const deltaX = Math.abs(touch.clientX - touchStartX);
+                        const deltaY = Math.abs(touch.clientY - touchStartY);
+                        
+                        if (deltaX > 10 || deltaY > 10) {
+                            clearTimeout(longPressTimer);
+                            longPressTimer = null;
+                        }
+                    }
+                }, { passive: false });
+                
+                canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    
+                    // 清除长按定时器
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                        
+                        const currentTime = Date.now();
+                        const tapDuration = currentTime - touchStartTime;
+                        
+                        // 检测双击
+                        if (currentTime - lastTapTime < DOUBLE_TAP_DURATION) {
+                            tapCount++;
+                        } else {
+                            tapCount = 1;
+                        }
+                        lastTapTime = currentTime;
+                        
+                        // 处理点击
+                        if (tapCount === 2) {
+                            // 双击 - 第二个字
+                            showCharacter(1);
+                            updateStatus("✌️ 双击", "#00ffff");
+                            tapCount = 0;
+                        } else {
+                            // 单击 - 第一个字
+                            setTimeout(() => {
+                                if (tapCount === 1) {
+                                    showCharacter(0);
+                                    updateStatus("👆 单击", "#00ffff");
+                                    tapCount = 0;
+                                }
+                            }, DOUBLE_TAP_DURATION);
+                        }
+                    }
+                }, { passive: false });
+                
+                // 防止双指缩放
+                document.addEventListener('gesturestart', (e) => e.preventDefault());
+                document.addEventListener('gesturechange', (e) => e.preventDefault());
+                document.addEventListener('gestureend', (e) => e.preventDefault());
+            }
+            
+            // 更新状态显示
+            function updateStatus(text, color) {
+                const statusDiv = document.getElementById('hud-status');
+                if (statusDiv) {
+                    statusDiv.innerText = text;
+                    statusDiv.style.color = color;
+                }
             }
 
             function onHandsResults(results) {
