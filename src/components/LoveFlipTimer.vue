@@ -361,8 +361,10 @@ export default {
       // 添加鼠标滚轮事件监听
       this.addWheelListeners();
       
-      // 添加触摸事件监听
-      this.addTouchListeners();
+      // 添加触摸事件监听 - 使用 nextTick 确保 DOM 已渲染
+      this.$nextTick(() => {
+        this.addTouchListeners();
+      });
       
       // 添加鼠标移动事件监听（用于检测向上移动）
       document.addEventListener('mousemove', this.handleMouseMove);
@@ -675,21 +677,22 @@ export default {
     
     // 添加触摸事件监听
     addTouchListeners() {
-      const gallery = this.$refs.imagesGallery;
-      if (gallery) {
-        gallery.addEventListener('touchstart', this.handleTouchStart, { passive: true });
-        gallery.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-        gallery.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+      // 绑定到整个组件容器，确保触摸在任何位置都能生效
+      const container = this.$el;
+      if (container) {
+        container.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+        container.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+        container.addEventListener('touchend', this.handleTouchEnd, { passive: false });
       }
     },
     
     // 移除触摸事件监听
     removeTouchListeners() {
-      const gallery = this.$refs.imagesGallery;
-      if (gallery) {
-        gallery.removeEventListener('touchstart', this.handleTouchStart);
-        gallery.removeEventListener('touchmove', this.handleTouchMove);
-        gallery.removeEventListener('touchend', this.handleTouchEnd);
+      const container = this.$el;
+      if (container) {
+        container.removeEventListener('touchstart', this.handleTouchStart);
+        container.removeEventListener('touchmove', this.handleTouchMove);
+        container.removeEventListener('touchend', this.handleTouchEnd);
       }
     },
     
@@ -714,13 +717,13 @@ export default {
       
       // 计算触摸移动距离
       const currentY = event.touches[0].clientY;
-      const deltaY = currentY - this.startY;
+      const deltaY = this.startY - currentY;
       
-      // 定义滚动步长系数
-      const touchScrollFactor = 1.2; // 触摸滑动灵敏度
+      // 定义滚动步长系数 - 调整灵敏度使触摸更自然
+      const touchScrollFactor = 1.5; // 触摸滑动灵敏度
       
-      // 调整滚动位置（与触摸方向相反）
-      this.scrollPosition -= deltaY * touchScrollFactor;
+      // 调整滚动位置（手指向上滑动，内容向上滚动）
+      this.scrollPosition += deltaY * touchScrollFactor;
       
       // 确保滚动位置不会小于0
       this.scrollPosition = Math.max(0, this.scrollPosition);
@@ -730,8 +733,8 @@ export default {
       if (gallery) {
         gallery.scrollTop = this.scrollPosition;
         
-        // 如果用户向上滚动（deltaY < 0），重置底部状态
-        if (deltaY < 0) {
+        // 如果用户向上滚动（deltaY > 0），重置底部状态
+        if (deltaY > 0) {
           this.isAtBottom = false;
         }
       }
@@ -839,10 +842,13 @@ export default {
   height: 100vh;
   font-family: 'romantic', sans-serif;
   overflow: hidden;
-    user-select: none; /* 禁止文字被选中 */
+  user-select: none; /* 禁止文字被选中 */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  /* 触摸优化 */
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
 }
 
 @font-face {
@@ -1120,6 +1126,11 @@ section::before {
   overflow: hidden;
   /* 隐藏滚动条 */
   height: 100vh;
+  /* 优化触摸体验 */
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .column {
