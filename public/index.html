@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" href="<%= BASE_URL %>sakura.ico">
   <title>送给你的礼物</title>
 </head>
@@ -22,5 +23,28 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
+  }
+
+  /* 禁止移动端双击缩放 */
+  html,
+  body {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 允许输入框和文本区域选择文本 */
+  input,
+  textarea {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
   }
 </style>
