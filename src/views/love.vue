@@ -70,6 +70,8 @@ export default {
       newText: 'XAM LOVE ZSY',
       newTextOpacity: 0,
       newTextScale: 0.8,
+      isInitialized: false, // 标记是否已初始化
+      visibilityObserver: null,
       settings: {
         particles: {
           length: 500, // maximum amount of particles
@@ -111,25 +113,11 @@ export default {
     }
   },
   mounted() {
+    // 使用 Intersection Observer 检测组件是否可见
+    this.setupVisibilityObserver();
     
-
-    // 使用$nextTick确保DOM已渲染
-    this.$nextTick(() => {
-      try {
-        // 初始化顺序调整，先设置画布尺寸
-        this.resizeSparkleCanvas();
-
-        // 然后初始化各个系统
-        this.initAnimation();
-        this.initSparkleEffect();
-        this.initTextAnimation();
-
-        // 最后添加事件监听
-        window.addEventListener('resize', this.onResize);
-      } catch (error) {
-        console.error('Error during component initialization:', error);
-      }
-    });
+    // 添加事件监听
+    window.addEventListener('resize', this.onResize);
   },
   beforeUnmount() {
     if (this.animationId) {
@@ -145,6 +133,12 @@ export default {
     if (this.heartbeatTimer) {
       clearInterval(this.heartbeatTimer);
     }
+    
+    // 移除 Intersection Observer
+    if (this.visibilityObserver) {
+      this.visibilityObserver.disconnect();
+    }
+    
     window.removeEventListener('resize', this.onResize);
   },
   computed: {
@@ -169,6 +163,33 @@ export default {
 
   },
   methods: {
+    setupVisibilityObserver() {
+      // 检测组件是否在视口中可见
+      this.visibilityObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !this.isInitialized) {
+            this.isInitialized = true;
+            this.$nextTick(() => {
+              try {
+                // 初始化顺序调整，先设置画布尺寸
+                this.resizeSparkleCanvas();
+
+                // 然后初始化各个系统
+                this.initAnimation();
+                this.initSparkleEffect();
+                this.initTextAnimation();
+              } catch (error) {
+                console.error('Error during component initialization:', error);
+              }
+            });
+          }
+        });
+      }, {
+        threshold: 0.1 // 至少10%可见时就触发
+      });
+      
+      this.visibilityObserver.observe(this.$el);
+    },
 
     handleClick() {
       // 连续三次点击检测逻辑
