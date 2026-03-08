@@ -383,9 +383,10 @@ export default {
     },
     resizeSparkleCanvas() {
       const sparkleCanvas = this.$refs.sparkleCanvas;
+      const container = this.$el;
       if (sparkleCanvas) {
-        sparkleCanvas.width = window.innerWidth;
-        sparkleCanvas.height = window.innerHeight;
+        sparkleCanvas.width = container ? container.clientWidth : window.innerWidth;
+        sparkleCanvas.height = container ? container.clientHeight : window.innerHeight;
       }
     },
     initTextAnimation() {
@@ -620,11 +621,12 @@ export default {
       })();
 
       // 避免循环调用，不再调用onResize()
-      // 直接设置画布尺寸
+      // 直接设置画布尺寸（使用容器实际尺寸）
       if (this.$refs.canvas) {
         const canvas = this.$refs.canvas;
-        canvas.width = window.innerWidth / 2;
-        canvas.height = window.innerHeight;
+        const container = this.$el;
+        canvas.width = container ? container.clientWidth : window.innerWidth / 2;
+        canvas.height = container ? container.clientHeight : window.innerHeight;
       }
       this.render();
     },
@@ -674,14 +676,15 @@ export default {
       this.particles.draw(this.context, this.image);
     },
     onResize() {
-      // 获取窗口尺寸
-      this.width = window.innerWidth;
-      this.height = window.innerHeight;
+      // 获取容器实际尺寸（翻页书容器高度固定为650px）
+      const container = this.$el;
+      this.width = container ? container.clientWidth : window.innerWidth;
+      this.height = container ? container.clientHeight : window.innerHeight;
 
       // 更新主画布尺寸（左侧面板宽度）
       const canvas = this.$refs.canvas;
       if (canvas) {
-        canvas.width = this.width / 2; // 左侧面板宽度为窗口的一半
+        canvas.width = this.width;
         canvas.height = this.height;
       }
 
@@ -903,5 +906,21 @@ export default {
   background: linear-gradient(135deg, rgba(255, 154, 158, 0.1) 0%, rgba(250, 208, 196, 0.1) 100%);
   border-radius: 20px;
   margin-bottom: 50px;
+}
+
+/* 移动端响应式样式 */
+@media (max-width: 768px) {
+  .love-animation-container {
+    height: 100%;
+    min-height: 650px;
+  }
+  
+  .box {
+    font-size: 3rem;
+  }
+  
+  .new-text {
+    font-size: 2rem;
+  }
 }
 </style>
