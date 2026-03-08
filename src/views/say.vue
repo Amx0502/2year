@@ -1,7 +1,7 @@
 <template>
   <div class="four-container">
     <div class="image-container">
-      <video ref="firstVideo" class="top-image" :src="videoSrc1" autoplay muted @ended="handleFirstVideoEnded"></video>
+      <video ref="firstVideo" class="top-image" :src="videoSrc1" :autoplay="isVisible" muted @ended="handleFirstVideoEnded"></video>
     </div>
     <div class="video-container">
       <video ref="sayVideo" class="background-video" :src="videoSrc2" muted @loadeddata="handleVideoLoaded"
@@ -18,9 +18,42 @@ export default {
     return {
       videoSrc1: '/image/six-↑.mp4',
       videoSrc2: '/image/say.mp4',
+      isVisible: false,
+      hasPlayed: false
+    }
+  },
+  mounted() {
+    // 使用 Intersection Observer 检测组件是否可见
+    this.setupVisibilityObserver()
+  },
+  beforeDestroy() {
+    if (this.observer) {
+      this.observer.disconnect()
     }
   },
   methods: {
+    setupVisibilityObserver() {
+      // 检测组件是否在视口中可见
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !this.hasPlayed) {
+            this.isVisible = true
+            this.hasPlayed = true
+            // 开始播放第一个视频
+            this.$nextTick(() => {
+              const firstVideo = this.$refs.firstVideo
+              if (firstVideo) {
+                firstVideo.play().catch(e => console.log('Video play failed:', e))
+              }
+            })
+          }
+        })
+      }, {
+        threshold: 0.5 // 至少50%可见时才触发
+      })
+      
+      this.observer.observe(this.$el)
+    },
     handleVideoLoaded() {
       // Video loaded but waiting to play
     },
@@ -28,7 +61,7 @@ export default {
       // First video ended, start playing the second video
       const secondVideo = this.$refs.sayVideo;
       if (secondVideo) {
-        secondVideo.play();
+        secondVideo.play().catch(e => console.log('Video play failed:', e));
       }
     },
     handleVideoEnded() {
