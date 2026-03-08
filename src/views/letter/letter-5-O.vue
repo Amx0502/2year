@@ -426,8 +426,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  height: 100vh;
-  margin-bottom: 50px;
+  height: 100%;
   background-image: url('../../assets/letters/letter-5.png');
   background-size: cover;
   background-position: center;
@@ -437,10 +436,10 @@ export default {
 .letter-container {
   width: 80%;
   max-width: 800px;
-  max-height: 80vh;
+  max-height: 80%;
   background-color: transparent;
   padding: 50px;
-  overflow-y: auto;
+  overflow-y: hidden;
   position: relative;
   text-align: left;
   display: block;
@@ -493,8 +492,9 @@ export default {
 
 /* 绘制O动画样式 */
 .draw-o-canvas {
-  position: fixed;
+  position: absolute;
   top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   z-index: 10;
@@ -507,8 +507,10 @@ export default {
 }
 
 .draw-o-instruction {
-  position: fixed;
+  position: absolute;
   top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 11;
   font-family: 'Write', cursive, 'Microsoft YaHei', sans-serif;
   font-size: 20px;
