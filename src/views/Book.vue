@@ -149,16 +149,22 @@ export default {
       renderer: null,
       controls: null,
       heartGroup: null,
-      animationId: null
+      animationId: null,
+      // 保存原始尺寸
+      originalWidth: 1300,
+      originalHeight: 650
     }
   },
   methods: {
     onTurn() {
       this.$nextTick(() => {
+        // 计算适合当前窗口的尺寸
+        const size = this.calculateOptimalSize();
+        
         $("#flipbook").turn({
           autoCenter: true,
-          height: 650,
-          width: 1300,
+          height: size.height,
+          width: size.width,
           duration: 1000, // 适当缩短翻页动画时长
           acceleration: true, // 开启硬件加速
           when: {
@@ -172,6 +178,42 @@ export default {
         this.totalPages = this.getTotalPages();
         this.currentPage = this.getCurrentPage();
       })
+    },
+    // 计算最佳尺寸，保持比例并适应窗口
+    calculateOptimalSize() {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const aspectRatio = this.originalWidth / this.originalHeight;
+      
+      // 留出边距给导航按钮和页码信息
+      const marginX = 40;
+      const marginY = 120;
+      
+      let newWidth = this.originalWidth;
+      let newHeight = this.originalHeight;
+      
+      // 如果窗口宽度不足以容纳双页
+      if (windowWidth < this.originalWidth + marginX) {
+        newWidth = windowWidth - marginX;
+        newHeight = newWidth / aspectRatio;
+      }
+      
+      // 如果高度超出窗口
+      if (newHeight > windowHeight - marginY) {
+        newHeight = windowHeight - marginY;
+        newWidth = newHeight * aspectRatio;
+      }
+      
+      // 确保最小尺寸
+      newWidth = Math.max(newWidth, 530);
+      newHeight = Math.max(newHeight, 300);
+      
+      return { width: Math.round(newWidth), height: Math.round(newHeight) };
+    },
+    // 响应式调整尺寸
+    resizeFlipbook() {
+      const size = this.calculateOptimalSize();
+      $("#flipbook").turn('size', size.width, size.height);
     },
     // 获取总页数
     getTotalPages() {
@@ -206,9 +248,24 @@ export default {
     if (window.startSakura) {
       window.startSakura();
     }
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', this.handleResize);
+  },
+  
+  // 防抖处理resize事件
+  handleResize() {
+    clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => {
+      this.resizeFlipbook();
+    }, 200);
   },
 
   beforeDestroy() {
+    // 移除resize监听
+    window.removeEventListener('resize', this.handleResize);
+    clearTimeout(this.resizeTimer);
+    
     // 清理turn.js实例
     if ($("#flipbook").turn("is")) {
       $("#flipbook").turn("destroy");
@@ -302,8 +359,9 @@ input, textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1200px;
-    height: 646px;
+    width: 100%;
+    max-width: 1300px;
+    height: 650px;
     position: relative;
   }
 
