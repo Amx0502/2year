@@ -158,9 +158,9 @@ export default {
       if (!canvas) return
 
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const zWidth = Math.min(canvas.width, canvas.height) * 0.35
+      const zWidth = Math.min(canvas.width, canvas.height) * 0.3
       const zHeight = zWidth * 1.4
 
       // Z的起始位置
@@ -371,9 +371,9 @@ export default {
 
       const canvas = this.$refs.drawZCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const zWidth = Math.min(canvas.width, canvas.height) * 0.35
+      const zWidth = Math.min(canvas.width, canvas.height) * 0.3
       const zHeight = zWidth * 1.4
 
       // Z的起始位置
@@ -409,13 +409,18 @@ export default {
 
     // 鼠标事件处理
     handleMouseDown(event) {
+      const canvas = this.$refs.drawZCanvas
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - 840, y: event.clientY -40 }]
+      this.drawingPath = [{ x: event.clientX - rect.left, y: event.clientY - rect.top }]
     },
-
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX - 840, y: event.clientY -40 })
+        const canvas = this.$refs.drawZCanvas
+        if (!canvas) return
+        const rect = canvas.getBoundingClientRect()
+        this.drawingPath.push({ x: event.clientX - rect.left, y: event.clientY - rect.top })
         this.drawUserPath()
       }
     },

@@ -568,7 +568,7 @@ export default {
       
       const rect = canvas.getBoundingClientRect()
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - rect.left + 320, y: event.clientY - rect.top + 160 }]
+      this.drawingPath = [{ x: event.clientX - rect.left, y: event.clientY - rect.top }]
     },
     
     handleMouseMove(event) {
@@ -576,7 +576,7 @@ export default {
       if (!canvas || !this.isDrawing) return
       
       const rect = canvas.getBoundingClientRect()
-      this.drawingPath.push({ x: event.clientX - rect.left + 320, y: event.clientY - rect.top + 160 })
+      this.drawingPath.push({ x: event.clientX - rect.left, y: event.clientY - rect.top })
       this.drawUserPath()
     },
     

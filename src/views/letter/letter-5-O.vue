@@ -332,13 +332,19 @@ export default {
 
     // 鼠标事件处理
     handleMouseDown(event) {
+      const canvas = this.$refs.drawOCanvas
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX + 250, y: event.clientY }]
+      this.drawingPath = [{ x: event.clientX - rect.left, y: event.clientY - rect.top }]
     },
 
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX + 250, y: event.clientY })
+        const canvas = this.$refs.drawOCanvas
+        if (!canvas) return
+        const rect = canvas.getBoundingClientRect()
+        this.drawingPath.push({ x: event.clientX - rect.left, y: event.clientY - rect.top })
         this.drawUserPath()
       }
     },

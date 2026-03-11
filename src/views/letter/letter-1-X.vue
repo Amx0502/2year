@@ -139,9 +139,9 @@ export default {
       
       const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const xSize = Math.min(canvas.width, canvas.height) * 0.6
+      const xSize = Math.min(canvas.width, canvas.height) * 0.5
       
       // 设置虚线样式
       ctx.setLineDash([10, 5])
@@ -280,9 +280,9 @@ export default {
       
       const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2 - canvas.width * 0.25
+      const centerX = canvas.width / 2
       const centerY = canvas.height / 2
-      const xSize = Math.min(canvas.width, canvas.height) * 0.6
+      const xSize = Math.min(canvas.width, canvas.height) * 0.5
       
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -309,13 +309,19 @@ export default {
     
     // 鼠标事件处理
     handleMouseDown(event) {
+      const canvas = this.$refs.tearCanvas
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - 220, y: event.clientY }]
+      this.drawingPath = [{ x: event.clientX - rect.left, y: event.clientY - rect.top }]
     },
     
     handleMouseMove(event) {
       if (this.isDrawing) {
-        this.drawingPath.push({ x: event.clientX - 220, y: event.clientY })
+        const canvas = this.$refs.tearCanvas
+        if (!canvas) return
+        const rect = canvas.getBoundingClientRect()
+        this.drawingPath.push({ x: event.clientX - rect.left, y: event.clientY - rect.top })
         this.drawUserPath()
       }
     },
