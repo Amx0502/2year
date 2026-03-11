@@ -729,15 +729,9 @@ export default {
     },
     handleCanvasClick(e) {
       if (this.hold) {
-        const canvas = this.$refs.canvas;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        if (this.seed && this.seed.hover(x, y)) {
-          this.hold = 0;
-          this.isHand = false;
-        }
+        // 点击 canvas 任意位置都触发动画
+        this.hold = 0;
+        this.isHand = false;
       }
     },
     handleCanvasMouseMove(e) {
