@@ -99,6 +99,23 @@ export default {
       canvas.addEventListener('touchstart', this.handleTouchStart)
       canvas.addEventListener('touchmove', this.handleTouchMove)
       canvas.addEventListener('touchend', this.handleTouchEnd)
+      
+      // 绑定滚轮事件，将滚动转发给 letter-container
+      canvas.addEventListener('wheel', this.handleWheel, { passive: false })
+    },
+    
+    // 处理滚轮事件
+    handleWheel(event) {
+      // 找到 letter-container 元素
+      const letterContainer = document.querySelector('.letter-container')
+      if (letterContainer) {
+        // 阻止默认行为
+        if (event.cancelable) {
+          event.preventDefault()
+        }
+        // 将滚动应用到 letter-container
+        letterContainer.scrollTop += event.deltaY
+      }
     },
 
     // 绘制初始覆盖层
@@ -476,13 +493,17 @@ export default {
 
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
-      event.preventDefault()
+      if (event.cancelable) {
+        event.preventDefault()
+      }
       const touch = event.touches[0]
       this.handleMouseDown(touch)
     },
 
     handleTouchMove(event) {
-      event.preventDefault()
+      if (event.cancelable) {
+        event.preventDefault()
+      }
       const touch = event.touches[0]
       this.handleMouseMove(touch)
     },
@@ -554,6 +575,14 @@ export default {
   position: relative;
   text-align: left;
   display: block;
+  /* 完全隐藏滚动条 */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 完全隐藏滚动条 */
+.letter-container::-webkit-scrollbar {
+  display: none;
 }
 
 .letter-content {
@@ -644,24 +673,7 @@ export default {
   }
 }
 
-/* 滚动条样式 */
-.letter-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.letter-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.letter-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-.letter-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
+/* 滚动条已完全隐藏，见 .letter-container 样式 */
 
 /* 响应式设计 */
 @media (max-width: 768px) {

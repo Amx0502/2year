@@ -98,6 +98,21 @@ export default {
       canvas.addEventListener('touchstart', this.handleTouchStart)
       canvas.addEventListener('touchmove', this.handleTouchMove)
       canvas.addEventListener('touchend', this.handleTouchEnd)
+      
+      // 绑定滚轮事件，将滚动转发给 letter-container
+      canvas.addEventListener('wheel', this.handleWheel, { passive: false })
+    },
+    
+    // 处理滚轮事件
+    handleWheel(event) {
+      // 找到 letter-container 元素
+      const letterContainer = document.querySelector('.letter-container')
+      if (letterContainer) {
+        // 阻止默认行为
+        event.preventDefault()
+        // 将滚动应用到 letter-container
+        letterContainer.scrollTop += event.deltaY
+      }
     },
     
     // 绘制初始覆盖层
@@ -344,13 +359,17 @@ export default {
     
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
-      event.preventDefault()
+      if (event.cancelable) {
+        event.preventDefault()
+      }
       const touch = event.touches[0]
       this.handleMouseDown(touch)
     },
     
     handleTouchMove(event) {
-      event.preventDefault()
+      if (event.cancelable) {
+        event.preventDefault()
+      }
       const touch = event.touches[0]
       this.handleMouseMove(touch)
     },
@@ -418,10 +437,13 @@ export default {
   max-height: 80%;
   background-color: transparent;
   padding: 50px;
-  overflow-y: auto;
+  overflow-y: auto; /* 允许滚动 */
   position: relative;
   text-align: left;
   display: block;
+  /* 完全隐藏滚动条 */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .letter-content {
@@ -479,7 +501,8 @@ export default {
   height: 100%;
   z-index: 10;
   cursor: grab;
-  pointer-events: all;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .tear-canvas:active {
@@ -510,23 +533,9 @@ export default {
   }
 }
 
-/* 滚动条样式 */
+/* 完全隐藏滚动条 */
 .letter-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.letter-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.letter-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-.letter-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  display: none;
 }
 
 /* 响应式设计 */
