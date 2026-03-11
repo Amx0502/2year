@@ -80,9 +80,10 @@ export default {
       const canvas = this.$refs.tearCanvas
       if (!canvas) return
       
-      // 设置Canvas尺寸为视口大小
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      // 设置Canvas尺寸为实际显示尺寸
+      const rect = canvas.getBoundingClientRect()
+      canvas.width = rect.width
+      canvas.height = rect.height
       
       this.canvasContext = canvas.getContext('2d')
       
@@ -364,7 +365,7 @@ export default {
       if (!canvas) return
       const rect = canvas.getBoundingClientRect()
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - rect.left, y: event.clientY - rect.top }]
+      this.drawingPath = [{ x: event.clientX - rect.left + 225, y: event.clientY - rect.top + 50 }]
     },
     
     handleMouseMove(event) {
@@ -372,7 +373,7 @@ export default {
         const canvas = this.$refs.tearCanvas
         if (!canvas) return
         const rect = canvas.getBoundingClientRect()
-        this.drawingPath.push({ x: event.clientX - rect.left, y: event.clientY - rect.top })
+        this.drawingPath.push({ x: event.clientX - rect.left + 225, y: event.clientY - rect.top + 50 })
         this.drawUserPath()
       }
     },

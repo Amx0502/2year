@@ -51,12 +51,12 @@ export default {
     }
   },
   mounted() {
-      this.loadLoveFont()
-      // 先初始化绘制X动画Canvas
-      this.$nextTick(() => {
-        this.initDrawXCanvas()
-      })
-    },
+    this.loadLoveFont()
+    // 先初始化绘制X动画Canvas
+    this.$nextTick(() => {
+      this.initDrawXCanvas()
+    })
+  },
   beforeDestroy() {
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
@@ -78,31 +78,32 @@ export default {
     initDrawXCanvas() {
       const canvas = this.$refs.tearCanvas
       if (!canvas) return
-      
-      // 设置Canvas尺寸为视口大小
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-      
+
+      // 设置Canvas尺寸为实际显示尺寸
+      const rect = canvas.getBoundingClientRect()
+      canvas.width = rect.width
+      canvas.height = rect.height
+
       this.canvasContext = canvas.getContext('2d')
-      
+
       // 绘制初始覆盖层
       this.drawXOverlay()
-      
+
       // 绑定鼠标事件
       canvas.addEventListener('mousedown', this.handleMouseDown)
       canvas.addEventListener('mousemove', this.handleMouseMove)
       canvas.addEventListener('mouseup', this.handleMouseUp)
       canvas.addEventListener('mouseleave', this.handleMouseUp)
-      
+
       // 绑定触摸事件（移动端支持）
       canvas.addEventListener('touchstart', this.handleTouchStart)
       canvas.addEventListener('touchmove', this.handleTouchMove)
       canvas.addEventListener('touchend', this.handleTouchEnd)
-      
+
       // 绑定滚轮事件，将滚动转发给 letter-container
       canvas.addEventListener('wheel', this.handleWheel, { passive: false })
     },
-    
+
     // 处理滚轮事件
     handleWheel(event) {
       // 找到 letter-container 元素
@@ -114,81 +115,81 @@ export default {
         letterContainer.scrollTop += event.deltaY
       }
     },
-    
+
     // 绘制初始覆盖层
     drawXOverlay() {
       if (!this.canvasContext) return
-      
+
       const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-      
+
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
+
       // 填充覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)' // 浅米色半透明
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
+
       // 绘制淡色X作为视觉提示
       this.drawTemplateX()
     },
-    
+
     // 绘制淡色X模板作为视觉提示
     drawTemplateX() {
       if (!this.canvasContext) return
-      
+
       const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
-      const centerX = canvas.width / 2
+      const centerX = canvas.width / 2 + 50
       const centerY = canvas.height / 2
       const xSize = Math.min(canvas.width, canvas.height) * 0.5
-      
+
       // 设置虚线样式
       ctx.setLineDash([10, 5])
       ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)' // 淡棕色虚线
       ctx.lineWidth = 4
       ctx.lineCap = 'round'
-      
+
       // 绘制虚线X
       ctx.beginPath()
-      
+
       // 左上到右下的对角线
       ctx.moveTo(centerX - xSize / 2, centerY - xSize / 2)
       ctx.lineTo(centerX + xSize / 2, centerY + xSize / 2)
-      
+
       // 右上到左下的对角线
       ctx.moveTo(centerX + xSize / 2, centerY - xSize / 2)
       ctx.lineTo(centerX - xSize / 2, centerY + xSize / 2)
-      
+
       ctx.stroke()
-      
+
       // 重置线条样式
       ctx.setLineDash([])
     },
-    
+
     // 绘制用户当前的笔画
     drawUserPath() {
       if (!this.canvasContext || this.drawingPath.length < 2) return
-      
+
       const ctx = this.canvasContext
-      
+
       // 重绘覆盖层（会自动包含淡色X模板）
       this.drawXOverlay()
-      
+
       // 绘制用户笔画
       ctx.beginPath()
       ctx.moveTo(this.drawingPath[0].x, this.drawingPath[0].y)
-      
+
       for (let i = 1; i < this.drawingPath.length; i++) {
         ctx.lineTo(this.drawingPath[i].x, this.drawingPath[i].y)
       }
-      
+
       ctx.strokeStyle = '#8b4513' // 棕色线条
       ctx.lineWidth = 5
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.stroke()
-      
+
       // 绘制已完成的线段
       this.lineSegments.forEach(segment => {
         ctx.beginPath()
@@ -199,11 +200,11 @@ export default {
         ctx.stroke()
       })
     },
-    
+
     // 分析笔画是否形成X形状
     analyzeXShape() {
       if (this.lineSegments.length < 2) return false
-      
+
       // 简单的X形状检测：寻找两条交叉的对角线
       const validLines = this.lineSegments.filter(segment => {
         // 只考虑有足够长度的线段
@@ -212,18 +213,18 @@ export default {
         const length = Math.sqrt(dx * dx + dy * dy)
         return length > Math.min(window.innerWidth, window.innerHeight) * 0.1 // 至少是视口大小的30%
       })
-      
+
       if (validLines.length < 2) return false
-      
+
       // 检查是否有两条交叉的线段，一条从左上到右下，一条从右上到左下
       let hasDiagonal1 = false // 左上到右下
       let hasDiagonal2 = false // 右上到左下
-      
+
       validLines.forEach(segment => {
         const dx = segment.end.x - segment.start.x
         const dy = segment.end.y - segment.start.y
         const slope = dy / dx
-        
+
         // 判断对角线方向
         if (Math.abs(slope) > 0.5 && Math.abs(slope) < 2.0) { // 接近30度角
           if ((dx > 0 && dy > 0) || (dx < 0 && dy < 0)) {
@@ -233,11 +234,11 @@ export default {
           }
         }
       })
-      
+
       // 需要同时满足两条对角线条件
       return hasDiagonal1 && hasDiagonal2
     },
-    
+
     // 完成绘制X动画
     completeDrawXAnimation() {
       // 添加叠化过渡效果
@@ -245,11 +246,11 @@ export default {
       if (canvas) {
         // 先绘制交叉的X动画
         this.drawCompletedX()
-        
+
         // 设置Canvas的过渡效果
         canvas.style.transition = 'opacity 0.8s ease-out'
         canvas.style.opacity = '0'
-        
+
         // 移除事件监听器
         canvas.removeEventListener('mousedown', this.handleMouseDown)
         canvas.removeEventListener('mousemove', this.handleMouseMove)
@@ -258,7 +259,7 @@ export default {
         canvas.removeEventListener('touchstart', this.handleTouchStart)
         canvas.removeEventListener('touchmove', this.handleTouchMove)
         canvas.removeEventListener('touchend', this.handleTouchEnd)
-        
+
         // 获取提示文字元素并添加过渡效果
         const instruction = document.querySelector('.tear-instruction')
         if (instruction) {
@@ -266,74 +267,74 @@ export default {
           instruction.style.opacity = '0'
         }
       }
-      
+
       // 延迟设置xAnimationCompleted和开始打字机动画，确保过渡效果完成
       setTimeout(() => {
         this.xAnimationCompleted = true
         this.startTypingAnimation()
       }, 800)
     },
-    
+
     // 绘制完成的X效果
     drawCompletedX() {
       if (!this.canvasContext) return
-      
+
       const canvas = this.$refs.tearCanvas
       const ctx = this.canvasContext
       const centerX = canvas.width / 2
       const centerY = canvas.height / 2
       const xSize = Math.min(canvas.width, canvas.height) * 0.5
-      
+
       // 清空Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
+
       // 保持原覆盖层
       ctx.fillStyle = 'rgba(255, 245, 238, 0.95)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
+
       // 绘制完成的X
       ctx.beginPath()
-      
+
       // 左上到右下的对角线
       ctx.moveTo(centerX - xSize / 2, centerY - xSize / 2)
       ctx.lineTo(centerX + xSize / 2, centerY + xSize / 2)
-      
+
       // 右上到左下的对角线
       ctx.moveTo(centerX + xSize / 2, centerY - xSize / 2)
       ctx.lineTo(centerX - xSize / 2, centerY + xSize / 2)
-      
+
       ctx.strokeStyle = '#8b4513'
       ctx.lineWidth = 8
       ctx.stroke()
     },
-    
+
     // 鼠标事件处理
     handleMouseDown(event) {
       const canvas = this.$refs.tearCanvas
       if (!canvas) return
       const rect = canvas.getBoundingClientRect()
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - rect.left, y: event.clientY - rect.top }]
+      this.drawingPath = [{ x: event.clientX - rect.left + 225, y: event.clientY - rect.top + 50 }]
     },
-    
+
     handleMouseMove(event) {
       if (this.isDrawing) {
         const canvas = this.$refs.tearCanvas
         if (!canvas) return
         const rect = canvas.getBoundingClientRect()
-        this.drawingPath.push({ x: event.clientX - rect.left, y: event.clientY - rect.top })
+        this.drawingPath.push({ x: event.clientX - rect.left + 225, y: event.clientY - rect.top + 50 })
         this.drawUserPath()
       }
     },
-    
+
     handleMouseUp() {
       if (this.isDrawing && this.drawingPath.length > 5) {
         // 保存完成的线段
         const startPoint = this.drawingPath[0]
         const endPoint = this.drawingPath[this.drawingPath.length - 1]
-        
+
         this.lineSegments.push({ start: startPoint, end: endPoint })
-        
+
         // 分析是否形成X形状
         if (this.analyzeXShape()) {
           // 形成X形状，完成动画
@@ -359,10 +360,10 @@ export default {
         this.drawingPath = []
         this.drawXOverlay()
       }
-      
+
       this.isDrawing = false
     },
-    
+
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
       if (event.cancelable) {
@@ -371,7 +372,7 @@ export default {
       const touch = event.touches[0]
       this.handleMouseDown(touch)
     },
-    
+
     handleTouchMove(event) {
       if (event.cancelable) {
         event.preventDefault()
@@ -379,7 +380,7 @@ export default {
       const touch = event.touches[0]
       this.handleMouseMove(touch)
     },
-    
+
     handleTouchEnd() {
       this.handleMouseUp()
     },
@@ -443,13 +444,16 @@ export default {
   max-height: 80%;
   background-color: transparent;
   padding: 50px;
-  overflow-y: auto; /* 允许滚动 */
+  overflow-y: auto;
+  /* 允许滚动 */
   position: relative;
   text-align: left;
   display: block;
   /* 完全隐藏滚动条 */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .letter-content {
@@ -531,9 +535,12 @@ export default {
 }
 
 @keyframes fadeInOut {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.8;
   }
+
   50% {
     opacity: 0.4;
   }

@@ -83,9 +83,10 @@ export default {
       const canvas = this.$refs.drawMCanvas
       if (!canvas) return
       
-      // 设置Canvas尺寸为视口大小
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      // 设置Canvas尺寸为实际显示尺寸
+      const rect = canvas.getBoundingClientRect()
+      canvas.width = rect.width
+      canvas.height = rect.height
       
       this.canvasContext = canvas.getContext('2d')
       
@@ -568,16 +569,17 @@ export default {
       
       const rect = canvas.getBoundingClientRect()
       this.isDrawing = true
-      this.drawingPath = [{ x: event.clientX - rect.left, y: event.clientY - rect.top }]
+      this.drawingPath = [{ x: event.clientX - rect.left + 180, y: event.clientY - rect.top + 50 }]
     },
     
     handleMouseMove(event) {
-      const canvas = this.$refs.drawMCanvas
-      if (!canvas || !this.isDrawing) return
-      
-      const rect = canvas.getBoundingClientRect()
-      this.drawingPath.push({ x: event.clientX - rect.left, y: event.clientY - rect.top })
-      this.drawUserPath()
+      if (this.isDrawing) {
+        const canvas = this.$refs.drawMCanvas
+        if (!canvas) return
+        const rect = canvas.getBoundingClientRect()
+        this.drawingPath.push({ x: event.clientX - rect.left + 180, y: event.clientY - rect.top + 50 })
+        this.drawUserPath()
+      }
     },
     
     handleMouseUp() {
@@ -609,31 +611,22 @@ export default {
       this.isDrawing = false
     },
     
+
     // 触摸事件处理（移动端支持）
     handleTouchStart(event) {
       if (event.cancelable) {
         event.preventDefault()
       }
       const touch = event.touches[0]
-      const canvas = this.$refs.drawMCanvas
-      if (!canvas) return
-      
-      const rect = canvas.getBoundingClientRect()
-      this.isDrawing = true
-      this.drawingPath = [{ x: touch.clientX - rect.left + 320, y: touch.clientY - rect.top + 160 }]
+      this.handleMouseDown(touch)
     },
-    
+
     handleTouchMove(event) {
       if (event.cancelable) {
         event.preventDefault()
       }
       const touch = event.touches[0]
-      const canvas = this.$refs.drawMCanvas
-      if (!canvas || !this.isDrawing) return
-      
-      const rect = canvas.getBoundingClientRect()
-      this.drawingPath.push({ x: touch.clientX - rect.left + 320, y: touch.clientY - rect.top + 160 })
-      this.drawUserPath()
+      this.handleMouseMove(touch)
     },
     
     handleTouchEnd() {
