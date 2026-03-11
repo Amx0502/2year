@@ -37,9 +37,7 @@ export default {
         { text: "你当时来汽车站接我是我没想到的，我以为只是在学校门口。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
         { text: "小事更能体现我对你的重视。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
         { text: "那你说哪里印象深刻？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "在去接你的路上，我满脑子想的是你见到我时的模样，期待", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "伴随着心中的澎湃，直至", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '114px', paddingRight: '0px' },
-        { text: "遇见你的那一刻。", fontSize: '23px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '114px', paddingRight: '0px' },
+        { text: "在去接你的路上，我满脑子想的是你见到我时的模样，期待伴随着心中的澎湃，直至遇见你的那一刻。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
       ],
       displayedTextLines: [],
       cursorInterval: null,
@@ -480,7 +478,7 @@ export default {
   max-height: 80%;
   background-color: transparent;
   padding: 50px;
-  overflow-y: hidden;
+  overflow-y: auto;
   position: relative;
   text-align: left;
   display: block;

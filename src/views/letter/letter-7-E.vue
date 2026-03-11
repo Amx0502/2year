@@ -550,7 +550,7 @@ export default {
   max-height: 80%;
   background-color: transparent;
   padding: 50px;
-  overflow-y: hidden;
+  overflow-y: auto;
   position: relative;
   text-align: left;
   display: block;

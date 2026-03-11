@@ -37,8 +37,7 @@ export default {
         { text: "你指的是那个创新创业？结果最后我们分却很低。", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
         { text: "是，那是我们相识相见的地方。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
         { text: "印象深刻在哪？", speaker: "她", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "你激烈回答的样子让我觉得很有依靠，我观察着你的一举一动，那种在台上属于我们的专属时刻，把我们绑定在一起一同对抗外人，多难", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
-        { text: "得。", fontSize: '23px', marginTop: '0px', marginBottom: '0px', paddingLeft: '200px', paddingRight: '0px' }
+        { text: "你激烈回答的样子让我觉得很有依靠，我观察着你的一举一动，那种在台上属于我们的专属时刻，把我们绑定在一起一同对抗外人，多难得。", speaker: "我", fontSize: '23px', marginTop: '0px', marginBottom: '10px', paddingLeft: '50px', paddingRight: '0px' },
       ],
       displayedTextLines: [],
       cursorInterval: null,
@@ -419,7 +418,7 @@ export default {
   max-height: 80%;
   background-color: transparent;
   padding: 50px;
-  overflow-y: hidden;
+  overflow-y: auto;
   position: relative;
   text-align: left;
   display: block;
