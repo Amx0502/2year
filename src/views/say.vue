@@ -81,35 +81,51 @@ export default {
 .four-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background-color: #fcfafc;
+  overflow: hidden;
+  gap: 0; /* 确保没有间隙 */
 }
 
 .image-container {
-  height: 50vh;
-  width: 100%;
-  display: flex;
-  align-items: left;
-}
-
-.top-image {
-  width: 100%;
-  height: 100%;
-}
-
-.video-container {
-  position: relative;
-  height: 100%;
+  flex: 0 0 40%;
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end; /* 底部对齐 */
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.top-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block; /* 移除图片底部间隙 */
+}
+
+.video-container {
+  flex: 0 0 60%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* 顶部对齐 */
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  background-color: black;
 }
 
 .background-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  margin-right: 3px;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block; /* 移除视频底部间隙 */
 }
 </style>
