@@ -798,6 +798,31 @@ export default {
   -ms-user-select: none;
 }
 
+/* 响应式文字大小 */
+@media (max-width: 1200px) {
+  .box {
+    font-size: 4rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .box {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .box {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .box {
+    font-size: 2rem;
+  }
+}
+
 /* 新文字样式 */
 .new-text {
   color: #ffb6c1;
@@ -817,6 +842,31 @@ export default {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+}
+
+/* 响应式新文字大小 */
+@media (max-width: 1200px) {
+  .new-text {
+    font-size: 5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .new-text {
+    font-size: 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .new-text {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .new-text {
+    font-size: 2rem;
+  }
 }
 
 /* GIF边框容器 */
