@@ -103,6 +103,74 @@
                 z-index: 999;
                 transition: opacity 0.5s;
             }
+
+            /* 移动端响应式布局 */
+            @media (max-width: 768px) {
+                #hud-panel {
+                    width: auto;
+                    min-width: 140px;
+                    max-width: 200px;
+                    padding: 10px;
+                    top: 10px;
+                    left: 10px;
+                }
+
+                #hud-status {
+                    font-size: 13px;
+                    white-space: nowrap;
+                }
+
+                #hud-detail {
+                    font-size: 10px;
+                    line-height: 1.5;
+                    word-wrap: break-word;
+                }
+
+                #input-panel {
+                    width: 200px;
+                    padding: 15px;
+                    bottom: 10px;
+                    left: 10px;
+                }
+
+                input {
+                    padding: 6px;
+                    margin-bottom: 8px;
+                }
+
+                label {
+                    font-size: 11px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                #hud-panel {
+                    width: 140px;
+                    padding: 8px;
+                }
+
+                #hud-status {
+                    font-size: 12px;
+                }
+
+                #hud-detail {
+                    font-size: 9px;
+                }
+
+                #input-panel {
+                    width: 160px;
+                    padding: 12px;
+                }
+
+                input {
+                    padding: 5px;
+                    font-size: 12px;
+                }
+
+                label {
+                    font-size: 10px;
+                }
+            }
         </style>
 
         <script src="./js/three.min.js"></script>
@@ -382,11 +450,11 @@
                 
                 // 根据屏幕最小边长决定字体大小
                 if (minDimension < 400) {
-                    return 35; // 小屏手机
+                    return 28; // 小屏手机
                 } else if (minDimension < 600) {
-                    return 45; // 大屏手机
+                    return 35; // 大屏手机
                 } else if (minDimension < 900) {
-                    return 55; // 平板
+                    return 45; // 平板
                 } else {
                     return 65; // 电脑大屏
                 }
