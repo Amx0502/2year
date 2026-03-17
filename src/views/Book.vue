@@ -1,5 +1,11 @@
 <template>
   <div class="home">
+    <!-- 开场加载动画 -->
+    <Start 
+      @start-flip-animation="startFlipAnimation" 
+      @animation-complete="onAnimationComplete"
+    />
+    
     <!-- 背景视频 -->
     <div class="video-background">
       <video autoplay loop muted playsinline class="bg-video">
@@ -110,6 +116,7 @@ import love_23 from './love.vue'
 import InTheEnd_24 from './In the end.vue'
 
 import MusicPlayer from '@/components/MusicPlayer.vue'
+import Start from '@/components/Start.vue'
 
 export default {
   name: 'Home',
@@ -135,8 +142,8 @@ export default {
     ToBeContinue_22,
     love_23,
     InTheEnd_24,
-
-    MusicPlayer
+    MusicPlayer,
+    Start
   },
   data() {
     return {
@@ -239,6 +246,35 @@ export default {
         $("#flipbook").turn("page", pageNum);
         this.currentPage = pageNum;
       }
+    },
+    // 开始翻页动画
+    startFlipAnimation() {
+      this.$nextTick(() => {
+        if ($("#flipbook").turn("is")) {
+          // 先跳转到最后一页
+          const lastPage = this.totalPages;
+          $("#flipbook").turn("page", lastPage);
+          
+          // 等待页面切换完成后开始翻页动画
+          setTimeout(() => {
+            this.animatePageFlip(lastPage, 1, 20); // 从最后一页翻到第一页，每20ms翻一页
+          }, 500);
+        }
+      });
+    },
+    // 翻页动画
+    animatePageFlip(currentPage, targetPage, delay) {
+      if (currentPage > targetPage) {
+        setTimeout(() => {
+          $("#flipbook").turn("previous");
+          this.currentPage = currentPage - 1;
+          this.animatePageFlip(currentPage - 1, targetPage, delay);
+        }, delay);
+      }
+    },
+    // 动画完成回调
+    onAnimationComplete() {
+      console.log('动画完成，进入主内容');
     },
   },
   mounted() {
