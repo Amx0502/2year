@@ -85,6 +85,9 @@ export default {
   },
   methods: {
     startFlipAnimation() {
+      // 先通知父组件显示翻页容器
+      this.$emit('show-flipbook')
+      
       // 触发从最后一页翻到第一页的动画
       this.$emit('start-flip-animation')
       

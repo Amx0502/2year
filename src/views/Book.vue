@@ -4,6 +4,7 @@
     <Start 
       @start-flip-animation="startFlipAnimation" 
       @animation-complete="onAnimationComplete"
+      @show-flipbook="showFlipbook = true"
     />
     
     <!-- 背景视频 -->
@@ -12,7 +13,7 @@
         <source src="/image/sakura.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="turnClass">
+    <div class="turnClass" v-show="showFlipbook">
       <div id="flipbook">
         <LoveTree_1 />
         <div class="calendar_2"></div>
@@ -46,7 +47,7 @@
     <div class="page-info">
       第 {{ currentPage }} / {{ totalPages }} 页
     </div>
-    <div class="navigation-buttons">
+    <div class="navigation-buttons" v-show="showFlipbook">
       <button class="prev-btn" @click="goToPreviousPage">
         上一页
         <div class="heart1">
@@ -159,7 +160,9 @@ export default {
       animationId: null,
       // 保存原始尺寸
       originalWidth: 1300,
-      originalHeight: 650
+      originalHeight: 650,
+      // 控制翻页容器显示
+      showFlipbook: false
     }
   },
   methods: {
