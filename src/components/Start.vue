@@ -1,12 +1,6 @@
 <template>
   <div class="start-overlay" v-if="isLoading" @click="startFlipAnimation">
-    <!-- 背景视频 -->
-    <div class="video-background">
-      <video autoplay loop muted playsinline class="bg-video">
-        <source src="/image/sakura.mp4" type="video/mp4">
-      </video>
-    </div>
-    
+
     <div class="content-container">
       <!-- 上方艺术字 - 水墨晕开+溶解效果 -->
       <div class="ink-text-container">
@@ -132,29 +126,6 @@ export default {
   justify-content: center;
   cursor: pointer;
   overflow: hidden;
-}
-
-/* 背景视频样式 */
-.video-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-}
-
-.bg-video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  transform: translate(-50%, -50%);
-  filter: brightness(1);
 }
 
 .content-container {
