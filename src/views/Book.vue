@@ -2,8 +2,6 @@
   <div class="home">
     <!-- 开场加载动画 -->
     <Start 
-      @start-flip-animation="startFlipAnimation" 
-      @animation-complete="onAnimationComplete"
       @show-flipbook="showFlipbook = true"
     />
     
@@ -13,8 +11,9 @@
         <source src="/image/sakura.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="turnClass" v-show="showFlipbook">
-      <div id="flipbook">
+    <transition name="fade-in">
+      <div class="turnClass" v-show="showFlipbook">
+        <div id="flipbook">
         <LoveTree_1 />
         <div class="calendar_2"></div>
         <Foreword_3 />
@@ -42,8 +41,9 @@
         <love_23 />
         <InTheEnd_24 />
         <!-- <div v-for="n in 1" :key="n" class="blank-page"></div> -->
+        </div>
       </div>
-    </div>
+    </transition>
     <div class="page-info">
       第 {{ currentPage }} / {{ totalPages }} 页
     </div>
@@ -554,6 +554,15 @@ input, textarea {
     backdrop-filter: blur(5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 100;
+  }
+
+  // 淡入过渡动画
+  .fade-in-enter-active {
+    transition: opacity 1s ease;
+  }
+
+  .fade-in-enter {
+    opacity: 0;
   }
 }
 </style>

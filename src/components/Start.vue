@@ -1,7 +1,7 @@
 <template>
-  <div class="start-overlay" v-if="isLoading" @click="startFlipAnimation">
-
-    <div class="content-container">
+  <transition name="fade-out">
+    <div class="start-overlay" v-if="isLoading" @click="startFlipAnimation">
+      <div class="content-container">
       <!-- 上方艺术字 - 水墨晕开+溶解效果 -->
       <div class="ink-text-container">
         <div class="ink-text top-text" :class="{ 'show': showTopText }">
@@ -59,8 +59,9 @@
         <div class="ink-blot ink-blot-4" :class="{ 'show': showBottomText }"></div>
         <div class="ink-blot ink-blot-5" :class="{ 'show': showBottomText }"></div>
       </div>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
@@ -70,7 +71,8 @@ export default {
     return {
       isLoading: true,
       showTopText: false,
-      showBottomText: false
+      showBottomText: false,
+      isFading: false
     }
   },
   mounted() {
@@ -85,16 +87,13 @@ export default {
   },
   methods: {
     startFlipAnimation() {
-      // 先通知父组件显示翻页容器
-      this.$emit('show-flipbook')
-      
-      // 触发从最后一页翻到第一页的动画
-      this.$emit('start-flip-animation')
-      
       // 淡出加载画面
+      this.isFading = true
+
+      // 等待淡出完成后通知父组件显示翻页容器
       setTimeout(() => {
+        this.$emit('show-flipbook')
         this.isLoading = false
-        this.$emit('animation-complete')
       }, 1000)
     },
     getParticleStyle(index, position) {
@@ -542,5 +541,16 @@ export default {
     width: 40px;
     height: 28px;
   }
+}
+
+/* 淡出过渡动画 */
+.fade-out-enter-active,
+.fade-out-leave-active {
+  transition: opacity 1s ease;
+}
+
+.fade-out-enter,
+.fade-out-leave-to {
+  opacity: 0;
 }
 </style>

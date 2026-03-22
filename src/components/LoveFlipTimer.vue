@@ -255,6 +255,7 @@ const photoUrls = [
   '/images/23.jpeg',
   '/images/24.jpeg',
   '/images/25.jpeg',
+  '/images/26.jpg',
   '/video/1.mp4',
   '/video/2.mp4',
   '/video/3.mp4',
