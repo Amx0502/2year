@@ -718,8 +718,10 @@ export default {
     handleTouchMove(event) {
       if (!this.isTouching) return;
       
-      // 阻止默认滚动行为
-      event.preventDefault();
+      // 阻止默认滚动行为（仅在事件可取消时）
+      if (event.cancelable) {
+        event.preventDefault();
+      }
       
       // 计算触摸移动距离
       const currentY = event.touches[0].clientY;
